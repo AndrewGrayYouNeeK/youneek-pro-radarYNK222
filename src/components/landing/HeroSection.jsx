@@ -24,8 +24,7 @@ export default function HeroSection() {
       {/* Vignette */}
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_100%)]" />
 
-      {/* Lightning flash */}
-      <div className="absolute inset-0 bg-white opacity-0 pointer-events-none animate-[lightning_8s_ease-in-out_infinite]" />
+
 
       {/* Scanlines */}
       <div className="absolute inset-0 pointer-events-none opacity-30 z-20 [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.06)_2px,rgba(0,255,156,0.06)_3px)]" />
