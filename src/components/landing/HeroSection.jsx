@@ -59,19 +59,19 @@ export default function HeroSection() {
 
             {/* Title with glitch */}
             <h1 className="relative font-bold leading-[0.9] tracking-tight">
-              <span className="block text-[12vw] md:text-[6rem] lg:text-[7rem] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)]">
-                LIVE
+              <span className="block text-[11vw] md:text-[5rem] lg:text-[6rem] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)]">
+                YouNeeK
               </span>
               <span
-                className="block text-[12vw] md:text-[6rem] lg:text-[7rem] bg-clip-text text-transparent"
+                className="block text-[11vw] md:text-[5rem] lg:text-[6rem] bg-clip-text text-transparent"
                 style={{
                   backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #c0c0c0 50%, #707070 100%)',
                   WebkitTextStroke: '1px rgba(0,255,156,0.3)',
                 }}
               >
-                NEXRAD
+                PRO
               </span>
-              <span className="relative block text-[12vw] md:text-[6rem] lg:text-[7rem]">
+              <span className="relative block text-[11vw] md:text-[5rem] lg:text-[6rem]">
                 <span className="absolute inset-0 text-[#ff00d4] translate-x-[3px] translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite]">
                   RADAR
                 </span>

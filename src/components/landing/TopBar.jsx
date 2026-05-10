@@ -27,7 +27,7 @@ export default function TopBar() {
           <div className="leading-tight">
             <div className="text-[10px] tracking-[0.3em] text-[#ff00d4]/80 uppercase">YouNeeK</div>
             <div className="text-base font-bold tracking-wider text-white">
-              PRO<span className="text-[#00ff9c]">_RADAR</span>
+              PRO<span className="text-[#00ff9c]"> RADAR</span>
             </div>
           </div>
         </a>
