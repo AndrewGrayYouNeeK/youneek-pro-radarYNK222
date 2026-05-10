@@ -31,6 +31,16 @@ export default function HeroSection() {
       {/* Lightning flash */}
       <div className="absolute inset-0 bg-white opacity-0 pointer-events-none animate-[lightning_8s_ease-in-out_infinite]" />
 
+      {/* Hidden lightning signature — flashes in sync with the lightning */}
+      <div className="absolute inset-0 pointer-events-none z-[25] flex items-center justify-center">
+        <span
+          className="text-white/0 text-[10px] md:text-xs tracking-[0.5em] uppercase font-mono select-none animate-[signature_8s_ease-in-out_infinite]"
+          style={{ textShadow: '0 0 12px rgba(255,255,255,0.9)' }}
+        >
+          by Andrew Gray
+        </span>
+      </div>
+
       {/* Scanlines */}
       <div className="absolute inset-0 pointer-events-none opacity-30 z-20 [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.06)_2px,rgba(0,255,156,0.06)_3px)]" />
 
@@ -172,6 +182,12 @@ export default function HeroSection() {
           93% { opacity: 0.4; }
           94% { opacity: 0; }
           95% { opacity: 0.2; }
+        }
+        @keyframes signature {
+          0%, 92%, 96%, 100% { color: rgba(255,255,255,0); }
+          93% { color: rgba(255,255,255,0.85); }
+          94% { color: rgba(255,255,255,0); }
+          95% { color: rgba(255,255,255,0.5); }
         }
       `}</style>
     </section>
