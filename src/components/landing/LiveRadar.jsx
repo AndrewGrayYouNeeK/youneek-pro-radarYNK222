@@ -80,7 +80,7 @@ export default function LiveRadar() {
           </div>
         </div>
 
-        <div className="relative border border-[#00ff9c]/30 bg-black">
+        <div className="relative border border-[#00ff9c]/30 bg-black isolate z-[80]">
           <span className="absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 border-[#00ff9c] z-[401]" />
           <span className="absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 border-[#ff00d4] z-[401]" />
           <span className="absolute -bottom-px -left-px w-4 h-4 border-b-2 border-l-2 border-[#ff00d4] z-[401]" />
