@@ -129,6 +129,100 @@ Deno.serve(async (req) => {
       });
     }
 
+    // 4) Geocode US locations (city, zip, address) via U.S. Census — no key required
+    if (action === 'geocode') {
+      const q = String(getParam('q') || '').trim();
+      if (!q) return Response.json({ error: 'q required' }, { status: 400 });
+
+      // Try ZIP code first
+      const zipMatch = q.match(/^\d{5}$/);
+      if (zipMatch) {
+        const zr = await fetch(`https://api.zippopotam.us/us/${q}`);
+        if (zr.ok) {
+          const zd = await zr.json();
+          const place = zd.places?.[0];
+          if (place) {
+            return Response.json({
+              results: [{
+                label: `${place['place name']}, ${place['state abbreviation']} ${q}`,
+                city: place['place name'],
+                state: place['state abbreviation'],
+                lat: parseFloat(place.latitude),
+                lon: parseFloat(place.longitude),
+              }],
+            });
+          }
+        }
+      }
+
+      const US_STATES = {
+        Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',
+        Connecticut:'CT',Delaware:'DE','District of Columbia':'DC',Florida:'FL',Georgia:'GA',
+        Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',
+        Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',
+        Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH',
+        'New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',
+        Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC',
+        'South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',
+        Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY','Puerto Rico':'PR',
+      };
+      const toCode = (s) => {
+        if (!s) return s;
+        if (s.length === 2) return s.toUpperCase();
+        return US_STATES[s] || s;
+      };
+
+      // Open-Meteo geocoder — best for city + state queries
+      const cityOnly = q.split(',')[0].trim();
+      const om = new URL('https://geocoding-api.open-meteo.com/v1/search');
+      om.searchParams.set('name', cityOnly);
+      om.searchParams.set('count', '10');
+      const omr = await fetch(om.toString());
+      if (omr.ok) {
+        const omd = await omr.json();
+        let results = (omd.results || [])
+          .filter((r) => r.country_code === 'US')
+          .map((r) => {
+            const code = toCode(r.admin1_code || r.admin1);
+            return {
+              label: `${r.name}${code ? ', ' + code : ''}`,
+              city: r.name,
+              state: code,
+              lat: r.latitude,
+              lon: r.longitude,
+            };
+          });
+        // If user typed "City, ST", prefer matches in that state
+        const stMatch = q.match(/,\s*([A-Za-z]{2})\s*$/);
+        if (stMatch) {
+          const st = stMatch[1].toUpperCase();
+          const filtered = results.filter((r) => (r.state || '').toUpperCase() === st);
+          if (filtered.length) results = filtered;
+        }
+        if (results.length) return Response.json({ results: results.slice(0, 5) });
+      }
+
+      // Fallback: Census street-address geocoder
+      const cu = new URL('https://geocoding.geo.census.gov/geocoder/locations/onelineaddress');
+      cu.searchParams.set('address', q);
+      cu.searchParams.set('benchmark', 'Public_AR_Current');
+      cu.searchParams.set('format', 'json');
+      const cr = await fetch(cu.toString());
+      if (cr.ok) {
+        const cd = await cr.json();
+        const matches = (cd.result?.addressMatches || []).slice(0, 5).map((m) => ({
+          label: m.matchedAddress,
+          city: m.addressComponents?.city,
+          state: m.addressComponents?.state,
+          lat: m.coordinates?.y,
+          lon: m.coordinates?.x,
+        }));
+        if (matches.length) return Response.json({ results: matches });
+      }
+
+      return Response.json({ results: [] });
+    }
+
     return Response.json({ error: 'unknown action' }, { status: 400 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });

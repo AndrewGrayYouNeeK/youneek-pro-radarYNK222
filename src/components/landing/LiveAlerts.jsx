@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { AlertTriangle, ShieldAlert, Loader2, RefreshCw } from 'lucide-react';
+import { useLocation } from './LocationContext';
 
 const SEVERITY_COLOR = {
   Extreme: '#ff00d4',
@@ -17,16 +18,20 @@ function formatTime(iso) {
 }
 
 export default function LiveAlerts() {
+  const { location } = useLocation();
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updated, setUpdated] = useState(null);
+  const [scope, setScope] = useState('local'); // 'local' | 'national'
 
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke('nwsData', { action: 'alerts', limit: 24 });
+      const payload = { action: 'alerts', limit: 36 };
+      if (scope === 'local' && location?.state) payload.area = location.state;
+      const res = await base44.functions.invoke('nwsData', payload);
       setAlerts(res.data?.alerts || []);
       setUpdated(new Date());
     } catch (e) {
@@ -40,7 +45,8 @@ export default function LiveAlerts() {
     load();
     const id = setInterval(load, 60000); // refresh every minute
     return () => clearInterval(id);
-  }, []);
+    // eslint-disable-next-line
+  }, [scope, location?.state]);
 
   return (
     <section id="alerts" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden">
@@ -55,16 +61,42 @@ export default function LiveAlerts() {
               Active Severe <span className="text-[#ff00d4]">Alerts</span>
             </h2>
             <p className="mt-3 text-sm text-white/60 max-w-xl">
-              Live feed from <span className="text-[#00ff9c]">api.weather.gov</span> — National Weather Service active alerts across CONUS.
+              Live feed from <span className="text-[#00ff9c]">api.weather.gov</span> —{' '}
+              {scope === 'local' && location?.state
+                ? <>showing alerts for <span className="text-[#ff00d4]">{location.state}</span></>
+                : <>showing all active alerts across CONUS</>}.
             </p>
           </div>
-          <button
-            onClick={load}
-            className="inline-flex items-center gap-2 px-4 py-2 border border-[#00ff9c]/40 text-[#00ff9c] text-[10px] tracking-[0.3em] uppercase hover:bg-[#00ff9c]/10 transition self-start"
-          >
-            <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2 self-start">
+            <div className="flex border border-[#00ff9c]/30">
+              <button
+                onClick={() => setScope('local')}
+                disabled={!location?.state}
+                className={`px-3 py-2 text-[10px] tracking-[0.3em] uppercase transition ${
+                  scope === 'local'
+                    ? 'bg-[#00ff9c] text-black font-bold'
+                    : 'text-white/60 hover:text-[#00ff9c] disabled:opacity-40'
+                }`}
+              >
+                Local{location?.state ? ` (${location.state})` : ''}
+              </button>
+              <button
+                onClick={() => setScope('national')}
+                className={`px-3 py-2 text-[10px] tracking-[0.3em] uppercase transition border-l border-[#00ff9c]/30 ${
+                  scope === 'national' ? 'bg-[#00ff9c] text-black font-bold' : 'text-white/60 hover:text-[#00ff9c]'
+                }`}
+              >
+                National
+              </button>
+            </div>
+            <button
+              onClick={load}
+              className="inline-flex items-center gap-2 px-4 py-2 border border-[#00ff9c]/40 text-[#00ff9c] text-[10px] tracking-[0.3em] uppercase hover:bg-[#00ff9c]/10 transition"
+            >
+              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
 
         {loading && alerts.length === 0 && (
@@ -82,8 +114,10 @@ export default function LiveAlerts() {
         {!loading && alerts.length === 0 && !error && (
           <div className="border border-[#00ff9c]/30 bg-[#00ff9c]/5 p-8 text-center">
             <ShieldAlert className="w-6 h-6 text-[#00ff9c] mx-auto mb-3" />
-            <div className="text-white text-sm">No active severe alerts at this time.</div>
-            <div className="text-white/40 text-xs mt-1">Skies are clear across CONUS.</div>
+            <div className="text-white text-sm">
+              No active alerts {scope === 'local' && location?.state ? `for ${location.state}` : 'across CONUS'}.
+            </div>
+            <div className="text-white/40 text-xs mt-1">Skies are clear right now.</div>
           </div>
         )}
 

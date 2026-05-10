@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { base44 } from '@/api/base44Client';
 import { Wind, Droplets, Gauge, Thermometer, MapPin, Loader2, Cloud } from 'lucide-react';
+import { useLocation } from './LocationContext';
 
 // helpers
 const cToF = (c) => (c == null ? null : Math.round((c * 9) / 5 + 32));
@@ -8,7 +9,7 @@ const mpsToMph = (m) => (m == null ? null : Math.round(m * 2.23694));
 const paToInHg = (p) => (p == null ? null : (p * 0.0002953).toFixed(2));
 
 export default function CurrentConditions() {
-  const [coords, setCoords] = useState({ lat: 39.7392, lon: -104.9903, label: 'Denver, CO' }); // default
+  const { location, hydrated } = useLocation();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -27,21 +28,10 @@ export default function CurrentConditions() {
   };
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          const { latitude, longitude } = pos.coords;
-          setCoords({ lat: latitude, lon: longitude, label: 'Your Location' });
-          load(latitude, longitude);
-        },
-        () => load(coords.lat, coords.lon),
-        { timeout: 4000 }
-      );
-    } else {
-      load(coords.lat, coords.lon);
-    }
+    if (!hydrated) return;
+    load(location.lat, location.lon);
     // eslint-disable-next-line
-  }, []);
+  }, [hydrated, location.lat, location.lon]);
 
   const obs = data?.observation;
   const loc = data?.location;
@@ -61,7 +51,7 @@ export default function CurrentConditions() {
           <div className="mt-3 flex items-center gap-2 text-sm text-white/60">
             <MapPin className="w-3.5 h-3.5 text-[#ff00d4]" />
             <span>
-              {loc ? `${loc.city || ''}${loc.city ? ', ' : ''}${loc.state || ''}` : coords.label}
+              {loc ? `${loc.city || ''}${loc.city ? ', ' : ''}${loc.state || ''}` : location.label}
               {loc?.radarStation && (
                 <span className="ml-3 text-[10px] tracking-[0.25em] uppercase text-[#00ff9c] font-mono">
                   RADAR: {loc.radarStation}
