@@ -9,11 +9,13 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import LandingFooter from '@/components/landing/LandingFooter';
 import { LocationProvider } from '@/components/landing/LocationContext';
 import LocationBar from '@/components/landing/LocationBar';
+import RainOverlay from '@/components/landing/RainOverlay';
 
 export default function Landing() {
   return (
     <LocationProvider>
       <div className="min-h-screen bg-black text-white overflow-x-hidden font-mono">
+        <RainOverlay />
         <HeroSection />
         <NeonBrandShowcase />
 

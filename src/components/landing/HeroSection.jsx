@@ -1,7 +1,6 @@
 import React from 'react';
 import { ChevronRight, Zap } from 'lucide-react';
 import TopBar from './TopBar';
-import RainOverlay from './RainOverlay';
 import RadarSweep from './RadarSweep';
 import { StatPanel, AlertPanel, SystemPanel } from './HudPanels';
 import { Wind, Droplets, Gauge, Thermometer } from 'lucide-react';
@@ -24,9 +23,6 @@ export default function HeroSection() {
 
       {/* Vignette */}
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_100%)]" />
-
-      {/* Rain */}
-      <RainOverlay />
 
       {/* Lightning flash */}
       <div className="absolute inset-0 bg-white opacity-0 pointer-events-none animate-[lightning_8s_ease-in-out_infinite]" />

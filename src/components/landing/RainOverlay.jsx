@@ -15,7 +15,7 @@ export default function RainOverlay() {
   );
 
   return (
-    <div className="absolute inset-0 pointer-events-none overflow-hidden z-10">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-[60]">
       {drops.map((d) => (
         <span
           key={d.id}
