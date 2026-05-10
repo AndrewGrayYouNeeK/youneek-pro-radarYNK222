@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X } from 'lucide-react';
-
-const LOGO_URL = 'https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/dfb81f42e_pgaLRg9bNEKoOW5HLzS34_rPjz7OY2.png';
+import { Radar, Menu, X } from 'lucide-react';
 
 const NAV = [
   { label: 'Radar', href: '#radar' },
@@ -19,12 +17,19 @@ export default function TopBar() {
       <div className="absolute inset-0 pointer-events-none opacity-30 [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.04)_2px,rgba(0,255,156,0.04)_3px)]" />
       <div className="relative max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center group">
-          <img
-            src={LOGO_URL}
-            alt="YouNeeK Pro Radar"
-            className="h-11 md:h-12 w-auto object-contain drop-shadow-[0_0_12px_rgba(0,180,255,0.5)] group-hover:drop-shadow-[0_0_18px_rgba(0,255,156,0.7)] transition"
-          />
+        <a href="#" className="flex items-center gap-3 group">
+          <div className="relative">
+            <div className="absolute inset-0 bg-[#00ff9c] blur-md opacity-60 group-hover:opacity-100 transition" />
+            <div className="relative w-9 h-9 rounded-sm border border-[#00ff9c]/60 bg-black flex items-center justify-center">
+              <Radar className="w-5 h-5 text-[#00ff9c]" strokeWidth={2.5} />
+            </div>
+          </div>
+          <div className="leading-tight">
+            <div className="text-[10px] tracking-[0.3em] text-[#ff00d4]/80 uppercase">YouNeeK</div>
+            <div className="text-base font-bold tracking-wider text-white">
+              PRO<span className="text-[#00ff9c]"> RADAR</span>
+            </div>
+          </div>
         </a>
 
         {/* Desktop Nav */}
