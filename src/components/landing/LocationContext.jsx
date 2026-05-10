@@ -16,15 +16,27 @@ const DEFAULT_LOC = {
 export function LocationProvider({ children }) {
   const [location, setLocation] = useState(DEFAULT_LOC);
   const [hydrated, setHydrated] = useState(false);
+  const [hasStoredLocation, setHasStoredLocation] = useState(false);
 
   // hydrate from localStorage
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setLocation(JSON.parse(raw));
+      if (raw) {
+        setLocation(JSON.parse(raw));
+        setHasStoredLocation(true);
+      }
     } catch (_) { /* ignore */ }
     setHydrated(true);
   }, []);
+
+  // Auto-detect GPS on first visit (no stored location yet)
+  useEffect(() => {
+    if (!hydrated || hasStoredLocation) return;
+    if (!navigator.geolocation) return;
+    detectGPS().catch(() => { /* silently fall back to default */ });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated, hasStoredLocation]);
 
   const updateLocation = (loc) => {
     setLocation(loc);
