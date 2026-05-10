@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Zap, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
+import NBoltLogo from './NBoltLogo';
 
 const NAV = [
   { label: 'Radar', href: '#radar' },
@@ -22,12 +23,7 @@ export default function TopBar() {
             <div className="absolute inset-0 bg-white blur-xl opacity-90 group-hover:opacity-100 transition animate-pulse" />
             <div className="absolute inset-0 bg-[#00ff9c] blur-md opacity-70" />
             <div className="relative w-9 h-9 rounded-sm border border-white/80 bg-black flex items-center justify-center">
-              <Zap
-                className="w-5 h-5 text-white"
-                strokeWidth={2.8}
-                fill="white"
-                style={{ filter: 'drop-shadow(0 0 6px #fff) drop-shadow(0 0 12px #00ff9c)' }}
-              />
+              <NBoltLogo className="w-5 h-6" />
             </div>
           </div>
           <div className="leading-tight">
