@@ -57,30 +57,15 @@ export default function HeroSection() {
               <span className="text-[10px] tracking-[0.3em] uppercase text-white/60">NEXRAD_v2.4</span>
             </div>
 
-            {/* Title with glitch */}
-            <h1 className="relative font-bold leading-[0.9] tracking-tight">
-              <span className="block text-[11vw] md:text-[5rem] lg:text-[6rem] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)]">
-                YouNeeK
-              </span>
-              <span
-                className="block text-[11vw] md:text-[5rem] lg:text-[6rem] bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #c0c0c0 50%, #707070 100%)',
-                  WebkitTextStroke: '1px rgba(0,255,156,0.3)',
-                }}
-              >
-                PRO
-              </span>
-              <span className="relative block text-[11vw] md:text-[5rem] lg:text-[6rem]">
-                <span className="absolute inset-0 text-[#ff00d4] translate-x-[3px] translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite]">
-                  RADAR
-                </span>
-                <span className="absolute inset-0 text-[#00ff9c] -translate-x-[3px] -translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite_reverse]">
-                  RADAR
-                </span>
-                <span className="relative text-white">RADAR</span>
-              </span>
-            </h1>
+            {/* Neon Logo */}
+            <div className="relative -ml-2">
+              <div className="absolute inset-0 bg-[#00b4ff]/20 blur-3xl" />
+              <img
+                src="https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/5d0da89c1_zKz9pCMiyhVZlXQQHwqfQ_ecHWOfCW.png"
+                alt="YouNeeK Pro Radar"
+                className="relative w-full max-w-xl drop-shadow-[0_0_40px_rgba(0,180,255,0.4)] animate-[glitch_5s_infinite]"
+              />
+            </div>
 
             <p className="mt-8 max-w-md text-sm md:text-base text-white/70 leading-relaxed border-l-2 border-[#00ff9c]/40 pl-4">
               Real-time storm tracking with time-lapse loops, multi-layer radar,
