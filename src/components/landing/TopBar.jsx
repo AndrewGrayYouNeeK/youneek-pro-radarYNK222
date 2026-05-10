@@ -22,8 +22,8 @@ export default function TopBar() {
           <div className="relative">
             <div className="absolute inset-0 bg-white blur-xl opacity-90 group-hover:opacity-100 transition animate-pulse" />
             <div className="absolute inset-0 bg-[#00ff9c] blur-md opacity-70" />
-            <div className="relative w-9 h-9 rounded-sm border border-white/80 bg-black flex items-center justify-center">
-              <NBoltLogo className="w-5 h-6" />
+            <div className="relative w-9 h-9 rounded-sm border border-white/80 bg-black flex items-center justify-center overflow-visible">
+              <NBoltLogo className="w-10 h-12" />
             </div>
           </div>
           <div className="leading-tight">

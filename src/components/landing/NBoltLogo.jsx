@@ -1,20 +1,26 @@
 import React from 'react';
 
-// "N" stylized as a lightning bolt — matches the neon brand logos
-export default function NBoltLogo({ className = 'w-6 h-6', glow = true }) {
+// "N" where the diagonal middle stroke is a jagged lightning bolt
+// that extends above the top-left and below the bottom-right of the letter.
+export default function NBoltLogo({ className = 'w-8 h-10' }) {
   return (
     <svg
-      viewBox="0 0 32 40"
+      viewBox="0 0 60 80"
       className={className}
       fill="none"
-      style={glow ? { filter: 'drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #00ff9c)' } : undefined}
+      style={{ filter: 'drop-shadow(0 0 4px #fff) drop-shadow(0 0 10px #00ff9c)', overflow: 'visible' }}
     >
-      {/* N-shaped lightning bolt: left vertical stroke, jagged diagonal, right vertical stroke */}
+      {/* Left vertical stroke of N */}
+      <rect x="6" y="14" width="9" height="52" fill="white" />
+      {/* Right vertical stroke of N */}
+      <rect x="45" y="14" width="9" height="52" fill="white" />
+
+      {/* Lightning bolt diagonal — extends past the N top-left and bottom-right */}
       <polygon
-        points="2,2 10,2 10,18 18,12 18,38 26,38 26,22 18,28 18,2 26,2 26,22 18,28 10,18 10,38 2,38"
+        points="20,0 38,28 28,32 44,80 22,46 32,42 14,14"
         fill="white"
         stroke="#00ff9c"
-        strokeWidth="1.2"
+        strokeWidth="1.5"
         strokeLinejoin="miter"
       />
     </svg>
