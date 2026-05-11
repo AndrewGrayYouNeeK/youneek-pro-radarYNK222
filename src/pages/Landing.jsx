@@ -11,12 +11,11 @@ import { LocationProvider } from '@/components/landing/LocationContext';
 import LocationBar from '@/components/landing/LocationBar';
 import LightningSignature from '@/components/landing/LightningSignature';
 import LightningFlash from '@/components/landing/LightningFlash';
-import TornadoBackground from '@/components/landing/TornadoBackground';
 
 export default function Landing() {
   return (
     <LocationProvider>
-      <TornadoBackground />
+      <div className="tornado-bg" />
       <div className="relative z-10 min-h-screen bg-black/60 backdrop-blur-md text-white overflow-x-hidden font-mono">
         <LightningFlash />
         <LightningSignature />
