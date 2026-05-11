@@ -26,7 +26,8 @@ export default function NeonBrandShowcase() {
           {[LOGO_1, LOGO_2].map((src, i) => (
             <div
               key={i}
-              className="group relative border border-[#00ff9c]/30 bg-black overflow-hidden"
+              className="group relative z-[70] border border-[#00ff9c]/30 bg-black overflow-hidden"
+              style={{ isolation: 'isolate' }}
             >
               {/* Corners */}
               <span className="absolute top-2 left-2 w-3 h-3 border-t border-l border-[#00ff9c] z-20" />
