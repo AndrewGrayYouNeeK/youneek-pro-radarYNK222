@@ -9,15 +9,17 @@ import FeaturesSection from '@/components/landing/FeaturesSection';
 import LandingFooter from '@/components/landing/LandingFooter';
 import { LocationProvider } from '@/components/landing/LocationContext';
 import LocationBar from '@/components/landing/LocationBar';
+import RainOverlay from '@/components/landing/RainOverlay';
 import LightningSignature from '@/components/landing/LightningSignature';
 import LightningFlash from '@/components/landing/LightningFlash';
-import RainBackground from '@/components/RainBackground';
+import TornadoBackground from '@/components/landing/TornadoBackground';
 
 export default function Landing() {
   return (
     <LocationProvider>
-      <RainBackground />
-      <div className="relative z-10 bg-black/60 backdrop-blur-xl min-h-screen text-white overflow-x-hidden font-mono">
+      <div className="min-h-screen bg-black text-white overflow-x-hidden font-mono">
+        <TornadoBackground />
+        <RainOverlay />
         <LightningFlash />
         <LightningSignature />
         <HeroSection />

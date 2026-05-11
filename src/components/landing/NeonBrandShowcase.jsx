@@ -5,7 +5,7 @@ const LOGO_2 = 'https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/
 
 export default function NeonBrandShowcase() {
   return (
-    <section className="relative bg-black/30 py-24 px-5 md:px-8 overflow-hidden border-y border-[#00ff9c]/20">
+    <section className="relative bg-black py-24 px-5 md:px-8 overflow-hidden border-y border-[#00ff9c]/20">
       {/* Ambient glow */}
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,rgba(255,0,212,0.12),transparent_60%)]" />
       <div className="absolute inset-0 opacity-20 pointer-events-none [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.06)_2px,rgba(0,255,156,0.06)_3px)]" />

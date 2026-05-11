@@ -7,11 +7,22 @@ import { Wind, Droplets, Gauge, Thermometer } from 'lucide-react';
 
 export default function HeroSection() {
   return (
-    <section className="relative min-h-screen w-full overflow-hidden bg-transparent">
+    <section className="relative min-h-screen w-full overflow-hidden bg-black">
       <TopBar />
 
-      {/* Light vignette only — let tornado show through */}
-      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_40%,rgba(0,0,0,0.5)_100%)] pointer-events-none" />
+      {/* Background City */}
+      <div
+        className="absolute inset-0 bg-cover bg-center"
+        style={{
+          backgroundImage: `url('https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/7b9a7e505_generated_67357671.png')`,
+        }}
+      />
+      {/* Color grade */}
+      <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#0a0014]/70 to-black" />
+      <div className="absolute inset-0 bg-gradient-to-r from-[#0a0014]/80 via-transparent to-[#001a14]/80" />
+
+      {/* Vignette */}
+      <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_100%)]" />
 
 
 
