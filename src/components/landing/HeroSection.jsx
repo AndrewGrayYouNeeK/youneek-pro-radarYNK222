@@ -5,18 +5,13 @@ import RadarSweep from './RadarSweep';
 import { StatPanel, AlertPanel, SystemPanel } from './HudPanels';
 import { Wind, Droplets, Gauge, Thermometer } from 'lucide-react';
 import LocationBar from './LocationBar';
+import TornadoAlertBanner from './TornadoAlertBanner';
 
 export default function HeroSection() {
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-black">
       <TopBar />
-
-      {/* Full-width location strip directly under the title bar */}
-      <div className="fixed top-16 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-b border-[#00ff9c]/20">
-        <div className="max-w-7xl mx-auto px-5 md:px-8 py-2.5 flex items-center justify-center">
-          <LocationBar />
-        </div>
-      </div>
+      <TornadoAlertBanner />
 
       {/* Background City */}
       <div
@@ -53,11 +48,16 @@ export default function HeroSection() {
           {/* LEFT — Copy */}
           <div className="relative">
             {/* Status Bar */}
-            <div className="inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/50 backdrop-blur mb-8">
+            <div className="inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/50 backdrop-blur mb-4">
               <span className="w-2 h-2 rounded-full bg-[#00ff9c] animate-pulse shadow-[0_0_8px_#00ff9c]" />
               <span className="text-[10px] tracking-[0.3em] uppercase text-[#00ff9c]">SYS_ONLINE</span>
               <span className="text-white/40 text-[10px]">|</span>
               <span className="text-[10px] tracking-[0.3em] uppercase text-white/60">NEXRAD_v2.4</span>
+            </div>
+
+            {/* Location selector — directly under SYS_ONLINE */}
+            <div className="mb-8">
+              <LocationBar />
             </div>
 
             {/* Title with glitch */}
