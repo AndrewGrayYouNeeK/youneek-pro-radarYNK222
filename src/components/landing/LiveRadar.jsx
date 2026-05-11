@@ -1,13 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Radio, Layers, Loader2, AlertTriangle } from 'lucide-react';
+import { Radio, Layers, Loader2, AlertTriangle, Play, Pause, Rewind } from 'lucide-react';
 import { useLocation } from './LocationContext';
 
 // Real NEXRAD radar tiles from Iowa State University Mesonet
 // (public NEXRAD WMS/TMS service used across the industry)
 const NEXRAD_BASE = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913';
+// Archived 5-minute frames: ridge::USCOMP-N0Q-YYYYMMDDHHMM (UTC, rounded to 5 min)
+const NEXRAD_ARCHIVE = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-';
 const DARK_BASE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+
+// Build last N timestamps (UTC), every 5 min, ending ~10 min ago to ensure availability
+const buildFrameTimestamps = (count = 10) => {
+  const out = [];
+  const now = new Date();
+  // Round down to nearest 5 minutes, then back off 10 min to let tiles publish
+  now.setUTCSeconds(0, 0);
+  now.setUTCMinutes(now.getUTCMinutes() - (now.getUTCMinutes() % 5) - 10);
+  for (let i = count - 1; i >= 0; i--) {
+    const d = new Date(now.getTime() - i * 5 * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const stamp =
+      d.getUTCFullYear() +
+      pad(d.getUTCMonth() + 1) +
+      pad(d.getUTCDate()) +
+      pad(d.getUTCHours()) +
+      pad(d.getUTCMinutes());
+    out.push({ stamp, date: d });
+  }
+  return out;
+};
 
 export default function LiveRadar() {
   const mapEl = useRef(null);
@@ -15,9 +38,15 @@ export default function LiveRadar() {
   const radarRef = useRef(null);
   const warningsLayerRef = useRef(null);
   const gpsMarkerRef = useRef(null);
+  const frameLayersRef = useRef([]);
+  const playTimerRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [ts, setTs] = useState(Date.now());
   const [warningCount, setWarningCount] = useState(0);
+  const [loopMode, setLoopMode] = useState(false);
+  const [frames, setFrames] = useState([]);
+  const [frameIdx, setFrameIdx] = useState(0);
+  const [playing, setPlaying] = useState(true);
   const { location } = useLocation();
 
   useEffect(() => {
@@ -136,6 +165,61 @@ export default function LiveRadar() {
     mapRef.current.setView([location.lat, location.lon], 7);
   }, [location]);
 
+  // Build/teardown frame layers when loop mode is toggled
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    // Clean up any previous frame layers
+    frameLayersRef.current.forEach((l) => mapRef.current.removeLayer(l));
+    frameLayersRef.current = [];
+
+    if (!loopMode) {
+      // Restore live radar layer
+      if (radarRef.current && !mapRef.current.hasLayer(radarRef.current)) {
+        radarRef.current.addTo(mapRef.current);
+      }
+      return;
+    }
+
+    // Hide live layer while looping
+    if (radarRef.current && mapRef.current.hasLayer(radarRef.current)) {
+      mapRef.current.removeLayer(radarRef.current);
+    }
+
+    const stamps = buildFrameTimestamps(10);
+    setFrames(stamps);
+    setFrameIdx(stamps.length - 1);
+
+    stamps.forEach((f, i) => {
+      const layer = L.tileLayer(`${NEXRAD_ARCHIVE}${f.stamp}/{z}/{x}/{y}.png`, {
+        opacity: i === stamps.length - 1 ? 0.75 : 0,
+        maxZoom: 10,
+      }).addTo(mapRef.current);
+      frameLayersRef.current.push(layer);
+    });
+  }, [loopMode]);
+
+  // Animate frames when playing
+  useEffect(() => {
+    if (!loopMode || !playing || frames.length === 0) {
+      clearInterval(playTimerRef.current);
+      return;
+    }
+    playTimerRef.current = setInterval(() => {
+      setFrameIdx((i) => (i + 1) % frames.length);
+    }, 600);
+    return () => clearInterval(playTimerRef.current);
+  }, [loopMode, playing, frames.length]);
+
+  // Show only the active frame
+  useEffect(() => {
+    frameLayersRef.current.forEach((layer, i) => {
+      layer.setOpacity(i === frameIdx ? 0.75 : 0);
+    });
+  }, [frameIdx]);
+
+  const activeFrame = frames[frameIdx];
+
   return (
     <section id="radar" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_top,rgba(0,255,156,0.1),transparent_60%)]" />
@@ -153,9 +237,10 @@ export default function LiveRadar() {
               Auto-refreshes every 2 minutes.
             </p>
           </div>
-          <div className="flex items-center gap-4 text-[10px] tracking-[0.25em] uppercase font-mono">
-            <span className="inline-flex items-center gap-2 text-[#00ff9c]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#00ff9c] animate-pulse" /> LIVE
+          <div className="flex items-center gap-4 text-[10px] tracking-[0.25em] uppercase font-mono flex-wrap">
+            <span className={`inline-flex items-center gap-2 ${loopMode ? 'text-white/40' : 'text-[#00ff9c]'}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${loopMode ? 'bg-white/40' : 'bg-[#00ff9c] animate-pulse'}`} />
+              {loopMode ? 'LOOP' : 'LIVE'}
             </span>
             <span className="text-white/50">
               <Layers className="inline w-3 h-3 mr-1" /> N0Q · 900913
@@ -167,6 +252,17 @@ export default function LiveRadar() {
               <AlertTriangle className="w-3 h-3" />
               {warningCount} TOR WARN
             </span>
+            <button
+              onClick={() => setLoopMode(!loopMode)}
+              className={`inline-flex items-center gap-1.5 px-2 py-1 border transition ${
+                loopMode
+                  ? 'border-[#ff00d4] bg-[#ff00d4]/10 text-[#ff00d4]'
+                  : 'border-[#00ff9c]/40 text-[#00ff9c] hover:bg-[#00ff9c]/10'
+              }`}
+            >
+              <Rewind className="w-3 h-3" />
+              {loopMode ? 'EXIT LOOP' : 'LOOP'}
+            </button>
           </div>
         </div>
 
@@ -191,6 +287,33 @@ export default function LiveRadar() {
             NOAA NEXRAD · Iowa State Mesonet · CartoDB
           </div>
         </div>
+
+        {/* Loop playback controls */}
+        {loopMode && frames.length > 0 && (
+          <div className="mt-3 border border-[#ff00d4]/40 bg-black/80 backdrop-blur p-3 flex items-center gap-3">
+            <button
+              onClick={() => setPlaying(!playing)}
+              className="w-8 h-8 flex items-center justify-center bg-[#ff00d4] text-black hover:bg-white transition"
+              aria-label={playing ? 'Pause' : 'Play'}
+            >
+              {playing ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5 ml-0.5" />}
+            </button>
+            <input
+              type="range"
+              min={0}
+              max={frames.length - 1}
+              value={frameIdx}
+              onChange={(e) => { setPlaying(false); setFrameIdx(parseInt(e.target.value, 10)); }}
+              className="flex-1 accent-[#ff00d4]"
+            />
+            <div className="text-[10px] tracking-[0.25em] uppercase font-mono text-[#ff00d4] tabular-nums whitespace-nowrap">
+              {activeFrame ? activeFrame.date.toUTCString().slice(17, 22) + ' UTC' : '—'}
+            </div>
+            <div className="text-[9px] tracking-[0.25em] uppercase font-mono text-white/40 tabular-nums whitespace-nowrap hidden sm:block">
+              {frameIdx + 1}/{frames.length}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
