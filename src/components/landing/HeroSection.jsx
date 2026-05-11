@@ -5,7 +5,6 @@ import RadarSweep from './RadarSweep';
 import { WindPanel, DbzPanel, AlertPanel, SystemPanel } from './HudPanels';
 import LocationBar from './LocationBar';
 import TornadoAlertBanner from './TornadoAlertBanner';
-import RainSplash from './RainSplash';
 
 export default function HeroSection() {
   return (
@@ -49,7 +48,6 @@ export default function HeroSection() {
           <div className="relative">
             {/* Status Bar */}
             <div className="relative z-[70] inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/80 backdrop-blur mb-4">
-              <RainSplash splashes={5} drips={3} />
               <span className="w-2 h-2 rounded-full bg-[#00ff9c] animate-pulse shadow-[0_0_8px_#00ff9c]" />
               <span className="text-[10px] tracking-[0.3em] uppercase text-[#00ff9c]">SYS_ONLINE</span>
               <span className="text-white/40 text-[10px]">|</span>
