@@ -33,7 +33,7 @@ export default function Landing() {
         <div className="tornado-streak"></div>
         <div className="tornado-streak"></div>
       </div>
-      <div className="relative z-10 bg-black/40 backdrop-blur-2xl min-h-screen text-white overflow-x-hidden font-mono">
+      <div className="relative z-10 bg-black/20 min-h-screen text-white overflow-x-hidden font-mono">
         <LightningFlash />
         <LightningSignature />
         <HeroSection />
