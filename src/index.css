@@ -95,7 +95,7 @@
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background: radial-gradient(circle at 50% 25%, #2a0044 0%, #0f001a 40%, #000 75%);
+  background: radial-gradient(circle at 50% 20%, #3a0055 0%, #12001f 45%, #0a0a0f 70%, #000 90%);
   overflow: hidden;
   pointer-events: none;
 }
@@ -103,38 +103,34 @@
 .tornado-bg::before {
   content: '';
   position: absolute;
-  inset: -150%;
+  inset: -200%;
   background: repeating-linear-gradient(
-    38deg,
+    35deg,
     transparent 0px,
-    transparent 10px,
-    rgba(0, 255, 230, 0.35) 10px,
-    rgba(0, 255, 230, 0.35) 26px
+    transparent 8px,
+    rgba(0, 255, 240, 0.45) 8px,
+    rgba(0, 255, 240, 0.45) 22px
   );
-  animation: tornadoSpin 11s linear infinite;
-  opacity: 0.9;
+  animation: tornadoSpin 9s linear infinite;
+  opacity: 0.95;
 }
 
 .tornado-bg::after {
   content: '';
   position: absolute;
-  inset: -120%;
+  inset: -150%;
   background: repeating-linear-gradient(
-    115deg,
+    110deg,
     transparent 0px,
-    transparent 18px,
-    rgba(120, 255, 255, 0.25) 18px,
-    rgba(120, 255, 255, 0.25) 42px
+    transparent 16px,
+    rgba(150, 255, 255, 0.35) 16px,
+    rgba(150, 255, 255, 0.35) 38px
   );
-  animation: tornadoSpin 17s linear infinite reverse;
-  opacity: 0.75;
+  animation: tornadoSpin 15s linear infinite reverse;
+  opacity: 0.8;
 }
 
 @keyframes tornadoSpin {
-  from {
-    transform: rotate(0deg) scale(1.1);
-  }
-  to {
-    transform: rotate(360deg) scale(1.6);
-  }
+  from { transform: rotate(0deg) scale(1.08); }
+  to { transform: rotate(360deg) scale(1.65); }
 }
