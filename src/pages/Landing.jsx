@@ -12,6 +12,7 @@ import LocationBar from '@/components/landing/LocationBar';
 import RainOverlay from '@/components/landing/RainOverlay';
 import LightningFlash from '@/components/landing/LightningFlash';
 import TornadoBackground from '@/components/landing/TornadoBackground';
+import SosButton from '@/components/landing/SosButton';
 
 export default function Landing() {
   return (
@@ -39,6 +40,7 @@ export default function Landing() {
         <NoaaRadioSection />
         <FeaturesSection />
         <LandingFooter />
+        <SosButton />
       </div>
     </LocationProvider>
   );
