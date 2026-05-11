@@ -17,7 +17,7 @@ import SosButton from '@/components/landing/SosButton';
 export default function Landing() {
   return (
     <LocationProvider>
-      <div className="min-h-screen bg-transparent text-white overflow-x-hidden font-mono relative z-[1]">
+      <div className="min-h-screen bg-black text-white overflow-x-hidden font-mono">
         <TornadoBackground />
         <RainOverlay />
         <LightningFlash />

@@ -35,7 +35,7 @@ export default function NoaaRadioSection() {
   };
 
   return (
-    <section id="stations" className="relative bg-transparent py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
+    <section id="stations" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_top_right,rgba(0,255,156,0.08),transparent_60%)]" />
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-10">

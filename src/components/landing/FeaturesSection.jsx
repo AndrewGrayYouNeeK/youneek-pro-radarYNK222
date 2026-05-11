@@ -42,7 +42,7 @@ const FEATURES = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="relative bg-transparent py-24 px-5 md:px-8 overflow-hidden">
+    <section id="features" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden">
       {/* Grid bg */}
       <div className="absolute inset-0 opacity-20 pointer-events-none"
         style={{
