@@ -15,15 +15,13 @@ export default function RainBackground() {
     };
 
     class Drop {
-      constructor() {
-        this.reset();
-      }
+      constructor() { this.reset(); }
       reset() {
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height - canvas.height;
-        this.length = Math.random() * 18 + 12;
-        this.speed = Math.random() * 18 + 12;
-        this.opacity = Math.random() * 0.6 + 0.4;
+        this.length = Math.random() * 22 + 14;
+        this.speed = Math.random() * 22 + 18;
+        this.opacity = Math.random() * 0.7 + 0.5;
       }
       update() {
         this.y += this.speed;
@@ -31,23 +29,20 @@ export default function RainBackground() {
       }
       draw() {
         ctx.beginPath();
-        ctx.strokeStyle = `rgba(150, 230, 255, ${this.opacity})`;
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = `rgba(180, 240, 255, ${this.opacity})`;
+        ctx.lineWidth = 1.8;
         ctx.moveTo(this.x, this.y);
-        ctx.lineTo(this.x, this.y + this.length);
+        ctx.lineTo(this.x + 1, this.y + this.length);
         ctx.stroke();
       }
     }
 
     const init = () => {
-      drops = [];
-      for (let i = 0; i < 280; i++) {
-        drops.push(new Drop());
-      }
+      drops = Array.from({ length: 350 }, () => new Drop());
     };
 
     const animate = () => {
-      ctx.fillStyle = 'rgba(10, 10, 15, 0.12)';
+      ctx.fillStyle = 'rgba(10, 10, 18, 0.18)';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
       drops.forEach(drop => {
