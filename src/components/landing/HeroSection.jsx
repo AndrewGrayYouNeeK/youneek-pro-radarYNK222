@@ -55,7 +55,7 @@ export default function HeroSection() {
             </div>
 
             {/* Location selector — directly under SYS_ONLINE */}
-            <div className="mb-8">
+            <div className="relative z-[70] mb-8">
               <LocationBar />
             </div>
 
