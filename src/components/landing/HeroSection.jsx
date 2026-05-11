@@ -2,8 +2,7 @@ import React from 'react';
 import { ChevronRight, Zap } from 'lucide-react';
 import TopBar from './TopBar';
 import RadarSweep from './RadarSweep';
-import { StatPanel, AlertPanel, SystemPanel } from './HudPanels';
-import { Wind, Droplets, Gauge, Thermometer } from 'lucide-react';
+import { WindPanel, DbzPanel, AlertPanel, SystemPanel } from './HudPanels';
 import LocationBar from './LocationBar';
 import TornadoAlertBanner from './TornadoAlertBanner';
 
@@ -133,7 +132,7 @@ export default function HeroSection() {
 
               {/* Floating HUD panels */}
               <div className="absolute -top-4 -left-2 md:-left-8 w-40 hidden md:block">
-                <StatPanel icon={Wind} label="Wind" value="28" unit="MPH" accent="#00ff9c" />
+                <WindPanel />
               </div>
               <div className="absolute top-1/4 -right-2 md:-right-8 w-44 hidden md:block">
                 <AlertPanel />
@@ -142,14 +141,14 @@ export default function HeroSection() {
                 <SystemPanel />
               </div>
               <div className="absolute -bottom-2 right-0 md:-right-6 w-40 hidden md:block">
-                <StatPanel icon={Thermometer} label="DBZ_PEAK" value="62" unit="DBZ" accent="#ff00d4" />
+                <DbzPanel />
               </div>
             </div>
 
             {/* Mobile HUD row */}
             <div className="grid grid-cols-2 gap-3 mt-6 md:hidden">
-              <StatPanel icon={Wind} label="Wind" value="28" unit="MPH" />
-              <StatPanel icon={Thermometer} label="DBZ" value="62" unit="DBZ" accent="#ff00d4" />
+              <WindPanel />
+              <DbzPanel />
               <div className="col-span-2"><AlertPanel /></div>
             </div>
 

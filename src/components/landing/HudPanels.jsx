@@ -1,5 +1,6 @@
 import React from 'react';
-import { Wind, Droplets, Gauge, Zap, AlertTriangle, Activity } from 'lucide-react';
+import { Wind, AlertTriangle, Activity, Loader2 } from 'lucide-react';
+import useLiveStormData from './useLiveStormData';
 
 const Panel = ({ children, className = '' }) => (
   <div className={`relative bg-black/70 backdrop-blur-md border border-[#00ff9c]/30 p-3 ${className}`}>
@@ -11,6 +12,13 @@ const Panel = ({ children, className = '' }) => (
   </div>
 );
 
+const cardinal = (deg) => {
+  if (deg == null || isNaN(deg)) return '—';
+  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+  return dirs[Math.round(deg / 22.5) % 16];
+};
+
+// Generic stat panel (still used for hardcoded labels like "DBZ_PEAK" fallback)
 export const StatPanel = ({ icon: Icon, label, value, unit, accent = '#00ff9c' }) => (
   <Panel>
     <div className="flex items-center gap-2 mb-1">
@@ -24,46 +32,144 @@ export const StatPanel = ({ icon: Icon, label, value, unit, accent = '#00ff9c' }
   </Panel>
 );
 
-export const AlertPanel = () => (
-  <Panel className="border-[#ff00d4]/50">
-    <div className="flex items-center gap-2 mb-2">
-      <AlertTriangle className="w-3 h-3 text-[#ff00d4] animate-pulse" />
-      <span className="text-[9px] uppercase tracking-[0.25em] text-[#ff00d4]">SEVERE_TRACKING</span>
-      <span className="ml-auto text-[9px] text-[#00ff9c] tabular-nums">LIVE</span>
-    </div>
-    <div className="text-[11px] text-white/80 leading-relaxed">
-      <span className="text-[#ff00d4]">[!]</span> Storm cell detected · 12mi NE
-    </div>
-    <div className="text-[10px] text-white/50 mt-1">DBZ peak: 62 · Movement: 28mph SSE</div>
-    <div className="mt-2 flex gap-1">
-      {[...Array(20)].map((_, i) => (
-        <div
-          key={i}
-          className="flex-1 h-1"
-          style={{
-            background: i < 14 ? '#ff00d4' : 'rgba(255,255,255,0.1)',
-            boxShadow: i < 14 ? '0 0 4px #ff00d4' : 'none',
-          }}
-        />
-      ))}
-    </div>
-  </Panel>
-);
+// LIVE wind from NWS station observations
+export const WindPanel = () => {
+  const { obs, loading } = useLiveStormData();
+  const mph = obs?.windMps != null ? Math.round(obs.windMps * 2.23694) : null;
+  const dir = cardinal(obs?.windDir);
+  return (
+    <Panel>
+      <div className="flex items-center gap-2 mb-1">
+        <Wind className="w-3 h-3 text-[#00ff9c]" />
+        <span className="text-[9px] uppercase tracking-[0.25em] text-white/50">WIND</span>
+        {loading && <Loader2 className="w-3 h-3 animate-spin text-white/30 ml-auto" />}
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-white tabular-nums">
+          {mph != null ? mph : '—'}
+        </span>
+        <span className="text-[10px] text-white/50">MPH {dir}</span>
+      </div>
+      <div className="text-[9px] text-white/40 font-mono mt-1">
+        {obs?.station ? `KSTN ${obs.station}` : 'No station data'}
+      </div>
+    </Panel>
+  );
+};
 
-export const SystemPanel = () => (
-  <Panel>
-    <div className="flex items-center gap-2 mb-2">
-      <Activity className="w-3 h-3 text-[#00ff9c]" />
-      <span className="text-[9px] uppercase tracking-[0.25em] text-white/50">NEXRAD_FEED</span>
-      <span className="ml-auto inline-flex items-center gap-1 text-[9px] text-[#00ff9c]">
-        <span className="w-1.5 h-1.5 rounded-full bg-[#00ff9c] animate-pulse" /> ONLINE
-      </span>
-    </div>
-    <div className="space-y-1 font-mono text-[10px] text-white/60">
-      <div>&gt; tile.0/n0q ........ <span className="text-[#00ff9c]">OK</span></div>
-      <div>&gt; spc.day1 ........... <span className="text-[#00ff9c]">OK</span></div>
-      <div>&gt; nws.alerts ......... <span className="text-[#00ff9c]">OK</span></div>
-      <div>&gt; sweep.refresh ...... <span className="text-[#ffea00]">2.4s</span></div>
-    </div>
-  </Panel>
-);
+// LIVE peak reflectivity from nearest real storm cell
+export const DbzPanel = () => {
+  const { cells, loading } = useLiveStormData();
+  const peak = cells.reduce((m, c) => (c.dbz != null && c.dbz > m ? c.dbz : m), 0);
+  return (
+    <Panel>
+      <div className="flex items-center gap-2 mb-1">
+        <Activity className="w-3 h-3 text-[#ff00d4]" />
+        <span className="text-[9px] uppercase tracking-[0.25em] text-white/50">DBZ_PEAK</span>
+        {loading && <Loader2 className="w-3 h-3 animate-spin text-white/30 ml-auto" />}
+      </div>
+      <div className="flex items-baseline gap-1">
+        <span className="text-2xl font-bold text-white tabular-nums">
+          {peak > 0 ? Math.round(peak) : '—'}
+        </span>
+        <span className="text-[10px] text-white/50">DBZ</span>
+      </div>
+      <div className="text-[9px] text-white/40 font-mono mt-1">
+        {cells.length} cell{cells.length !== 1 ? 's' : ''} tracked
+      </div>
+    </Panel>
+  );
+};
+
+// LIVE severe cell tracking — nearest real storm cell
+export const AlertPanel = () => {
+  const { cells, loading } = useLiveStormData();
+  const nearest = cells[0];
+
+  if (loading && !nearest) {
+    return (
+      <Panel className="border-[#ff00d4]/50">
+        <div className="flex items-center gap-2 text-[10px] text-white/60">
+          <Loader2 className="w-3 h-3 animate-spin" /> Scanning NEXRAD…
+        </div>
+      </Panel>
+    );
+  }
+
+  if (!nearest) {
+    return (
+      <Panel className="border-[#00ff9c]/40">
+        <div className="flex items-center gap-2 mb-1">
+          <Activity className="w-3 h-3 text-[#00ff9c]" />
+          <span className="text-[9px] uppercase tracking-[0.25em] text-[#00ff9c]">SEVERE_TRACKING</span>
+          <span className="ml-auto text-[9px] text-[#00ff9c] tabular-nums">LIVE</span>
+        </div>
+        <div className="text-[11px] text-white/70">No storm cells within 150 mi</div>
+        <div className="text-[10px] text-white/40 mt-1">All clear · NEXRAD scan complete</div>
+      </Panel>
+    );
+  }
+
+  // Bar fills proportional to dBZ intensity (0-75 typical range)
+  const intensity = Math.min(1, (nearest.dbz || 0) / 70);
+  const filled = Math.round(intensity * 20);
+
+  return (
+    <Panel className="border-[#ff00d4]/50">
+      <div className="flex items-center gap-2 mb-2">
+        <AlertTriangle className="w-3 h-3 text-[#ff00d4] animate-pulse" />
+        <span className="text-[9px] uppercase tracking-[0.25em] text-[#ff00d4]">SEVERE_TRACKING</span>
+        <span className="ml-auto text-[9px] text-[#00ff9c] tabular-nums">LIVE</span>
+      </div>
+      <div className="text-[11px] text-white/80 leading-relaxed">
+        <span className="text-[#ff00d4]">[!]</span> Storm cell · {nearest.distanceMi.toFixed(0)}mi {nearest.bearingCardinal}
+      </div>
+      <div className="text-[10px] text-white/50 mt-1">
+        DBZ peak: {nearest.dbz != null ? Math.round(nearest.dbz) : '—'}
+        {nearest.stormSpeedKt != null && (
+          <> · Movement: {Math.round(nearest.stormSpeedKt * 1.15078)}mph {cardinal(nearest.stormHeading)}</>
+        )}
+      </div>
+      {(nearest.tvs || nearest.meso) && (
+        <div className="text-[10px] text-[#ff0033] mt-1 font-bold tracking-wider">
+          {nearest.tvs ? '⚠ TVS' : ''} {nearest.meso ? '⚠ MESO' : ''}
+        </div>
+      )}
+      <div className="mt-2 flex gap-1">
+        {[...Array(20)].map((_, i) => (
+          <div
+            key={i}
+            className="flex-1 h-1"
+            style={{
+              background: i < filled ? '#ff00d4' : 'rgba(255,255,255,0.1)',
+              boxShadow: i < filled ? '0 0 4px #ff00d4' : 'none',
+            }}
+          />
+        ))}
+      </div>
+    </Panel>
+  );
+};
+
+export const SystemPanel = () => {
+  const { error, loading } = useLiveStormData();
+  const ok = !error;
+  return (
+    <Panel>
+      <div className="flex items-center gap-2 mb-2">
+        <Activity className="w-3 h-3 text-[#00ff9c]" />
+        <span className="text-[9px] uppercase tracking-[0.25em] text-white/50">NEXRAD_FEED</span>
+        <span className="ml-auto inline-flex items-center gap-1 text-[9px] text-[#00ff9c]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#00ff9c] animate-pulse" />
+          {ok ? 'ONLINE' : 'ERR'}
+        </span>
+      </div>
+      <div className="space-y-1 font-mono text-[10px] text-white/60">
+        <div>&gt; tile.0/n0q ........ <span className="text-[#00ff9c]">OK</span></div>
+        <div>&gt; nexrad.attr ....... <span className={ok ? 'text-[#00ff9c]' : 'text-[#ff0033]'}>{ok ? 'OK' : 'ERR'}</span></div>
+        <div>&gt; nws.observations .. <span className={ok ? 'text-[#00ff9c]' : 'text-[#ff0033]'}>{ok ? 'OK' : 'ERR'}</span></div>
+        <div>&gt; sweep.refresh ...... <span className="text-[#ffea00]">{loading ? '…' : '5m'}</span></div>
+      </div>
+    </Panel>
+  );
+};

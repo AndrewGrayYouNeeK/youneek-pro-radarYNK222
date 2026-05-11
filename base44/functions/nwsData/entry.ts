@@ -223,6 +223,79 @@ Deno.serve(async (req) => {
       return Response.json({ results: [] });
     }
 
+    // 5) Real storm cells near a lat/lon — NEXRAD Level III storm attributes
+    //    Source: Iowa State Mesonet GeoJSON for the "nexrad_attr" layer (public, no key)
+    if (action === 'cells') {
+      const lat = parseFloat(getParam('lat'));
+      const lon = parseFloat(getParam('lon'));
+      if (isNaN(lat) || isNaN(lon)) {
+        return Response.json({ error: 'lat and lon required' }, { status: 400 });
+      }
+
+      // Pull all current NEXRAD storm attributes (CONUS) — refreshes every volume scan (~5 min)
+      const url = 'https://mesonet.agron.iastate.edu/geojson/nexrad_attr.geojson';
+      const r = await fetch(url, { headers: { 'User-Agent': UA } });
+      if (!r.ok) return Response.json({ cells: [], error: `cells ${r.status}` });
+      const data = await r.json();
+
+      // Compute distance + bearing from user, sort by distance, return top 10 within 150 miles
+      const toRad = (d) => (d * Math.PI) / 180;
+      const toDeg = (r) => (r * 180) / Math.PI;
+      const haversineMi = (lat1, lon1, lat2, lon2) => {
+        const R = 3958.8;
+        const dLat = toRad(lat2 - lat1);
+        const dLon = toRad(lon2 - lon1);
+        const a =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+        return 2 * R * Math.asin(Math.sqrt(a));
+      };
+      const bearing = (lat1, lon1, lat2, lon2) => {
+        const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
+        const x =
+          Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) -
+          Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
+        return (toDeg(Math.atan2(y, x)) + 360) % 360;
+      };
+      const cardinal = (deg) => {
+        const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
+        return dirs[Math.round(deg / 22.5) % 16];
+      };
+
+      const cells = (data.features || [])
+        .filter((f) => f.geometry?.type === 'Point')
+        .map((f) => {
+          const [cLon, cLat] = f.geometry.coordinates;
+          const p = f.properties || {};
+          const dist = haversineMi(lat, lon, cLat, cLon);
+          const bear = bearing(lat, lon, cLat, cLon);
+          return {
+            lat: cLat,
+            lon: cLon,
+            distanceMi: dist,
+            bearing: bear,
+            bearingCardinal: cardinal(bear),
+            // Storm motion: heading degrees + speed in knots from NEXRAD attributes
+            stormHeading: p.drct ?? null,
+            stormSpeedKt: p.sknt ?? null,
+            // Max reflectivity (dBZ) — peak intensity in the cell
+            dbz: p.max_dbz ?? null,
+            // Hail / tornado / mesocyclone indicators (NEXRAD product)
+            tvs: p.tvs || null,        // Tornadic Vortex Signature
+            meso: p.meso || null,      // Mesocyclone
+            hailProb: p.poh ?? null,   // Probability of hail (%)
+            severeHailProb: p.posh ?? null, // Probability of severe hail (%)
+            maxHailIn: p.max_size ?? null,  // Max hail size (in)
+            radarSite: p.nexrad || null,
+          };
+        })
+        .filter((c) => c.distanceMi <= 150)
+        .sort((a, b) => a.distanceMi - b.distanceMi)
+        .slice(0, 10);
+
+      return Response.json({ count: cells.length, cells });
+    }
+
     return Response.json({ error: 'unknown action' }, { status: 400 });
   } catch (error) {
     return Response.json({ error: error.message }, { status: 500 });
