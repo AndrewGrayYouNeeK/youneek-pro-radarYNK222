@@ -13,36 +13,41 @@ export default function TornadoBackground() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountRef.current.appendChild(renderer.domElement);
 
-    const particleCount = 12000;
+    const particleCount = 10000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(particleCount * 3);
-    const velocities = new Float32Array(particleCount);
+    const colors = new Float32Array(particleCount * 3);
 
     for (let i = 0; i < particleCount * 3; i += 3) {
-      const radius = Math.random() * 18 + 3;
+      const radius = Math.random() * 22 + 2;
       const angle = Math.random() * Math.PI * 2;
       
-      positions[i]     = Math.cos(angle) * radius;           // x
-      positions[i + 1] = (Math.random() - 0.5) * 90 - 10;   // y (very tall)
-      positions[i + 2] = Math.sin(angle) * radius;           // z
+      positions[i]     = Math.cos(angle) * radius;
+      positions[i + 1] = (Math.random() - 0.5) * 95 - 15;
+      positions[i + 2] = Math.sin(angle) * radius;
 
-      velocities[i/3] = Math.random() * 1.8 + 1.2;           // upward speed
+      // Cyan → White → Teal gradient
+      const shade = Math.random();
+      colors[i]     = 0.1 + shade * 0.6;     // R
+      colors[i + 1] = 0.9 + shade * 0.1;     // G  (very strong green)
+      colors[i + 2] = 0.8 + shade * 0.2;     // B
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 0.13,
-      color: 0x00ffcc,
+      size: 0.14,
+      vertexColors: true,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.9,
       blending: THREE.AdditiveBlending,
       depthTest: false
     });
 
     const tornado = new THREE.Points(geometry, material);
     scene.add(tornado);
-    camera.position.z = 45;
+    camera.position.z = 48;
 
     let frame;
     const animate = () => {
@@ -53,19 +58,14 @@ export default function TornadoBackground() {
       for (let i = 0; i < pos.length; i += 3) {
         const x = pos[i];
         const z = pos[i + 2];
-        
-        // Strong swirling
-        const currentRadius = Math.hypot(x, z);
-        const angle = Math.atan2(z, x) + 0.035;   // ← Increased swirl speed
-        
-        const targetRadius = currentRadius * 0.975; // Tighten into funnel shape
-        
-        pos[i]     = Math.cos(angle) * targetRadius;
-        pos[i + 2] = Math.sin(angle) * targetRadius;
-        
-        // Move upward
-        pos[i + 1] += velocities[i/3];
-        if (pos[i + 1] > 50) pos[i + 1] = -45;
+        const angle = Math.atan2(z, x) + 0.028;   // swirl speed
+        const radius = Math.hypot(x, z) * 0.977;
+
+        pos[i]     = Math.cos(angle) * radius;
+        pos[i + 2] = Math.sin(angle) * radius;
+        pos[i + 1] += 1.35;   // faster upward movement
+
+        if (pos[i + 1] > 55) pos[i + 1] = -50;
       }
 
       tornado.geometry.attributes.position.needsUpdate = true;
@@ -84,7 +84,7 @@ export default function TornadoBackground() {
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', handleResize);
-      mountRef.current?.removeChild(renderer.domElement);
+      if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
     };
   }, []);
 
@@ -98,7 +98,8 @@ export default function TornadoBackground() {
         width: '100vw',
         height: '100vh',
         zIndex: -1,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        background: '#0a0a0f'
       }}
     />
   );
