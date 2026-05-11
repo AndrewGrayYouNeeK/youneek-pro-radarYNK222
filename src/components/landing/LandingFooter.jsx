@@ -18,6 +18,11 @@ export default function LandingFooter() {
           © 2026 — All systems nominal
         </div>
       </div>
+      <div className="mt-6 pt-6 border-t border-white/5 text-center">
+        <div className="text-[10px] tracking-[0.4em] uppercase font-mono text-white/50">
+          By <span className="text-[#00ff9c]">Andrew Gray</span>
+        </div>
+      </div>
     </footer>
   );
 }
