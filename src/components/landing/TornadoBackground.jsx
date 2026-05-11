@@ -13,31 +13,40 @@ export default function TornadoBackground() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     mountRef.current.appendChild(renderer.domElement);
 
-    const count = 18000;
+    const count = 14000;
     const geometry = new THREE.BufferGeometry();
     const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
 
     for (let i = 0; i < count * 3; i += 3) {
-      const radius = Math.random() * 28 + 5;
+      const radius = Math.random() * 26 + 6;
       const angle = Math.random() * Math.PI * 2;
+      
       positions[i]     = Math.cos(angle) * radius;
-      positions[i + 1] = (Math.random() - 0.5) * 140 - 20;
+      positions[i + 1] = (Math.random() - 0.5) * 130 - 20;
       positions[i + 2] = Math.sin(angle) * radius;
+
+      // Strong Cyan
+      colors[i]     = 0.05;
+      colors[i + 1] = 1.0;
+      colors[i + 2] = 0.95;
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
 
     const material = new THREE.PointsMaterial({
-      size: 0.28,
-      color: 0x00ffff,
+      size: 0.25,
+      vertexColors: true,
       transparent: true,
       opacity: 0.95,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      depthTest: false
     });
 
     const tornado = new THREE.Points(geometry, material);
     scene.add(tornado);
-    camera.position.z = 65;
+    camera.position.z = 60;
 
     let frame;
     const animate = () => {
@@ -48,14 +57,14 @@ export default function TornadoBackground() {
       for (let i = 0; i < pos.length; i += 3) {
         const x = pos[i];
         const z = pos[i + 2];
-        const angle = Math.atan2(z, x) + 0.032;
-        const radius = Math.hypot(x, z) * 0.972;
+        const angle = Math.atan2(z, x) + 0.033;
+        const radius = Math.hypot(x, z) * 0.973;
 
         pos[i]     = Math.cos(angle) * radius;
         pos[i + 2] = Math.sin(angle) * radius;
-        pos[i + 1] += 2.2;
+        pos[i + 1] += 2.4;
 
-        if (pos[i + 1] > 70) pos[i + 1] = -70;
+        if (pos[i + 1] > 75) pos[i + 1] = -70;
       }
 
       tornado.geometry.attributes.position.needsUpdate = true;
@@ -74,7 +83,7 @@ export default function TornadoBackground() {
     return () => {
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
-      if (mountRef.current) mountRef.current.removeChild(renderer.domElement);
+      mountRef.current?.removeChild(renderer.domElement);
     };
   }, []);
 
@@ -88,7 +97,8 @@ export default function TornadoBackground() {
         width: '100vw',
         height: '100vh',
         zIndex: -1,
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        background: '#0a0a0f'
       }}
     />
   );
