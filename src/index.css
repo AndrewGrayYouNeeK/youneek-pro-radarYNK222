@@ -87,6 +87,42 @@
   }
 }
 
+.project-card {
+  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    rgba(180, 240, 255, 0.15) 50%,
+    transparent 60%
+  );
+  opacity: 0;
+  transition: opacity 0.4s;
+  pointer-events: none;
+}
+
+.project-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+}
+
+.project-card:hover::after {
+  opacity: 1;
+  animation: rainDrip 1.2s linear infinite;
+}
+
+@keyframes rainDrip {
+  0% { transform: translateY(-30%); }
+  100% { transform: translateY(80%); }
+}
+
 .cyber-bg {
   position: fixed;
   top: 0;

@@ -11,11 +11,12 @@ import { LocationProvider } from '@/components/landing/LocationContext';
 import LocationBar from '@/components/landing/LocationBar';
 import LightningSignature from '@/components/landing/LightningSignature';
 import LightningFlash from '@/components/landing/LightningFlash';
+import RainBackground from '@/components/RainBackground';
 
 export default function Landing() {
   return (
     <LocationProvider>
-      <div className="cyber-bg"></div>
+      <RainBackground />
       <div className="relative z-10 bg-black/60 backdrop-blur-xl min-h-screen text-white overflow-x-hidden font-mono">
         <LightningFlash />
         <LightningSignature />
