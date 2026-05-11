@@ -49,7 +49,7 @@ export default function LiveAlerts() {
   }, [scope, location?.state]);
 
   return (
-    <section id="alerts" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden">
+    <section id="alerts" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden z-[70] isolate">
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_top_left,rgba(255,0,212,0.1),transparent_60%)]" />
       <div className="relative max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10">
