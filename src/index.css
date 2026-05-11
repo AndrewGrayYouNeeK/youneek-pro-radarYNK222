@@ -86,3 +86,44 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Tornado Wind Background */
+.tornado-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background: radial-gradient(circle at center, #0a0a0f 0%, #000 70%);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.tornado-bg::before,
+.tornado-bg::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 20px,
+    rgba(0, 255, 220, 0.08) 20px,
+    rgba(0, 255, 220, 0.08) 40px
+  );
+  animation: tornadoSpin 25s linear infinite;
+  opacity: 0.6;
+}
+
+.tornado-bg::after {
+  animation-duration: 18s;
+  animation-direction: reverse;
+  opacity: 0.4;
+}
+
+@keyframes tornadoSpin {
+  from { transform: rotate(0deg) scale(1); }
+  to { transform: rotate(360deg) scale(1.3); }
+}
