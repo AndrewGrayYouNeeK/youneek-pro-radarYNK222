@@ -58,7 +58,8 @@ export default function TopBar() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-[#00ff9c] p-2 border border-[#00ff9c]/40"
+          className="md:hidden relative z-[70] text-[#00ff9c] p-2 border border-[#00ff9c]/40 bg-black"
+          style={{ isolation: 'isolate' }}
         >
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
