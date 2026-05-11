@@ -94,51 +94,115 @@
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background: #0a0a0f;
+  background: radial-gradient(ellipse at 50% 50%, #0d1a1a 0%, #041010 35%, #020808 100%);
   overflow: hidden;
   pointer-events: none;
 }
 
-/* Main Tornado Funnel */
 .tornado-bg::before {
   content: '';
   position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: repeating-linear-gradient(
-    35deg,
-    transparent 0px,
-    transparent 8px,
-    rgba(0, 255, 240, 0.75) 8px,
-    rgba(0, 255, 240, 0.75) 22px
+  top: 50%;
+  left: 50%;
+  width: 250%;
+  height: 250%;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(0, 200, 255, 0.0) 0deg,
+    rgba(0, 200, 255, 0.12) 8deg,
+    rgba(30, 220, 255, 0.0) 16deg,
+    rgba(0, 150, 200, 0.07) 28deg,
+    rgba(0, 200, 255, 0.0) 36deg
   );
-  animation: tornadoSpin 7s linear infinite;
-  opacity: 0.9;
+  animation: spinCW 8s linear infinite;
   filter: blur(2px);
 }
 
-/* Secondary swirling layer */
 .tornado-bg::after {
   content: '';
   position: absolute;
-  top: -60%;
-  left: -60%;
-  width: 220%;
-  height: 220%;
-  background: repeating-linear-gradient(
-    105deg,
-    transparent 0px,
-    transparent 14px,
-    rgba(180, 255, 255, 0.55) 14px,
-    rgba(180, 255, 255, 0.55) 35px
+  top: 50%;
+  left: 50%;
+  width: 300%;
+  height: 300%;
+  transform: translate(-50%, -50%);
+  background: repeating-conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(80, 220, 255, 0.0) 0deg,
+    rgba(80, 220, 255, 0.09) 12deg,
+    rgba(0, 180, 220, 0.0) 24deg,
+    rgba(50, 200, 255, 0.06) 40deg,
+    rgba(80, 220, 255, 0.0) 52deg
   );
-  animation: tornadoSpin 11.5s linear infinite reverse;
-  opacity: 0.75;
+  animation: spinCCW 13s linear infinite;
+  filter: blur(4px);
 }
 
-@keyframes tornadoSpin {
-  from { transform: rotate(0deg) scale(1.1); }
-  to { transform: rotate(360deg) scale(2.05); }
+.tornado-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(0, 220, 255, 0.2);
+  animation: spinCW linear infinite;
+}
+.tornado-ring:nth-child(1) { width: 120px;  height: 120px;  animation-duration: 3s;   border-color: rgba(0,220,255,0.35); }
+.tornado-ring:nth-child(2) { width: 240px;  height: 240px;  animation-duration: 4.5s; border-color: rgba(0,210,255,0.25); }
+.tornado-ring:nth-child(3) { width: 380px;  height: 380px;  animation-duration: 6s;   border-color: rgba(0,200,255,0.18); animation-direction: reverse; }
+.tornado-ring:nth-child(4) { width: 540px;  height: 540px;  animation-duration: 7.5s; border-color: rgba(0,190,255,0.13); }
+.tornado-ring:nth-child(5) { width: 720px;  height: 720px;  animation-duration: 9s;   border-color: rgba(0,180,255,0.09); animation-direction: reverse; }
+.tornado-ring:nth-child(6) { width: 960px;  height: 960px;  animation-duration: 12s;  border-color: rgba(0,170,255,0.06); }
+.tornado-ring:nth-child(7) { width: 1300px; height: 1300px; animation-duration: 16s;  border-color: rgba(0,160,255,0.04); animation-direction: reverse; }
+
+.tornado-eye {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(0, 255, 240, 0.15) 0%, transparent 70%);
+  filter: blur(6px);
+  animation: eyePulse 4s ease-in-out infinite;
+}
+
+.tornado-streak {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, rgba(0, 220, 255, 0.5), transparent);
+  border-radius: 2px;
+  transform-origin: 0 0;
+  animation: streakSpin linear infinite;
+  filter: blur(0.5px);
+}
+.tornado-streak:nth-child(1)  { animation-duration: 2.1s; transform: rotate(0deg)   translateY(-180px); opacity: 0.7; }
+.tornado-streak:nth-child(2)  { animation-duration: 2.6s; transform: rotate(45deg)  translateY(-240px); opacity: 0.5; height: 40px; }
+.tornado-streak:nth-child(3)  { animation-duration: 1.9s; transform: rotate(90deg)  translateY(-160px); opacity: 0.8; }
+.tornado-streak:nth-child(4)  { animation-duration: 3.1s; transform: rotate(135deg) translateY(-300px); opacity: 0.4; height: 80px; }
+.tornado-streak:nth-child(5)  { animation-duration: 2.4s; transform: rotate(180deg) translateY(-200px); opacity: 0.6; }
+.tornado-streak:nth-child(6)  { animation-duration: 1.7s; transform: rotate(225deg) translateY(-140px); opacity: 0.9; height: 35px; }
+.tornado-streak:nth-child(7)  { animation-duration: 2.8s; transform: rotate(270deg) translateY(-260px); opacity: 0.5; }
+.tornado-streak:nth-child(8)  { animation-duration: 2.2s; transform: rotate(315deg) translateY(-190px); opacity: 0.65; height: 50px; }
+
+@keyframes spinCW {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+@keyframes spinCCW {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(-360deg); }
+}
+@keyframes streakSpin {
+  from { transform: rotate(0deg) translateY(-200px); }
+  to   { transform: rotate(360deg) translateY(-200px); }
+}
+@keyframes eyePulse {
+  0%, 100% { opacity: 0.6; transform: translate(-50%, -50%) scale(1); }
+  50%       { opacity: 1;   transform: translate(-50%, -50%) scale(1.4); }
 }
