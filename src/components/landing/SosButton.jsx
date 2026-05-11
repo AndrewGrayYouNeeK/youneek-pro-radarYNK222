@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { AlertOctagon, X, Loader2, MessageSquare, Phone, MapPin, Copy, Check, Settings, Save } from 'lucide-react';
+import { AlertOctagon, X, Loader2, MessageSquare, Phone, MapPin, Copy, Check, Settings, Save, Tornado } from 'lucide-react';
+import useTornadoNearby from './useTornadoNearby';
 
 const STORAGE_KEY = 'younk_sos_profile_v1';
 
@@ -19,6 +20,7 @@ export default function SosButton() {
   const [draft, setDraft] = useState(DEFAULT_PROFILE);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
+  const { inWarning, warning } = useTornadoNearby();
 
   // Load saved profile
   useEffect(() => {
@@ -83,20 +85,40 @@ export default function SosButton() {
     } catch (_) {}
   };
 
+  const areaDesc = warning?.properties?.areaDesc || '';
+
   return (
     <>
-      {/* Floating SOS button */}
-      <button
-        onClick={openPanel}
-        className="fixed bottom-5 right-5 z-[200] group"
-        aria-label="Emergency SOS"
-      >
-        <span className="absolute inset-0 rounded-full bg-[#ff0033] opacity-60 animate-ping" />
-        <span className="relative flex items-center gap-2 px-4 py-3 rounded-full bg-[#ff0033] text-white font-bold text-xs tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(255,0,51,0.6)] border-2 border-white/20 group-hover:bg-white group-hover:text-[#ff0033] transition">
-          <AlertOctagon className="w-4 h-4" />
-          SOS
-        </span>
-      </button>
+      {/* Floating SOS button — only appears when GPS is inside an active tornado warning polygon */}
+      {inWarning && (
+        <button
+          onClick={openPanel}
+          className="fixed bottom-5 right-5 z-[200] group"
+          aria-label="Emergency SOS — Tornado Warning in your area"
+        >
+          <span className="absolute inset-0 rounded-full bg-[#ff0033] opacity-60 animate-ping" />
+          <span className="relative flex items-center gap-2 px-4 py-3 rounded-full bg-[#ff0033] text-white font-bold text-xs tracking-[0.3em] uppercase shadow-[0_0_30px_rgba(255,0,51,0.6)] border-2 border-white/20 group-hover:bg-white group-hover:text-[#ff0033] transition">
+            <Tornado className="w-4 h-4" />
+            SOS
+          </span>
+          {areaDesc && (
+            <span className="absolute bottom-full right-0 mb-2 whitespace-nowrap text-[9px] tracking-[0.2em] uppercase font-mono text-[#ff0033] bg-black/80 border border-[#ff0033]/50 px-2 py-1">
+              ⚠ TOR WARN: {areaDesc.split(';')[0]}
+            </span>
+          )}
+        </button>
+      )}
+
+      {/* Small discreet "setup" button when no tornado — lets users pre-fill ahead of time */}
+      {!inWarning && (
+        <button
+          onClick={() => { setOpen(true); setMode('settings'); }}
+          className="fixed bottom-5 right-5 z-[200] inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-black/70 backdrop-blur border border-white/20 text-white/50 hover:text-[#00ff9c] hover:border-[#00ff9c]/50 text-[9px] tracking-[0.25em] uppercase font-mono transition"
+          aria-label="Pre-configure SOS"
+        >
+          <Settings className="w-3 h-3" /> SOS_SETUP
+        </button>
+      )}
 
       {/* Modal */}
       {open && (
