@@ -11,6 +11,13 @@ export default function HeroSection() {
     <section className="relative min-h-screen w-full overflow-hidden bg-black">
       <TopBar />
 
+      {/* Full-width location strip directly under the title bar */}
+      <div className="fixed top-16 left-0 right-0 z-40 bg-black/80 backdrop-blur-xl border-b border-[#00ff9c]/20">
+        <div className="max-w-7xl mx-auto px-5 md:px-8 py-2.5 flex items-center justify-center">
+          <LocationBar />
+        </div>
+      </div>
+
       {/* Background City */}
       <div
         className="absolute inset-0 bg-cover bg-center"
@@ -45,11 +52,6 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-10 items-center flex-1">
           {/* LEFT — Copy */}
           <div className="relative">
-            {/* Location selector — centered above SYS_ONLINE */}
-            <div className="flex justify-center mb-4">
-              <LocationBar />
-            </div>
-
             {/* Status Bar */}
             <div className="inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/50 backdrop-blur mb-8">
               <span className="w-2 h-2 rounded-full bg-[#00ff9c] animate-pulse shadow-[0_0_8px_#00ff9c]" />
