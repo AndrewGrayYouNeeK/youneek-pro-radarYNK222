@@ -60,7 +60,7 @@ export default function HeroSection() {
             </div>
 
             {/* Title with glitch */}
-            <h1 className="relative z-[55] font-bold leading-[0.9] tracking-tight" style={{ isolation: 'isolate' }}>
+            <h1 className="relative z-[59] font-bold leading-[0.9] tracking-tight" style={{ isolation: 'isolate' }}>
               <span className="block text-[11vw] md:text-[5rem] lg:text-[6rem] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)]">
                 YouNeeK
               </span>
