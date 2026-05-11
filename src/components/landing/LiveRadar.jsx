@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Radio, Layers, Loader2 } from 'lucide-react';
+import { Radio, Layers, Loader2, AlertTriangle } from 'lucide-react';
 
 // Real NEXRAD radar tiles from Iowa State University Mesonet
 // (public NEXRAD WMS/TMS service used across the industry)
@@ -12,8 +12,10 @@ export default function LiveRadar() {
   const mapEl = useRef(null);
   const mapRef = useRef(null);
   const radarRef = useRef(null);
+  const warningsLayerRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [ts, setTs] = useState(Date.now());
+  const [warningCount, setWarningCount] = useState(0);
 
   useEffect(() => {
     if (!mapEl.current || mapRef.current) return;
@@ -35,6 +37,50 @@ export default function LiveRadar() {
 
     radarRef.current.on('load', () => setLoading(false));
 
+    // Tornado warning polygons layer
+    warningsLayerRef.current = L.layerGroup().addTo(map);
+
+    const fetchWarnings = async () => {
+      try {
+        const res = await fetch(
+          'https://api.weather.gov/alerts/active?event=Tornado%20Warning',
+          { headers: { Accept: 'application/geo+json' } }
+        );
+        const data = await res.json();
+        const features = (data.features || []).filter((f) => f.geometry);
+
+        warningsLayerRef.current.clearLayers();
+        features.forEach((f) => {
+          const layer = L.geoJSON(f.geometry, {
+            style: {
+              color: '#ff0033',
+              weight: 2,
+              fillColor: '#ff0033',
+              fillOpacity: 0.18,
+              dashArray: '4,3',
+            },
+          });
+          const p = f.properties || {};
+          const expires = p.expires ? new Date(p.expires).toUTCString().slice(17, 22) : '';
+          layer.bindPopup(
+            `<div style="font-family:monospace;color:#000;min-width:180px">
+              <div style="background:#ff0033;color:#fff;padding:4px 6px;font-weight:bold;font-size:11px;letter-spacing:1px">TORNADO WARNING</div>
+              <div style="padding:6px 4px;font-size:11px">
+                <div><b>${p.areaDesc || ''}</b></div>
+                <div style="margin-top:4px;opacity:0.7">Expires: ${expires} UTC</div>
+              </div>
+            </div>`
+          );
+          warningsLayerRef.current.addLayer(layer);
+        });
+        setWarningCount(features.length);
+      } catch (_) {
+        // silent
+      }
+    };
+
+    fetchWarnings();
+
     // Auto-refresh radar every 2 minutes (real NEXRAD updates ~every 2-5 min)
     const interval = setInterval(() => {
       if (!radarRef.current) return;
@@ -43,8 +89,12 @@ export default function LiveRadar() {
       radarRef.current.setUrl(`${NEXRAD_BASE}/{z}/{x}/{y}.png?ts=${newTs}`);
     }, 120000);
 
+    // Refresh warnings every 60s
+    const warnInterval = setInterval(fetchWarnings, 60000);
+
     return () => {
       clearInterval(interval);
+      clearInterval(warnInterval);
       map.remove();
       mapRef.current = null;
     };
@@ -76,6 +126,10 @@ export default function LiveRadar() {
             </span>
             <span className="text-white/40">
               {new Date(ts).toUTCString().slice(17, 25)} UTC
+            </span>
+            <span className={`inline-flex items-center gap-1.5 ${warningCount > 0 ? 'text-[#ff0033]' : 'text-white/40'}`}>
+              <AlertTriangle className="w-3 h-3" />
+              {warningCount} TOR WARN
             </span>
           </div>
         </div>
