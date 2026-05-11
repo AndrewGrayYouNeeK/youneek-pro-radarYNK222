@@ -12,11 +12,13 @@ import LocationBar from '@/components/landing/LocationBar';
 import RainOverlay from '@/components/landing/RainOverlay';
 import LightningSignature from '@/components/landing/LightningSignature';
 import LightningFlash from '@/components/landing/LightningFlash';
+import TornadoBackground from '@/components/landing/TornadoBackground';
 
 export default function Landing() {
   return (
     <LocationProvider>
       <div className="min-h-screen bg-black text-white overflow-x-hidden font-mono">
+        <TornadoBackground />
         <RainOverlay />
         <LightningFlash />
         <LightningSignature />
