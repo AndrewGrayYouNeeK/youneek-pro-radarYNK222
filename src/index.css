@@ -93,32 +93,81 @@
   overflow: hidden;
 }
 
+/* Water fill layer (rises from bottom on hover) */
+.project-card::before {
+  content: '';
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  bottom: -120%;
+  height: 220%;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(0, 255, 200, 0.35) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 0%, rgba(120, 220, 255, 0.3) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(0, 200, 255, 0.45) 0%, rgba(0, 120, 200, 0.55) 100%);
+  border-radius: 45% 45% 0 0 / 8% 8% 0 0;
+  transition: bottom 1s cubic-bezier(0.23, 1, 0.32, 1), border-radius 1s;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.5px);
+  mix-blend-mode: screen;
+}
+
+/* Surface highlight wave */
 .project-card::after {
   content: '';
   position: absolute;
-  inset: 0;
+  left: -10%;
+  right: -10%;
+  bottom: -120%;
+  height: 14px;
   background: linear-gradient(
     180deg,
-    transparent 40%,
-    rgba(180, 240, 255, 0.15) 50%,
-    transparent 60%
+    rgba(220, 255, 255, 0.9) 0%,
+    rgba(180, 240, 255, 0.5) 50%,
+    transparent 100%
   );
-  opacity: 0;
-  transition: opacity 0.4s;
+  border-radius: 50%;
+  transition: bottom 1s cubic-bezier(0.23, 1, 0.32, 1);
   pointer-events: none;
+  z-index: 1;
+  box-shadow: 0 0 12px rgba(0, 255, 220, 0.5);
 }
 
 .project-card:hover {
   transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
+  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5),
+              0 0 30px -10px rgba(0, 255, 200, 0.4);
+}
+
+.project-card:hover::before {
+  bottom: -30%;
+  animation: waterWobble 3s ease-in-out infinite;
 }
 
 .project-card:hover::after {
-  opacity: 1;
-  animation: rainDrip 1.2s linear infinite;
+  bottom: 88%;
+  animation: surfaceRipple 2.5s ease-in-out infinite;
 }
 
-@keyframes rainDrip {
-  0% { transform: translateY(-30%); }
-  100% { transform: translateY(80%); }
+/* Ensure card content stays above the water */
+.project-card > * {
+  position: relative;
+  z-index: 2;
+}
+
+@keyframes waterWobble {
+  0%, 100% { border-radius: 45% 45% 0 0 / 8% 8% 0 0; }
+  50%      { border-radius: 40% 50% 0 0 / 10% 6% 0 0; }
+}
+
+@keyframes surfaceRipple {
+  0%, 100% { transform: translateX(0) scaleY(1); }
+  50%      { transform: translateX(-3%) scaleY(1.4); }
+}
+
+/* Optional dripping edges on the bottom */
+.project-card:hover .drip,
+.project-card .drip {
+  display: none;
 }
