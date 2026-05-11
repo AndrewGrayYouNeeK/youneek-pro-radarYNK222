@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { Radio, Layers, Loader2, AlertTriangle } from 'lucide-react';
+import { useLocation } from './LocationContext';
 
 // Real NEXRAD radar tiles from Iowa State University Mesonet
 // (public NEXRAD WMS/TMS service used across the industry)
@@ -13,9 +14,11 @@ export default function LiveRadar() {
   const mapRef = useRef(null);
   const radarRef = useRef(null);
   const warningsLayerRef = useRef(null);
+  const gpsMarkerRef = useRef(null);
   const [loading, setLoading] = useState(true);
   const [ts, setTs] = useState(Date.now());
   const [warningCount, setWarningCount] = useState(0);
+  const { location } = useLocation();
 
   useEffect(() => {
     if (!mapEl.current || mapRef.current) return;
@@ -99,6 +102,39 @@ export default function LiveRadar() {
       mapRef.current = null;
     };
   }, []);
+
+  // GPS location dot — update when location changes
+  useEffect(() => {
+    if (!mapRef.current || !location?.lat || !location?.lon) return;
+
+    if (gpsMarkerRef.current) {
+      gpsMarkerRef.current.remove();
+    }
+
+    const icon = L.divIcon({
+      className: '',
+      html: `
+        <div style="position:relative;width:18px;height:18px;">
+          <span style="position:absolute;inset:0;border-radius:50%;background:#00ff9c;opacity:0.35;animation:gpsPulse 1.8s ease-out infinite;"></span>
+          <span style="position:absolute;inset:5px;border-radius:50%;background:#00ff9c;box-shadow:0 0 10px #00ff9c,0 0 4px #fff;border:2px solid #000;"></span>
+        </div>
+        <style>@keyframes gpsPulse{0%{transform:scale(0.6);opacity:0.6}100%{transform:scale(2.4);opacity:0}}</style>
+      `,
+      iconSize: [18, 18],
+      iconAnchor: [9, 9],
+    });
+
+    gpsMarkerRef.current = L.marker([location.lat, location.lon], { icon, zIndexOffset: 1000 })
+      .addTo(mapRef.current)
+      .bindPopup(
+        `<div style="font-family:monospace;color:#000;font-size:11px">
+          <b>${location.label || 'Your location'}</b><br/>
+          <span style="opacity:0.6">${location.lat.toFixed(3)}, ${location.lon.toFixed(3)}</span>
+        </div>`
+      );
+
+    mapRef.current.setView([location.lat, location.lon], 7);
+  }, [location]);
 
   return (
     <section id="radar" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
