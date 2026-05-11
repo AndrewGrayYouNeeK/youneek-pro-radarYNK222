@@ -51,7 +51,7 @@ export default function LiveRadar() {
   }, []);
 
   return (
-    <section id="radar" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
+    <section id="radar" className="relative bg-black/30 py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_top,rgba(0,255,156,0.1),transparent_60%)]" />
       <div className="relative max-w-7xl mx-auto">
         <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
