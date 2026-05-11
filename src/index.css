@@ -88,39 +88,34 @@
 }
 
 .project-card {
-  transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
   position: relative;
   overflow: hidden;
 }
 
-.project-card::after {
+.project-card:hover {
+  transform: translateY(-6px) scale(1.015);
+  box-shadow: 0 30px 60px -15px rgba(0, 255, 240, 0.3);
+}
+
+.project-card::before {
   content: '';
   position: absolute;
-  inset: 0;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 300%;
   background: linear-gradient(
-    180deg,
-    transparent 40%,
-    rgba(180, 240, 255, 0.15) 50%,
-    transparent 60%
+    transparent,
+    rgba(180, 240, 255, 0.25),
+    transparent
   );
-  opacity: 0;
-  transition: opacity 0.4s;
+  transition: top 0.8s ease;
   pointer-events: none;
 }
 
-.project-card:hover {
-  transform: translateY(-4px) scale(1.02);
-  box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.5);
-}
-
-.project-card:hover::after {
-  opacity: 1;
-  animation: rainDrip 1.2s linear infinite;
-}
-
-@keyframes rainDrip {
-  0% { transform: translateY(-30%); }
-  100% { transform: translateY(80%); }
+.project-card:hover::before {
+  top: 100%;
 }
 
 .cyber-bg {
