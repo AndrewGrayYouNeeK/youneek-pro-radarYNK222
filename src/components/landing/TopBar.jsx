@@ -58,7 +58,7 @@ export default function TopBar() {
         {/* Mobile Toggle */}
         <button
           onClick={() => setOpen(!open)}
-          className="md:hidden text-[#00ff9c] p-2 border border-[#00ff9c]/40"
+          className="md:hidden relative z-[200] text-[#00ff9c] p-2 border border-[#00ff9c]/40 bg-black"
         >
           {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
@@ -66,7 +66,7 @@ export default function TopBar() {
 
       {/* Mobile Menu */}
       {open && (
-        <div className="md:hidden border-t border-[#00ff9c]/20 bg-black/95 backdrop-blur-xl">
+        <div className="md:hidden relative z-[200] border-t border-[#00ff9c]/20 bg-black">
           <nav className="flex flex-col p-4 gap-2">
             {NAV.map((item) => (
               <a
