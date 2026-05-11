@@ -46,7 +46,7 @@ export default function LocationBar() {
   };
 
   return (
-    <div className="relative z-[70]">
+    <div className="relative z-[50]">
       <button
         onClick={() => setOpen(!open)}
         className="relative inline-flex items-center gap-2 px-3 py-2 border border-[#00ff9c]/40 bg-black/80 hover:bg-[#00ff9c]/10 transition text-left"
