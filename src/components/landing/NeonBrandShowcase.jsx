@@ -45,7 +45,7 @@ export default function NeonBrandShowcase() {
               <img
                 src={src}
                 alt={`YouNeeK Pro Radar neon sign ${i + 1}`}
-                className="relative w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02]"
+                className="relative w-full h-auto block transition-transform duration-700 group-hover:scale-[1.02] brightness-75"
               />
 
               {/* Scanlines on hover */}
