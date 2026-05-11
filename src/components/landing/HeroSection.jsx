@@ -42,12 +42,12 @@ export default function HeroSection() {
       />
 
       {/* Content */}
-      <div className="relative z-[70] max-w-7xl mx-auto px-5 md:px-8 pt-32 pb-20 min-h-screen flex flex-col">
+      <div className="relative z-[50] max-w-7xl mx-auto px-5 md:px-8 pt-32 pb-20 min-h-screen flex flex-col">
         <div className="grid lg:grid-cols-2 gap-10 items-center flex-1">
           {/* LEFT — Copy */}
           <div className="relative">
             {/* Status Bar */}
-            <div className="relative z-[70] inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/80 backdrop-blur mb-4">
+            <div className="relative z-[50] inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/80 backdrop-blur mb-4">
               <span className="w-2 h-2 rounded-full bg-[#00ff9c] animate-pulse shadow-[0_0_8px_#00ff9c]" />
               <span className="text-[10px] tracking-[0.3em] uppercase text-[#00ff9c]">SYS_ONLINE</span>
               <span className="text-white/40 text-[10px]">|</span>
@@ -55,7 +55,7 @@ export default function HeroSection() {
             </div>
 
             {/* Location selector — directly under SYS_ONLINE */}
-            <div className="relative z-[70] mb-8">
+            <div className="relative z-[50] mb-8">
               <LocationBar />
             </div>
 
