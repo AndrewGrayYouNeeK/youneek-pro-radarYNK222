@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { MapPin, Search, Crosshair, Loader2, X } from 'lucide-react';
 import { useLocation } from './LocationContext';
+import RainSplash from './RainSplash';
 
 export default function LocationBar() {
   const { location, setLocation, detectGPS, search } = useLocation();
@@ -49,8 +50,9 @@ export default function LocationBar() {
     <div className="relative z-[70]">
       <button
         onClick={() => setOpen(!open)}
-        className="inline-flex items-center gap-2 px-3 py-2 border border-[#00ff9c]/40 bg-black/80 hover:bg-[#00ff9c]/10 transition text-left"
+        className="relative inline-flex items-center gap-2 px-3 py-2 border border-[#00ff9c]/40 bg-black/80 hover:bg-[#00ff9c]/10 transition text-left"
       >
+        <RainSplash splashes={6} drips={3} />
         <MapPin className="w-3.5 h-3.5 text-[#ff00d4]" />
         <span className="text-[10px] tracking-[0.25em] uppercase text-white/50 font-mono">Location</span>
         <span className="text-xs text-white font-bold">{location.label}</span>

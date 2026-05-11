@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X } from 'lucide-react';
 import NBoltLogo from './NBoltLogo';
+import RainSplash from './RainSplash';
 
 const NAV = [
   { label: 'Radar', href: '#radar' },
@@ -15,6 +16,7 @@ export default function TopBar() {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[70] backdrop-blur-xl bg-black/70 border-b border-[#00ff9c]/20">
+      <RainSplash splashes={14} drips={6} />
       <div className="absolute inset-0 pointer-events-none opacity-30 [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.04)_2px,rgba(0,255,156,0.04)_3px)]" />
       <div className="relative max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
