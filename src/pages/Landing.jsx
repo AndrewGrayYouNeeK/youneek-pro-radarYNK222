@@ -16,7 +16,7 @@ export default function Landing() {
   return (
     <LocationProvider>
       <div className="cyber-bg"></div>
-      <div className="relative z-10 bg-black/20 min-h-screen text-white overflow-x-hidden font-mono">
+      <div className="relative z-10 bg-black/60 backdrop-blur-xl min-h-screen text-white overflow-x-hidden font-mono">
         <LightningFlash />
         <LightningSignature />
         <HeroSection />
