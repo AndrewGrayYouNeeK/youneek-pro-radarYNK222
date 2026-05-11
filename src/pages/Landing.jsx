@@ -13,6 +13,7 @@ import RainOverlay from '@/components/landing/RainOverlay';
 import LightningFlash from '@/components/landing/LightningFlash';
 import TornadoBackground from '@/components/landing/TornadoBackground';
 import SosButton from '@/components/landing/SosButton';
+import ClickSplash from '@/components/landing/ClickSplash';
 
 export default function Landing() {
   return (
@@ -30,6 +31,7 @@ export default function Landing() {
         <FeaturesSection />
         <LandingFooter />
         <SosButton />
+        <ClickSplash />
       </div>
     </LocationProvider>
   );
