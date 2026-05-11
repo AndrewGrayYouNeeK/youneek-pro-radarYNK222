@@ -112,7 +112,7 @@ export default function LiveAlerts() {
         )}
 
         {!loading && alerts.length === 0 && !error && (
-          <div className="border border-[#00ff9c]/30 bg-[#00ff9c]/5 p-8 text-center">
+          <div className="relative z-[70] border border-[#00ff9c]/30 bg-black/80 p-8 text-center">
             <ShieldAlert className="w-6 h-6 text-[#00ff9c] mx-auto mb-3" />
             <div className="text-white text-sm">
               No active alerts {scope === 'local' && location?.state ? `for ${location.state}` : 'across CONUS'}.
