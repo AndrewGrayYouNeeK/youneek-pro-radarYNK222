@@ -1,5 +1,5 @@
-import React, { useRef, useState, useMemo, useEffect } from 'react';
-import { Radio, Play, Pause, Volume2, Search, MapPin } from 'lucide-react';
+import React, { useRef, useState, useMemo } from 'react';
+import { Radio, Play, Pause, Volume2, MapPin, Loader2 } from 'lucide-react';
 import { useLocation } from './LocationContext';
 import { NOAA_STATIONS } from './noaaStations';
 
@@ -19,42 +19,33 @@ const distMi = (a, b) => {
 
 export default function NoaaRadioSection() {
   const audioRef = useRef(null);
-  const [active, setActive] = useState(null);
+  const [playing, setPlaying] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [query, setQuery] = useState('');
   const { location } = useLocation();
 
-  // Stations sorted by distance from user
-  const sortedStations = useMemo(() => {
-    if (!location?.lat || !location?.lon) return STATIONS;
-    return [...STATIONS]
-      .map((s) => ({ ...s, distance: distMi(location, s) }))
-      .sort((a, b) => a.distance - b.distance);
+  // Nearest station based on GPS / saved location
+  const nearest = useMemo(() => {
+    if (!location?.lat || !location?.lon) return null;
+    let best = null;
+    for (const s of STATIONS) {
+      const d = distMi(location, s);
+      if (!best || d < best.distance) best = { ...s, distance: d };
+    }
+    return best;
   }, [location]);
 
-  // Closest station
-  const nearest = sortedStations[0];
-
-  // Filtered by search
-  const visible = useMemo(() => {
-    if (!query.trim()) return sortedStations;
-    const q = query.toLowerCase();
-    return sortedStations.filter(
-      (s) => s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q) || s.freq.toLowerCase().includes(q)
-    );
-  }, [sortedStations, query]);
-
-  const toggle = (s) => {
-    if (active?.id === s.id) {
+  const toggle = () => {
+    if (!nearest) return;
+    if (playing) {
       audioRef.current?.pause();
-      setActive(null);
+      setPlaying(false);
       return;
     }
     setLoading(true);
-    setActive(s);
+    setPlaying(true);
     setTimeout(() => {
       if (audioRef.current) {
-        audioRef.current.src = s.url;
+        audioRef.current.src = nearest.url;
         audioRef.current.play().catch(() => {}).finally(() => setLoading(false));
       }
     }, 50);
@@ -63,100 +54,91 @@ export default function NoaaRadioSection() {
   return (
     <section id="stations" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden border-t border-[#00ff9c]/20">
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_top_right,rgba(0,255,156,0.08),transparent_60%)]" />
-      <div className="relative max-w-7xl mx-auto">
-        <div className="mb-6">
+      <div className="relative max-w-3xl mx-auto">
+        <div className="mb-8">
           <div className="text-[10px] tracking-[0.4em] uppercase text-[#00ff9c] mb-3 font-mono">
             // NOAA_WEATHER_RADIO
           </div>
           <h2 className="text-4xl md:text-5xl font-bold leading-[0.95] tracking-tight text-white">
-            Live <span className="text-[#ff00d4]">NOAA</span> Radio
+            Your Local <span className="text-[#ff00d4]">NOAA</span> Radio
           </h2>
           <p className="mt-3 text-sm text-white/60 max-w-xl">
-            {STATIONS.length}+ NOAA Weather Radio All Hazards (NWR) transmitters across every U.S. state & territory. Auto-tuned to your nearest station.
+            Auto-tuned to the closest NOAA Weather Radio All Hazards (NWR) transmitter based on your GPS location.
           </p>
         </div>
 
-        {/* Nearest banner + search */}
-        <div className="mb-6 flex flex-col md:flex-row md:items-center gap-3 justify-between">
-          {nearest && location?.lat && (
-            <div className="inline-flex items-center gap-2 px-3 py-2 border border-[#ff00d4]/40 bg-black/70 text-[10px] tracking-[0.25em] uppercase font-mono">
-              <MapPin className="w-3 h-3 text-[#ff00d4]" />
-              <span className="text-white/50">Nearest:</span>
-              <span className="text-[#ff00d4] font-bold">{nearest.id}</span>
-              {nearest.distance != null && (
-                <span className="text-white/40">· {Math.round(nearest.distance)} mi</span>
-              )}
+        {!nearest && (
+          <div className="border border-white/10 bg-black/60 p-6 text-center">
+            <MapPin className="w-5 h-5 text-[#ff00d4] mx-auto mb-3" />
+            <div className="text-sm text-white/70 mb-1">Location required</div>
+            <div className="text-[10px] tracking-[0.25em] uppercase text-white/40 font-mono">
+              Set your location at the top of the page to tune in
             </div>
-          )}
-
-          <div className="relative flex-1 md:max-w-xs">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-white/40" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search by city, ID, or freq…"
-              className="w-full bg-black border border-white/15 pl-9 pr-3 py-2 text-xs text-white placeholder:text-white/30 focus:border-[#00ff9c] outline-none font-mono"
-            />
           </div>
-        </div>
+        )}
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {visible.map((s) => {
-            const isActive = active?.id === s.id;
-            const isNearest = nearest?.id === s.id && location?.lat;
-            return (
+        {nearest && (
+          <div className="relative border border-[#ff00d4]/50 bg-black/80 p-6 md:p-8">
+            <span className="absolute -top-px -left-px w-4 h-4 border-t-2 border-l-2 border-[#ff00d4]" />
+            <span className="absolute -top-px -right-px w-4 h-4 border-t-2 border-r-2 border-[#00ff9c]" />
+            <span className="absolute -bottom-px -left-px w-4 h-4 border-b-2 border-l-2 border-[#00ff9c]" />
+            <span className="absolute -bottom-px -right-px w-4 h-4 border-b-2 border-r-2 border-[#ff00d4]" />
+
+            <div className="flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-mono text-[#ff00d4] mb-4">
+              <MapPin className="w-3 h-3" />
+              Nearest Station · {Math.round(nearest.distance)} mi from {location.label}
+            </div>
+
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
               <button
-                key={s.id}
-                onClick={() => toggle(s)}
-                className={`relative text-left border p-4 transition group ${
-                  isActive
-                    ? 'border-[#00ff9c] bg-[#00ff9c]/5'
-                    : isNearest
-                    ? 'border-[#ff00d4]/60 bg-[#ff00d4]/5 hover:border-[#ff00d4]'
-                    : 'border-white/10 bg-black/60 hover:border-[#00ff9c]/50'
+                onClick={toggle}
+                className={`relative w-20 h-20 rounded-full flex items-center justify-center transition shrink-0 ${
+                  playing ? 'bg-[#00ff9c] text-black' : 'bg-white text-black hover:bg-[#00ff9c]'
                 }`}
               >
-                {isNearest && (
-                  <span className="absolute -top-2 left-3 px-1.5 py-0.5 bg-[#ff00d4] text-black text-[8px] tracking-[0.25em] uppercase font-bold">
-                    Nearest
-                  </span>
+                {playing && (
+                  <span className="absolute inset-0 rounded-full bg-[#00ff9c] opacity-40 animate-ping" />
                 )}
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <Radio className={`w-4 h-4 ${isActive ? 'text-[#00ff9c] animate-pulse' : 'text-white/50'}`} />
-                  <span className={`w-7 h-7 rounded-full flex items-center justify-center ${
-                    isActive ? 'bg-[#00ff9c] text-black' : 'bg-white/10 text-white group-hover:bg-[#00ff9c] group-hover:text-black'
-                  } transition`}>
-                    {isActive ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3 ml-0.5" />}
-                  </span>
-                </div>
-                <div className="text-sm font-bold text-white leading-tight">{s.name}</div>
-                <div className="text-[10px] tracking-[0.25em] uppercase text-white/40 mt-1 font-mono flex items-center gap-2">
-                  <span>{s.freq}</span>
-                  {s.distance != null && (
-                    <span className="text-white/30">· {Math.round(s.distance)} mi</span>
-                  )}
-                </div>
-                {isActive && (
-                  <div className="mt-3 flex items-center gap-1.5 text-[9px] tracking-[0.3em] uppercase text-[#00ff9c]">
-                    <Volume2 className="w-3 h-3" />
-                    {loading ? 'Buffering…' : 'On Air'}
-                  </div>
+                {loading ? (
+                  <Loader2 className="w-7 h-7 animate-spin relative" />
+                ) : playing ? (
+                  <Pause className="w-7 h-7 relative" />
+                ) : (
+                  <Play className="w-7 h-7 ml-1 relative" />
                 )}
               </button>
-            );
-          })}
-        </div>
 
-        {visible.length === 0 && (
-          <div className="text-center py-12 text-xs text-white/40 font-mono tracking-wider">
-            No stations match "{query}"
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-2">
+                  <Radio className={`w-4 h-4 ${playing ? 'text-[#00ff9c] animate-pulse' : 'text-white/60'}`} />
+                  <span className="text-[10px] tracking-[0.3em] uppercase font-mono text-[#00ff9c]">
+                    {playing ? (loading ? 'Buffering…' : 'On Air') : 'Standby'}
+                  </span>
+                </div>
+                <div className="text-2xl md:text-3xl font-bold text-white leading-tight">
+                  {nearest.name}
+                </div>
+                <div className="mt-2 flex flex-wrap items-center gap-3 text-[11px] tracking-[0.25em] uppercase text-white/50 font-mono">
+                  <span><span className="text-white/30">CALL </span>{nearest.id}</span>
+                  <span><span className="text-white/30">FREQ </span>{nearest.freq}</span>
+                  <span><span className="text-white/30">DIST </span>{Math.round(nearest.distance)} mi</span>
+                </div>
+              </div>
+            </div>
+
+            {playing && (
+              <div className="mt-5 flex items-center gap-2 text-[9px] tracking-[0.3em] uppercase text-[#00ff9c] font-mono">
+                <Volume2 className="w-3 h-3" />
+                Live audio · NOAA / NWS
+              </div>
+            )}
           </div>
         )}
 
         <audio ref={audioRef} crossOrigin="anonymous" preload="none" />
 
         <div className="mt-6 text-[10px] tracking-[0.25em] uppercase text-white/30 font-mono">
-          // Source: Broadcastify public NWR feeds · NOAA / NWS
+          // Source: Broadcastify public NWR feeds · NOAA / NWS · {STATIONS.length}+ transmitters indexed
         </div>
       </div>
     </section>
