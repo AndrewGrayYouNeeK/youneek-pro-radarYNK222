@@ -87,6 +87,57 @@
   }
 }
 
+.cyber-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% 30%, rgba(80, 0, 120, 0.6) 0%, transparent 60%),
+    #0a0a0f;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.cyber-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    transparent 40%,
+    rgba(0, 255, 220, 0.08) 50%,
+    transparent 60%
+  );
+  animation: scanline 8s linear infinite;
+}
+
+.cyber-bg::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 40px,
+    rgba(0, 255, 220, 0.05) 40px,
+    rgba(0, 255, 220, 0.05) 80px
+  );
+  animation: matrixRain 25s linear infinite;
+}
+
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(300%); }
+}
+
+@keyframes matrixRain {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 800px; }
+}
+
 .tornado-bg {
   position: fixed;
   top: 0;

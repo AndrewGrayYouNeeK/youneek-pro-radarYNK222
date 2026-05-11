@@ -15,24 +15,7 @@ import LightningFlash from '@/components/landing/LightningFlash';
 export default function Landing() {
   return (
     <LocationProvider>
-      <div className="tornado-bg">
-        <div className="tornado-ring"></div>
-        <div className="tornado-ring"></div>
-        <div className="tornado-ring"></div>
-        <div className="tornado-ring"></div>
-        <div className="tornado-ring"></div>
-        <div className="tornado-ring"></div>
-        <div className="tornado-ring"></div>
-        <div className="tornado-eye"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-        <div className="tornado-streak"></div>
-      </div>
+      <div className="cyber-bg"></div>
       <div className="relative z-10 bg-black/20 min-h-screen text-white overflow-x-hidden font-mono">
         <LightningFlash />
         <LightningSignature />
