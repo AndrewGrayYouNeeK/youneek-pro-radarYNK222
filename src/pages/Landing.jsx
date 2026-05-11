@@ -23,17 +23,6 @@ export default function Landing() {
         <LightningFlash />
         <HeroSection />
         <NeonBrandShowcase />
-
-        {/* Location bar — sits directly above the radar */}
-        <div className="bg-black border-t border-[#00ff9c]/20">
-          <div className="max-w-7xl mx-auto px-5 md:px-8 py-3 flex items-center justify-between gap-4">
-            <div className="text-[10px] tracking-[0.3em] uppercase text-white/50 font-mono hidden sm:block">
-              // LOCAL_FEED
-            </div>
-            <LocationBar />
-          </div>
-        </div>
-
         <LiveRadar />
         <LiveAlerts />
         <CurrentConditions />

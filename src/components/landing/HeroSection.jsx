@@ -4,6 +4,7 @@ import TopBar from './TopBar';
 import RadarSweep from './RadarSweep';
 import { StatPanel, AlertPanel, SystemPanel } from './HudPanels';
 import { Wind, Droplets, Gauge, Thermometer } from 'lucide-react';
+import LocationBar from './LocationBar';
 
 export default function HeroSection() {
   return (
@@ -44,6 +45,11 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-10 items-center flex-1">
           {/* LEFT — Copy */}
           <div className="relative">
+            {/* Location selector — centered above SYS_ONLINE */}
+            <div className="flex justify-center mb-4">
+              <LocationBar />
+            </div>
+
             {/* Status Bar */}
             <div className="inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/50 backdrop-blur mb-8">
               <span className="w-2 h-2 rounded-full bg-[#00ff9c] animate-pulse shadow-[0_0_8px_#00ff9c]" />
