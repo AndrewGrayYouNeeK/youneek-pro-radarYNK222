@@ -87,7 +87,6 @@
   }
 }
 
-/* Tornado Wind Background */
 .tornado-bg {
   position: fixed;
   top: 0;
@@ -95,42 +94,51 @@
   width: 100vw;
   height: 100vh;
   z-index: -1;
-  background: radial-gradient(circle at 50% 15%, #5a0080 0%, #220033 40%, #0a0a0f 70%, #000);
+  background: #0a0a0f;
   overflow: hidden;
   pointer-events: none;
 }
 
+/* Main Tornado Funnel */
 .tornado-bg::before {
   content: '';
   position: absolute;
-  inset: -400%;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
   background: repeating-linear-gradient(
-    30deg,
+    35deg,
     transparent 0px,
-    transparent 5px,
-    rgba(0, 255, 245, 0.7) 5px,
-    rgba(0, 255, 245, 0.7) 17px
+    transparent 8px,
+    rgba(0, 255, 240, 0.75) 8px,
+    rgba(0, 255, 240, 0.75) 22px
   );
-  animation: tornadoSpin 6.5s linear infinite;
-  opacity: 0.95;
+  animation: tornadoSpin 7s linear infinite;
+  opacity: 0.9;
+  filter: blur(2px);
 }
 
+/* Secondary swirling layer */
 .tornado-bg::after {
   content: '';
   position: absolute;
-  inset: -250%;
+  top: -60%;
+  left: -60%;
+  width: 220%;
+  height: 220%;
   background: repeating-linear-gradient(
-    100deg,
+    105deg,
     transparent 0px,
-    transparent 11px,
-    rgba(200, 255, 255, 0.55) 11px,
-    rgba(200, 255, 255, 0.55) 28px
+    transparent 14px,
+    rgba(180, 255, 255, 0.55) 14px,
+    rgba(180, 255, 255, 0.55) 35px
   );
-  animation: tornadoSpin 11s linear infinite reverse;
-  opacity: 0.9;
+  animation: tornadoSpin 11.5s linear infinite reverse;
+  opacity: 0.75;
 }
 
 @keyframes tornadoSpin {
-  from { transform: rotate(0deg) scale(1.15); }
-  to { transform: rotate(360deg) scale(2.1); }
+  from { transform: rotate(0deg) scale(1.1); }
+  to { transform: rotate(360deg) scale(2.05); }
 }
