@@ -1,95 +1,81 @@
 import { useEffect, useRef } from 'react';
-import * as THREE from 'three';
 
 export default function TornadoBackground() {
-  const mountRef = useRef(null);
+  const canvasRef = useRef(null);
 
   useEffect(() => {
-    const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 2000);
-    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-    
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    mountRef.current.appendChild(renderer.domElement);
-
-    const count = 14000;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(count * 3);
-    const colors = new Float32Array(count * 3);
-
-    for (let i = 0; i < count * 3; i += 3) {
-      const radius = Math.random() * 26 + 6;
-      const angle = Math.random() * Math.PI * 2;
-      
-      positions[i]     = Math.cos(angle) * radius;
-      positions[i + 1] = (Math.random() - 0.5) * 130 - 20;
-      positions[i + 2] = Math.sin(angle) * radius;
-
-      // Strong Cyan
-      colors[i]     = 0.05;
-      colors[i + 1] = 1.0;
-      colors[i + 2] = 0.95;
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-    const material = new THREE.PointsMaterial({
-      size: 0.25,
-      vertexColors: true,
-      transparent: true,
-      opacity: 0.95,
-      blending: THREE.AdditiveBlending,
-      depthTest: false
-    });
-
-    const tornado = new THREE.Points(geometry, material);
-    scene.add(tornado);
-    camera.position.z = 60;
-
-    let frame;
-    const animate = () => {
-      frame = requestAnimationFrame(animate);
-
-      const pos = tornado.geometry.attributes.position.array;
-
-      for (let i = 0; i < pos.length; i += 3) {
-        const x = pos[i];
-        const z = pos[i + 2];
-        const angle = Math.atan2(z, x) + 0.033;
-        const radius = Math.hypot(x, z) * 0.973;
-
-        pos[i]     = Math.cos(angle) * radius;
-        pos[i + 2] = Math.sin(angle) * radius;
-        pos[i + 1] += 2.4;
-
-        if (pos[i + 1] > 75) pos[i + 1] = -70;
-      }
-
-      tornado.geometry.attributes.position.needsUpdate = true;
-      renderer.render(scene, camera);
-    };
-
-    animate();
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationFrame;
 
     const resize = () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
     };
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = Math.random() * canvas.height;
+        this.size = Math.random() * 3 + 1;
+        this.speed = Math.random() * 4 + 2;
+        this.angle = Math.random() * Math.PI * 2;
+        this.spin = (Math.random() - 0.5) * 0.1;
+      }
+      update() {
+        this.angle += this.spin;
+        this.x += Math.cos(this.angle) * 3;
+        this.y += this.speed;
+        if (this.y > canvas.height || this.x < 0 || this.x > canvas.width) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(this.angle);
+        ctx.fillStyle = 'rgba(0, 255, 220, 0.9)';
+        ctx.fillRect(-this.size/2, -this.size*3, this.size, this.size*6);
+        ctx.restore();
+      }
+    }
+
+    const init = () => {
+      particles = [];
+      for (let i = 0; i < 800; i++) {
+        particles.push(new Particle());
+      }
+    };
+
+    const animate = () => {
+      ctx.fillStyle = 'rgba(10, 10, 15, 0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    resize();
+    init();
+    animate();
+
     window.addEventListener('resize', resize);
 
     return () => {
-      cancelAnimationFrame(frame);
+      cancelAnimationFrame(animationFrame);
       window.removeEventListener('resize', resize);
-      mountRef.current?.removeChild(renderer.domElement);
     };
   }, []);
 
   return (
-    <div
-      ref={mountRef}
+    <canvas
+      ref={canvasRef}
       style={{
         position: 'fixed',
         top: 0,
