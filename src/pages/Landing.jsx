@@ -16,7 +16,7 @@ export default function Landing() {
   return (
     <LocationProvider>
       <div className="tornado-bg" />
-      <div className="relative z-10 min-h-screen bg-black/55 backdrop-blur-xl text-white overflow-x-hidden font-mono">
+      <div className="relative z-10 min-h-screen bg-black/45 backdrop-blur-2xl text-white overflow-x-hidden font-mono">
         <LightningFlash />
         <LightningSignature />
         <HeroSection />
