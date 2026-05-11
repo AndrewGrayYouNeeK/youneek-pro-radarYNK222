@@ -17,8 +17,8 @@ import TornadoBackground from '@/components/landing/TornadoBackground';
 export default function Landing() {
   return (
     <LocationProvider>
-      <div className="min-h-screen bg-black text-white overflow-x-hidden font-mono">
-        <TornadoBackground />
+      <TornadoBackground />
+      <div className="relative z-10 min-h-screen text-white overflow-x-hidden font-mono">
         <RainOverlay />
         <LightningFlash />
         <LightningSignature />
