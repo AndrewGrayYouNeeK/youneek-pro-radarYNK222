@@ -3,14 +3,14 @@ import React, { useMemo } from 'react';
 export default function RainOverlay() {
   const drops = useMemo(
     () =>
-      Array.from({ length: 260 }).map((_, i) => ({
+      Array.from({ length: 140 }).map((_, i) => ({
         id: i,
         left: Math.random() * 100,
         delay: Math.random() * 2,
-        duration: 0.35 + Math.random() * 0.5,
-        opacity: 0.35 + Math.random() * 0.55,
-        height: 60 + Math.random() * 120,
-        width: 1 + Math.random() * 1.5,
+        duration: 0.4 + Math.random() * 0.6,
+        opacity: 0.25 + Math.random() * 0.45,
+        height: 50 + Math.random() * 100,
+        width: 1 + Math.random() * 0.8,
       })),
     []
   );
