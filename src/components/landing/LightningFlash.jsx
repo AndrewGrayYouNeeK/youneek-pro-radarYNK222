@@ -24,13 +24,15 @@ export default function LightningFlash() {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-white opacity-0 pointer-events-none z-[65] animate-[lightning_8s_ease-in-out_infinite]">
+    <div className="fixed inset-0 bg-white opacity-0 pointer-events-none z-[65] animate-[lightning_8s_ease-in-out_infinite]" style={{ mixBlendMode: 'screen' }}>
       <style>{`
         @keyframes lightning {
-          0%, 92%, 96%, 100% { opacity: 0; }
-          93% { opacity: 0.4; }
+          0%, 90%, 96%, 100% { opacity: 0; }
+          91% { opacity: 0.85; }
+          92% { opacity: 0.1; }
+          93% { opacity: 0.95; }
           94% { opacity: 0; }
-          95% { opacity: 0.2; }
+          95% { opacity: 0.5; }
         }
       `}</style>
     </div>
