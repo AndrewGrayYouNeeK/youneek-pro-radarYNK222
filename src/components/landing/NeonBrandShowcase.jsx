@@ -1,7 +1,7 @@
 import React from 'react';
 
-const LOGO_1 = 'https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/c9a04a20f_zKz9pCMiyhVZlXQQHwqfQ_ecHWOfCW.png';
-const LOGO_2 = 'https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/43b3d70f8_pgaLRg9bNEKoOW5HLzS34_rPjz7OY2.png';
+const LOGO_1 = 'https://images.unsplash.com/photo-1605727216801-27b7b0b26d8d?w=600&q=80';
+const LOGO_2 = 'https://images.unsplash.com/photo-1527482797697-3b2389a3b841?w=600&q=80';
 
 export default function NeonBrandShowcase() {
   return (

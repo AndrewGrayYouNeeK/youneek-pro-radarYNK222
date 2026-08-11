@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeNwsData } from '@/api/nwsData';
 
 const LocationCtx = createContext(null);
 
@@ -51,7 +51,7 @@ export function LocationProvider({ children }) {
           const { latitude, longitude } = pos.coords;
           // Use NWS point endpoint to derive city/state for a nice label
           try {
-            const res = await base44.functions.invoke('nwsData', {
+            const res = await invokeNwsData({
               action: 'point', lat: latitude, lon: longitude,
             });
             const city = res.data?.location?.city || 'Current';
@@ -74,7 +74,7 @@ export function LocationProvider({ children }) {
     });
 
   const search = async (q) => {
-    const res = await base44.functions.invoke('nwsData', { action: 'geocode', q });
+    const res = await invokeNwsData({ action: 'geocode', q });
     return res.data?.results || [];
   };
 

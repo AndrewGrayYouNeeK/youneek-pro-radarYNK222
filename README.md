@@ -1,39 +1,53 @@
-**Welcome to your Base44 project** 
+# YouNeeK Pro Radar
 
-**About**
+Real-time storm tracking app with live NEXRAD radar, NOAA severe weather alerts, and current conditions.
 
-View and Edit  your app on [Base44.com](http://Base44.com) 
+## Local Development
 
-This project contains everything you need to run your app locally.
+**Prerequisites:** Node.js 18+
 
-**Edit the code in your local development environment**
+```bash
+# Clone the repo
+git clone https://github.com/AndrewGrayYouNeeK/youneek-pro-radarYNK222.git
+cd youneek-pro-radarYNK222
 
-Any change pushed to the repo will also be reflected in the Base44 Builder.
+# Install dependencies
+npm install
 
-**Prerequisites:** 
-
-1. Clone the repository using the project's Git URL 
-2. Navigate to the project directory
-3. Install dependencies: `npm install`
-4. Create an `.env.local` file and set the right environment variables
-
-```
-VITE_BASE44_APP_ID=your_app_id
-VITE_BASE44_APP_BASE_URL=your_backend_url
-
-e.g.
-VITE_BASE44_APP_ID=cbef744a8545c389ef439ea6
-VITE_BASE44_APP_BASE_URL=https://my-to-do-list-81bfaad7.base44.app
+# Start the dev server
+npm run dev
 ```
 
-Run the app: `npm run dev`
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-**Publish your changes**
+## Scripts
 
-Open [Base44.com](http://Base44.com) and click on Publish.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start Vite dev server with local NWS API proxy |
+| `npm run build` | Production build |
+| `npm run preview` | Preview production build (includes API proxy) |
+| `npm run lint` | Run ESLint |
 
-**Docs & Support**
+## GitHub
 
-Documentation: [https://docs.base44.com/Integrations/Using-GitHub](https://docs.base44.com/Integrations/Using-GitHub)
+This project is connected to GitHub at [AndrewGrayYouNeeK/youneek-pro-radarYNK222](https://github.com/AndrewGrayYouNeeK/youneek-pro-radarYNK222).
 
-Support: [https://app.base44.com/support](https://app.base44.com/support)
+Push changes to `main` to update the remote repository.
+
+## Data Sources
+
+- [NOAA National Weather Service API](https://www.weather.gov/documentation/services-web-api) — alerts, forecasts, observations
+- [Iowa State Mesonet](https://mesonet.agron.iastate.edu/) — NEXRAD storm attributes
+- [Open-Meteo Geocoding](https://open-meteo.com/) — location search
+
+## Project Structure
+
+```
+src/
+  api/nwsData.js          # Client API for weather data
+  components/landing/     # Landing page components
+  pages/Landing.jsx       # Main page
+server/
+  nwsApi.js               # Local API proxy (dev + preview)
+```
