@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeNwsData } from '@/api/nwsData';
 import { useLocation } from './LocationContext';
 
 // Polls real NWS observations + real NEXRAD storm-cell attributes
@@ -18,10 +18,10 @@ export default function useLiveStormData() {
     const fetchAll = async () => {
       try {
         const [pointRes, cellsRes] = await Promise.all([
-          base44.functions.invoke('nwsData', {
+          invokeNwsData({
             action: 'point', lat: location.lat, lon: location.lon,
           }),
-          base44.functions.invoke('nwsData', {
+          invokeNwsData({
             action: 'cells', lat: location.lat, lon: location.lon,
           }),
         ]);

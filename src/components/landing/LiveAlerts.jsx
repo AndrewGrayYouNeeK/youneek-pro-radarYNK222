@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeNwsData } from '@/api/nwsData';
 import { AlertTriangle, ShieldAlert, Loader2, RefreshCw } from 'lucide-react';
 import { useLocation } from './LocationContext';
 
@@ -31,7 +31,7 @@ export default function LiveAlerts() {
     try {
       const payload = { action: 'alerts', limit: 36 };
       if (scope === 'local' && location?.state) payload.area = location.state;
-      const res = await base44.functions.invoke('nwsData', payload);
+      const res = await invokeNwsData(payload);
       setAlerts(res.data?.alerts || []);
       setUpdated(new Date());
     } catch (e) {

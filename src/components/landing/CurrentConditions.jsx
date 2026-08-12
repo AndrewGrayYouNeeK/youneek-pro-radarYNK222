@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { base44 } from '@/api/base44Client';
+import { invokeNwsData } from '@/api/nwsData';
 import { Wind, Droplets, Gauge, Thermometer, MapPin, Loader2, Cloud } from 'lucide-react';
 import { useLocation } from './LocationContext';
 
@@ -18,7 +18,7 @@ export default function CurrentConditions() {
     setLoading(true);
     setError(null);
     try {
-      const res = await base44.functions.invoke('nwsData', { action: 'point', lat, lon });
+      const res = await invokeNwsData({ action: 'point', lat, lon });
       setData(res.data);
     } catch (e) {
       setError(e.message || 'Failed to load NOAA data');

@@ -16,7 +16,7 @@ export default function HeroSection() {
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{
-          backgroundImage: `url('https://media.base44.com/images/public/6a004a8189e15cd0ff5bc2f0/7b9a7e505_generated_67357671.png')`,
+          backgroundImage: `url('https://images.unsplash.com/photo-1519692933481-1627890fdedf?w=1920&q=80')`,
         }}
       />
       {/* Color grade */}
