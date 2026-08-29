@@ -35,7 +35,7 @@ export default function HeroSection() {
       />
 
       {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-5 md:px-8 pt-32 pb-20 min-h-screen flex flex-col">
+      <div className="relative max-w-7xl mx-auto px-5 md:px-8 pt-36 pb-20 min-h-screen flex flex-col">
         <div className="grid lg:grid-cols-2 gap-10 items-center flex-1">
           {/* LEFT — Copy */}
           <div className="relative">
