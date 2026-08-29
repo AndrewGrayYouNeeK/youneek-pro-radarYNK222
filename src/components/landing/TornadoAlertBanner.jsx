@@ -37,7 +37,7 @@ export default function TornadoAlertBanner() {
 
   return (
     <div
-      className={`fixed top-24 left-0 right-0 z-40 border-b ${
+      className={`fixed top-28 left-0 right-0 z-40 border-b ${
         inWarning
           ? 'bg-[#ff0033] border-[#ff0033] animate-pulse'
           : 'bg-[#ff0033]/30 border-[#ff0033]/50 backdrop-blur-xl'

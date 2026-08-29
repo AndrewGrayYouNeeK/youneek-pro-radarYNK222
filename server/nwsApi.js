@@ -89,7 +89,9 @@ export async function handleNwsRequest(body) {
 
   if (action === 'point') {
     const { lat, lon } = body;
-    if (!lat || !lon) throw Object.assign(new Error('lat and lon required'), { status: 400 });
+    if (!Number.isFinite(Number(lat)) || !Number.isFinite(Number(lon))) {
+      throw Object.assign(new Error('lat and lon required'), { status: 400 });
+    }
     const point = await nwsFetch(`https://api.weather.gov/points/${lat},${lon}`);
     const stationsUrl = point.properties?.observationStations;
     const forecastUrl = point.properties?.forecast;

@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Radio, ShieldAlert, Tv, MapPin, Siren, CloudLightning } from 'lucide-react';
 
 const FEATURES = [
@@ -100,16 +101,16 @@ export default function FeaturesSection() {
                 // INITIATE_SCAN
               </div>
               <h3 className="text-3xl md:text-4xl font-bold text-white max-w-xl">
-                Storms don't wait. <span className="text-[#ff00d4]">Neither should you.</span>
+                <span className="text-[#00ff9c]">MAKING IT RAIN</span>
               </h3>
             </div>
-            <a
-              href="#launch"
+            <Link
+              to="/app"
               className="group relative inline-flex items-center gap-2 px-8 py-4 bg-[#00ff9c] text-black font-bold text-xs tracking-[0.3em] uppercase whitespace-nowrap hover:bg-white transition-colors"
             >
               <span className="absolute inset-0 bg-[#ff00d4] -translate-x-1.5 -translate-y-1.5 -z-10 group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform" />
               Launch Pro Radar
-            </a>
+            </Link>
           </div>
         </div>
       </div>

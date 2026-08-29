@@ -1,7 +1,7 @@
 import React from 'react';
 
-const LOGO_1 = 'https://images.unsplash.com/photo-1605727216801-27b7b0b26d8d?w=600&q=80';
-const LOGO_2 = 'https://images.unsplash.com/photo-1527482797697-3b2389a3b841?w=600&q=80';
+const LOGO_1 = '/neon/logo-1.png';
+const LOGO_2 = '/neon/logo-2.png';
 
 export default function NeonBrandShowcase() {
   return (
@@ -19,6 +19,9 @@ export default function NeonBrandShowcase() {
           <h2 className="text-3xl md:text-5xl font-bold leading-[0.95] tracking-tight text-white">
             Lit up like a <span className="text-[#00ff9c]">storm cell</span>.
           </h2>
+          <div className="mt-4 text-sm md:text-base tracking-[0.35em] uppercase text-[#ff00d4] font-bold">
+            Making it rain
+          </div>
         </div>
 
         {/* Logo grid */}
