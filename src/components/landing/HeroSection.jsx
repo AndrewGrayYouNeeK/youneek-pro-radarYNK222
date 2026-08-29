@@ -1,12 +1,17 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronRight, Zap } from 'lucide-react';
 import TopBar from './TopBar';
 import RadarSweep from './RadarSweep';
 import { WindPanel, DbzPanel, AlertPanel, SystemPanel } from './HudPanels';
 import LocationBar from './LocationBar';
 import TornadoAlertBanner from './TornadoAlertBanner';
+import { useLocation } from './LocationContext';
 
 export default function HeroSection() {
+  const { location } = useLocation();
+  const latLabel = location?.lat != null ? `LAT_${location.lat.toFixed(4)}°` : 'LAT_LOCKING…';
+  const lonLabel = location?.lon != null ? `LON_${location.lon.toFixed(4)}°` : 'LON_LOCKING…';
   return (
     <section className="relative min-h-screen w-full overflow-hidden bg-black">
       <TopBar />
@@ -77,21 +82,24 @@ export default function HeroSection() {
               </span>
             </h1>
 
+            <div className="mt-5 text-xl md:text-3xl font-bold tracking-[0.28em] uppercase text-[#00ff9c] drop-shadow-[0_0_18px_rgba(0,255,156,0.55)]">
+              Making it rain
+            </div>
+
             <p className="mt-8 max-w-md text-sm md:text-base text-white/70 leading-relaxed border-l-2 border-[#00ff9c]/40 pl-4">
-              Real-time storm tracking with time-lapse loops, multi-layer radar,
-              and hurricane overlays. Severe weather monitoring that doesn't blink.
+              Live NEXRAD, NOAA alerts, and GPS-locked conditions for wherever you actually are.
             </p>
 
             {/* CTAs */}
             <div className="mt-10 flex flex-wrap items-center gap-4">
-              <a
-                href="#launch"
+              <Link
+                to="/app"
                 className="group relative inline-flex items-center gap-2 px-6 py-3.5 bg-[#00ff9c] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-white transition-colors"
               >
                 <span className="absolute inset-0 bg-[#ff00d4] -translate-x-1.5 -translate-y-1.5 -z-10 group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform" />
                 Launch Radar
                 <ChevronRight className="w-4 h-4" />
-              </a>
+              </Link>
               <a
                 href="#features"
                 className="inline-flex items-center gap-2 px-6 py-3.5 border border-white/30 text-white/80 text-xs tracking-[0.25em] uppercase hover:border-[#00ff9c] hover:text-[#00ff9c] transition"
@@ -147,9 +155,9 @@ export default function HeroSection() {
 
             {/* Coordinates ticker */}
             <div className="mt-8 hidden md:flex items-center justify-between text-[10px] tracking-[0.25em] text-white/40 font-mono">
-              <span>LAT_37.1031°</span>
+              <span>{latLabel}</span>
               <span className="text-[#00ff9c]">// SCAN_ACTIVE //</span>
-              <span>LON_-85.3047°</span>
+              <span>{lonLabel}</span>
             </div>
           </div>
         </div>

@@ -1,42 +1,24 @@
 import React, { useEffect, useState } from 'react';
 import { AlertOctagon, X, Loader2, MessageSquare, Phone, MapPin, Copy, Check, Settings, Save, Tornado } from 'lucide-react';
 import useTornadoNearby from './useTornadoNearby';
-
-const STORAGE_KEY = 'younk_sos_profile_v1';
-
-const DEFAULT_PROFILE = {
-  name: '',
-  contact: '',
-  message: "SOS — I'm trapped and need help. My location:",
-};
+import { useLocation, DEFAULT_SOS } from './LocationContext';
 
 export default function SosButton() {
+  const { sos, setSos, gpsFix, location, locating } = useLocation();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState('sos'); // 'sos' | 'settings'
-  const [coords, setCoords] = useState(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [profile, setProfile] = useState(DEFAULT_PROFILE);
-  const [draft, setDraft] = useState(DEFAULT_PROFILE);
+  const [draft, setDraft] = useState(sos || DEFAULT_SOS);
   const [copied, setCopied] = useState(false);
   const [saved, setSaved] = useState(false);
   const { inWarning, warning } = useTornadoNearby();
 
-  // Load saved profile
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const p = { ...DEFAULT_PROFILE, ...JSON.parse(raw) };
-        setProfile(p);
-        setDraft(p);
-      }
-    } catch (_) {}
-  }, []);
+    setDraft(sos || DEFAULT_SOS);
+  }, [sos]);
 
   const saveProfile = () => {
-    setProfile(draft);
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(draft)); } catch (_) {}
+    setSos(draft);
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
@@ -45,29 +27,11 @@ export default function SosButton() {
     setOpen(true);
     setMode('sos');
     setError(null);
-    setLoading(true);
-    if (!navigator.geolocation) {
-      setError('GPS not supported on this device');
-      setLoading(false);
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setCoords({
-          lat: pos.coords.latitude,
-          lon: pos.coords.longitude,
-          acc: pos.coords.accuracy,
-        });
-        setLoading(false);
-      },
-      (err) => {
-        setError(err.message || 'Could not get GPS location');
-        setLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
   };
 
+  const coords = gpsFix || (location?.lat != null ? { lat: location.lat, lon: location.lon, accuracy: location.accuracy } : null);
+  const loading = locating && !coords;
+  const profile = sos || DEFAULT_SOS;
   const mapsLink = coords ? `https://maps.google.com/?q=${coords.lat},${coords.lon}` : '';
   const namePart = profile.name ? `[${profile.name}] ` : '';
   const fullMessage = coords
@@ -175,11 +139,14 @@ export default function SosButton() {
                     </div>
                   )}
                   {error && <div className="text-xs text-[#ff0033]">{error}</div>}
+            {!coords && !loading && (
+              <div className="text-xs text-[#ffea00]">Waiting for GPS — allow location in the browser.</div>
+            )}
                   {coords && (
                     <div className="space-y-1 font-mono text-xs text-white">
                       <div><span className="text-white/40">LAT </span>{coords.lat.toFixed(5)}°</div>
                       <div><span className="text-white/40">LON </span>{coords.lon.toFixed(5)}°</div>
-                      <div className="text-white/40 text-[10px]">±{Math.round(coords.acc)}m accuracy</div>
+                      <div className="text-white/40 text-[10px]">±{Math.round(coords.accuracy || 0)}m accuracy</div>
                     </div>
                   )}
                 </div>
