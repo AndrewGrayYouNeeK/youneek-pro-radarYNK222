@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+  <!-- Radar rings -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="#1e40af" stroke-width="3" opacity="0.6"/>
+  <circle cx="256" cy="256" r="140" fill="none" stroke="#1e40af" stroke-width="3" opacity="0.7"/>
+  <circle cx="256" cy="256" r="80" fill="none" stroke="#1e40af" stroke-width="3" opacity="0.8"/>
+  <circle cx="256" cy="256" r="20" fill="#3b82f6" opacity="0.9"/>
+  <!-- Sweep beam -->
+  <path d="M256 256 L456 176" stroke="#22d3ee" stroke-width="3" opacity="0.9"/>
+  <path d="M256 256 L256 56" stroke="#22d3ee" stroke-width="1.5" opacity="0.3"/>
+  <!-- Sweep glow fill -->
+  <path d="M256 256 L456 176 A200 200 0 0 0 256 56 Z" fill="#22d3ee" opacity="0.07"/>
+  <!-- Center dot -->
+  <circle cx="256" cy="256" r="8" fill="#22d3ee"/>
+  <!-- Crosshairs -->
+  <line x1="256" y1="40" x2="256" y2="472" stroke="#1e40af" stroke-width="1.5" opacity="0.4"/>
+  <line x1="40" y1="256" x2="472" y2="256" stroke="#1e40af" stroke-width="1.5" opacity="0.4"/>
+  <!-- Echo blip -->
+  <circle cx="360" cy="160" r="6" fill="#f59e0b" opacity="0.9"/>
+  <circle cx="360" cy="160" r="10" fill="none" stroke="#f59e0b" stroke-width="2" opacity="0.5"/>
+</svg>

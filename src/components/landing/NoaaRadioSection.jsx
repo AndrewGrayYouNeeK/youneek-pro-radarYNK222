@@ -86,7 +86,7 @@ export default function NoaaRadioSection() {
 
             <div className="flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase font-mono text-[#ff00d4] mb-4">
               <MapPin className="w-3 h-3" />
-              Nearest Station · {Math.round(nearest.distance)} mi from {location.label}
+              Nearest Station · {Math.round(nearest.distance)} mi from {location?.label || 'you'}
             </div>
 
             <div className="flex flex-col md:flex-row md:items-center gap-6">

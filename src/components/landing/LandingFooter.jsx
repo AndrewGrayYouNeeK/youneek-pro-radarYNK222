@@ -3,7 +3,7 @@ import { Radar } from 'lucide-react';
 
 export default function LandingFooter() {
   return (
-    <footer className="relative bg-black border-t border-[#00ff9c]/20 py-10 px-5 md:px-8">
+    <footer id="about" className="relative bg-black border-t border-[#00ff9c]/20 py-10 px-5 md:px-8">
       <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <Radar className="w-4 h-4 text-[#00ff9c]" />
@@ -11,8 +11,8 @@ export default function LandingFooter() {
             YouNeeK Pro<span className="text-[#00ff9c]">_</span>Radar
           </span>
         </div>
-        <div className="text-[10px] tracking-[0.25em] uppercase text-white/30 font-mono">
-          // Powered by NEXRAD · NOAA · NWS · SPC
+        <div className="text-[10px] tracking-[0.25em] uppercase text-[#00ff9c] font-mono font-bold">
+          // MAKING IT RAIN
         </div>
         <div className="text-[10px] tracking-[0.25em] uppercase text-white/30">
           © 2026 — All systems nominal

@@ -28,10 +28,10 @@ export default function CurrentConditions() {
   };
 
   useEffect(() => {
-    if (!hydrated) return;
+    if (!hydrated || location?.lat == null || location?.lon == null) return;
     load(location.lat, location.lon);
     // eslint-disable-next-line
-  }, [hydrated, location.lat, location.lon]);
+  }, [hydrated, location?.lat, location?.lon]);
 
   const obs = data?.observation;
   const loc = data?.location;
@@ -51,7 +51,7 @@ export default function CurrentConditions() {
           <div className="mt-3 flex items-center gap-2 text-sm text-white/60">
             <MapPin className="w-3.5 h-3.5 text-[#ff00d4]" />
             <span>
-              {loc ? `${loc.city || ''}${loc.city ? ', ' : ''}${loc.state || ''}` : location.label}
+              {loc ? `${loc.city || ''}${loc.city ? ', ' : ''}${loc.state || ''}` : (location?.label || 'Waiting for GPS…')}
               {loc?.radarStation && (
                 <span className="ml-3 text-[10px] tracking-[0.25em] uppercase text-[#00ff9c] font-mono">
                   RADAR: {loc.radarStation}

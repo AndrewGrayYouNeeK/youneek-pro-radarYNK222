@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useLocation } from './LocationContext';
 
 // Ray-casting point-in-polygon. ring = [[lon, lat], ...]
 function pointInRing(lon, lat, ring) {
@@ -26,22 +27,13 @@ function pointInGeometry(lon, lat, geom) {
 }
 
 export default function useTornadoNearby() {
-  const [coords, setCoords] = useState(null);
+  const { gpsFix, location } = useLocation();
+  const coords = gpsFix || (location?.source === 'gps' && location?.lat != null
+    ? { lat: location.lat, lon: location.lon }
+    : null);
   const [inWarning, setInWarning] = useState(false);
   const [warning, setWarning] = useState(null);
 
-  // Watch GPS continuously
-  useEffect(() => {
-    if (!navigator.geolocation) return;
-    const id = navigator.geolocation.watchPosition(
-      (pos) => setCoords({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
-      () => {},
-      { enableHighAccuracy: false, maximumAge: 60000, timeout: 15000 }
-    );
-    return () => navigator.geolocation.clearWatch(id);
-  }, []);
-
-  // Poll NWS tornado warnings and test containment
   useEffect(() => {
     if (!coords) return;
     let cancelled = false;
@@ -64,7 +56,7 @@ export default function useTornadoNearby() {
     check();
     const t = setInterval(check, 60000);
     return () => { cancelled = true; clearInterval(t); };
-  }, [coords]);
+  }, [coords?.lat, coords?.lon]);
 
   return { coords, inWarning, warning };
 }

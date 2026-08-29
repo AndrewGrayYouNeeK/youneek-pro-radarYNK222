@@ -3,7 +3,7 @@ import { MapPin, Search, Crosshair, Loader2, X } from 'lucide-react';
 import { useLocation } from './LocationContext';
 
 export default function LocationBar() {
-  const { location, setLocation, detectGPS, search } = useLocation();
+  const { location, setLocation, detectGPS, search, locating, gpsStatus } = useLocation();
   const [open, setOpen] = useState(false);
   const [q, setQ] = useState('');
   const [results, setResults] = useState([]);
@@ -53,7 +53,11 @@ export default function LocationBar() {
       >
         <MapPin className="w-3.5 h-3.5 text-[#ff00d4]" />
         <span className="text-[10px] tracking-[0.25em] uppercase text-white/50 font-mono">Location</span>
-        <span className="text-xs text-white font-bold">{location.label}</span>
+        <span className="text-xs text-white font-bold">
+          {locating && !location
+            ? 'Locating…'
+            : location?.label || (gpsStatus === 'denied' ? 'Allow GPS or search' : 'Set location')}
+        </span>
       </button>
 
       {open && (
@@ -93,6 +97,11 @@ export default function LocationBar() {
 
             {error && (
               <div className="text-[10px] text-[#ff00d4] tracking-wider">{error}</div>
+            )}
+            {gpsStatus === 'denied' && (
+              <div className="text-[10px] text-[#ffea00] tracking-wider">
+                Browser blocked GPS. Allow location, or search your city — we will not fake Denver.
+              </div>
             )}
 
             {results.length > 0 && (
