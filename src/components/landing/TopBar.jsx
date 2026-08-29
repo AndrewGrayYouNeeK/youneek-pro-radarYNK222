@@ -16,19 +16,19 @@ export default function TopBar() {
   return (
     <header className="fixed top-0 left-0 right-0 z-[100] bg-black/70 border-b border-[#00ff9c]/20">
       <div className="absolute inset-0 pointer-events-none opacity-30 [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.04)_2px,rgba(0,255,156,0.04)_3px)]" />
-      <div className="relative max-w-7xl mx-auto px-5 md:px-8 h-16 flex items-center justify-between">
+      <div className="relative max-w-7xl mx-auto px-5 md:px-8 h-24 flex items-center justify-between">
         {/* Logo */}
-        <a href="#" className="flex items-center gap-3 group">
+        <a href="#" className="flex items-center gap-4 group">
           <div className="relative">
             <div className="absolute inset-0 bg-white blur-xl opacity-90 group-hover:opacity-100 transition animate-pulse" />
             <div className="absolute inset-0 bg-[#00ff9c] blur-md opacity-70" />
-            <div className="relative w-9 h-9 rounded-sm border border-white/80 bg-black flex items-center justify-center overflow-visible">
-              <NBoltLogo className="w-10 h-12" />
+            <div className="relative w-14 h-14 md:w-16 md:h-16 rounded-sm border border-white/80 bg-black flex items-center justify-center overflow-visible">
+              <NBoltLogo className="w-16 h-20 md:w-[4.5rem] md:h-[5.5rem]" />
             </div>
           </div>
           <div className="leading-tight">
-            <div className="text-[10px] tracking-[0.3em] text-[#ff00d4]/80 uppercase">YouNeeK</div>
-            <div className="text-base font-bold tracking-wider text-white">
+            <div className="text-xl md:text-2xl tracking-[0.22em] text-[#ff00d4]/80 uppercase font-bold">YouNeeK</div>
+            <div className="text-2xl md:text-3xl font-bold tracking-wider text-white">
               PRO<span className="text-[#00ff9c]"> RADAR</span>
             </div>
           </div>
@@ -74,7 +74,7 @@ export default function TopBar() {
             className="md:hidden fixed inset-0 z-[240] bg-black/90 backdrop-blur-md"
           />
           {/* Slide-in panel from top-right */}
-          <div className="md:hidden fixed top-16 right-0 z-[250] w-72 max-w-[85vw] max-h-[calc(100vh-4rem)] overflow-y-auto bg-black border-l border-b border-[#00ff9c]/30 shadow-[0_0_40px_rgba(0,255,156,0.2)] animate-[slideInRight_0.25s_ease-out]">
+          <div className="md:hidden fixed top-24 right-0 z-[250] w-72 max-w-[85vw] max-h-[calc(100vh-6rem)] overflow-y-auto bg-black border-l border-b border-[#00ff9c]/30 shadow-[0_0_40px_rgba(0,255,156,0.2)] animate-[slideInRight_0.25s_ease-out]">
             <nav className="flex flex-col p-4 gap-2">
               {NAV.map((item) => (
                 <a
