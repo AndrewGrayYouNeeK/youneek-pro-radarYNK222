@@ -12,14 +12,7 @@ export default function HeroSection() {
       <TopBar />
       <TornadoAlertBanner />
 
-      {/* Background City */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url('https://images.unsplash.com/photo-1519692933481-1627890fdedf?w=1920&q=80')`,
-        }}
-      />
-      {/* Color grade */}
+      {/* Color grade (no photo — storm overlays sit on black) */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#0a0014]/70 to-black" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#0a0014]/80 via-transparent to-[#001a14]/80" />
 
