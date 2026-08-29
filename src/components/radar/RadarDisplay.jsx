@@ -190,9 +190,10 @@ export default function RadarDisplay({
       minZoom: 4,
       maxZoom: 12,
     }).setView(coords, 7);
-    const baseLayer = L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-      attribution: '&copy; OpenStreetMap contributors &copy; CARTO',
-      subdomains: "abcd", maxZoom: 20, crossOrigin: "anonymous"
+    const baseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
+      maxZoom: 16,
+      crossOrigin: "anonymous",
     }).addTo(leafletMap.current);
     baseLayer.once("load", () => {
       setIsMapReady(true);
@@ -287,7 +288,7 @@ export default function RadarDisplay({
       return undefined;
     }
 
-    let tileUrl = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-0/{z}/{x}/{y}.png";
+    let tileUrl = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png";
     if (loopEnabled && loopFrames[loopIndex]?.tileUrl) {
       tileUrl = loopFrames[loopIndex].tileUrl;
     }
@@ -504,7 +505,7 @@ export default function RadarDisplay({
     }
 
     if (leafletMap.current && showNexrad) {
-      const tileUrl = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-0/{z}/{x}/{y}.png';
+      const tileUrl = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png';
       radarLayerRef.current = L.tileLayer(tileUrl, {
         attribution: "NEXRAD data from Iowa Environmental Mesonet",
         opacity: ACTIVE_PRODUCT.opacity,
