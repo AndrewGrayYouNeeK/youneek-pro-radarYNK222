@@ -25,15 +25,11 @@ function Section({ title, children }) {
 }
 
 function SettingRow({ icon: Icon, label, sublabel, right, onClick, danger }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={!onClick}
-      className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
-        onClick ? "hover:bg-white/5 active:bg-white/10" : "cursor-default"
-      } ${danger ? "text-red-300" : "text-white"}`}
-    >
+  const className = `flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
+    onClick ? "hover:bg-white/5 active:bg-white/10" : "cursor-default"
+  } ${danger ? "text-red-300" : "text-white"}`;
+  const content = (
+    <>
       {Icon && (
         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${danger ? "bg-red-950/60" : "bg-white/10"}`}>
           <Icon className={`h-4 w-4 ${danger ? "text-red-400" : "text-slate-300"}`} aria-hidden="true" />
@@ -48,6 +44,16 @@ function SettingRow({ icon: Icon, label, sublabel, right, onClick, danger }) {
       ) : onClick ? (
         <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
       ) : null}
+    </>
+  );
+
+  if (!onClick) {
+    return <div className={className}>{content}</div>;
+  }
+
+  return (
+    <button type="button" onClick={onClick} className={className}>
+      {content}
     </button>
   );
 }

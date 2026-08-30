@@ -14,7 +14,7 @@ export default function Cameras() {
     <PageScaffold title="Weather cameras">
       <LocationSearch current={coords} onSelect={setLocation} />
       <p className="text-xs text-slate-400">
-        GOES satellite sky views plus public National Park webcams. Snapshots refresh from the source.
+        Live NOAA GOES GeoColor sectors and the national NWS radar mosaic, sorted by distance from you.
       </p>
       <div className="space-y-3">
         {cameras.map((camera) => (
@@ -24,6 +24,9 @@ export default function Cameras() {
               alt={camera.name}
               className="h-40 w-full object-cover bg-slate-900"
               loading="lazy"
+              onError={(event) => {
+                event.currentTarget.style.display = "none";
+              }}
             />
             <div className="px-3 py-2">
               <div className="text-sm font-medium text-white">{camera.name}</div>
