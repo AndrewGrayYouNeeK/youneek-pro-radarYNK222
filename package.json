@@ -10,8 +10,10 @@
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
-    "deploy": "wrangler deploy",
-    "pages:deploy": "npm run build && npm run deploy"
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:dry": "npm run build && wrangler deploy --dry-run",
+    "cf:whoami": "wrangler whoami",
+    "cf:secret": "wrangler secret put"
   },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",

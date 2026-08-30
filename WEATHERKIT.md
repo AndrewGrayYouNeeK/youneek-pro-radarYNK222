@@ -72,7 +72,7 @@ This Services ID becomes your `WEATHERKIT_SERVICE_ID`.
 
 ## Step 5 — Production (Cloudflare Worker)
 
-Set secrets on the `youneekproradarbaby` Worker (never commit these):
+Set secrets on the `youneek-pro-radarynk222` Worker (never commit these):
 
 ```bash
 npx wrangler secret put WEATHERKIT_TEAM_ID
@@ -81,7 +81,7 @@ npx wrangler secret put WEATHERKIT_SERVICE_ID
 npx wrangler secret put WEATHERKIT_PRIVATE_KEY
 ```
 
-Or in the Cloudflare dashboard: **Workers & Pages → youneekproradarbaby → Settings → Variables and Secrets → Add**.
+Or in the Cloudflare dashboard: **Workers & Pages → youneek-pro-radarynk222 → Settings → Variables and Secrets → Add**.
 
 After saving secrets, redeploy (push a commit or **Retry deployment** in Builds).
 

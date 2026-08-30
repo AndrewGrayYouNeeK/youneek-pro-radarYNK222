@@ -341,23 +341,16 @@ export default function RadarDisplay({
   useEffect(() => {
     if (!loopEnabled && !showGlobalRadar && !showFutureRadar) return undefined;
     let cancelled = false;
-    fetch("https://api.rainviewer.com/public/weather-maps.json")
+    fetch("/api/rainviewer")
       .then((response) => response.json())
       .then((payload) => {
         if (cancelled) return;
-        const host = payload.host || "https://tilecache.rainviewer.com";
-        const past = (payload?.radar?.past || []).map((frame) => ({
+        const withTiles = (frame) => ({
           ...frame,
-          host,
-          kind: "past",
-          tileUrl: `${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
-        }));
-        const nowcast = (payload?.radar?.nowcast || []).map((frame) => ({
-          ...frame,
-          host,
-          kind: "future",
-          tileUrl: `${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
-        }));
+          tileUrl: `${frame.host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
+        });
+        const past = (payload.past || []).map(withTiles);
+        const nowcast = (payload.nowcast || []).map(withTiles);
         setRadarCatalog({ past, nowcast });
         const frames = showFutureRadar && nowcast.length ? nowcast : [...past, ...nowcast];
         loopFramesRef.current = frames;

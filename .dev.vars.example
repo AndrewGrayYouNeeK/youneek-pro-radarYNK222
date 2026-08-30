@@ -1,0 +1,7 @@
+# Local Worker secrets for `npx wrangler dev` (copy to .dev.vars — never commit)
+# Vite `npm run dev` still reads the same names from `.env`.
+
+WEATHERKIT_TEAM_ID=
+WEATHERKIT_KEY_ID=
+WEATHERKIT_SERVICE_ID=
+WEATHERKIT_PRIVATE_KEY=

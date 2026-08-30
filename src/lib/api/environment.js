@@ -4,30 +4,11 @@ function maxFinite(values) {
 }
 
 export async function fetchEnvironment({ latitude, longitude }) {
-  const url = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
-  url.searchParams.set("latitude", String(latitude));
-  url.searchParams.set("longitude", String(longitude));
-  url.searchParams.set(
-    "current",
-    [
-      "us_aqi",
-      "pm2_5",
-      "pm10",
-      "ozone",
-      "nitrogen_dioxide",
-      "carbon_monoxide",
-      "uv_index",
-      "alder_pollen",
-      "birch_pollen",
-      "grass_pollen",
-      "mugwort_pollen",
-      "olive_pollen",
-      "ragweed_pollen",
-    ].join(",")
-  );
-  url.searchParams.set("timezone", "auto");
-
-  const response = await fetch(url.toString());
+  const params = new URLSearchParams({
+    lat: String(latitude),
+    lon: String(longitude),
+  });
+  const response = await fetch(`/api/air?${params.toString()}`);
   if (!response.ok) throw new Error("Air quality unavailable");
   const payload = await response.json();
   const current = payload.current || {};

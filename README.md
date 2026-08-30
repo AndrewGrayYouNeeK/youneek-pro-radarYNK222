@@ -22,7 +22,9 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). Allow location when the browser asks, then Launch Radar.
 
-WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` and follow [WEATHERKIT.md](./WEATHERKIT.md). Radar, NWS alerts, and NOAA radio work without them.
+WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` and follow [WEATHERKIT.md](./WEATHERKIT.md). Radar, NWS alerts, NOAA radio, and Open-Meteo forecasts work without them.
+
+Cloudflare Worker APIs live under `/api/*`. See [DEPLOY.md](./DEPLOY.md) for `wrangler login`, secrets, and `npm run deploy`.
 
 ## Scripts
 
@@ -31,7 +33,7 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 | `npm run dev` | Vite + local NWS / alerts / WeatherKit / lightning proxies |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build (includes API proxies) |
-| `npm run deploy` | Cloudflare Worker deploy (`wrangler.toml`) |
+| `npm run deploy` | Build + Cloudflare Worker deploy (`wrangler.jsonc`) |
 | `npm run lint` | Run ESLint |
 
 ## Data Sources

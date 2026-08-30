@@ -29,4 +29,6 @@ dist-ssr
 *.sw?
 
 .env
+.dev.vars
+.wrangler
 .vite

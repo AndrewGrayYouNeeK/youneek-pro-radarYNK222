@@ -1,37 +1,7 @@
-const CATALOG_URL = "https://api.rainviewer.com/public/weather-maps.json";
-
 export async function fetchRainViewerCatalog() {
-  const response = await fetch(CATALOG_URL);
+  const response = await fetch("/api/rainviewer");
   if (!response.ok) throw new Error("Radar catalog unavailable");
-  const payload = await response.json();
-  const host = payload.host || "https://tilecache.rainviewer.com";
-  const past = (payload?.radar?.past || []).map((frame) => ({
-    time: frame.time,
-    path: frame.path,
-    kind: "past",
-    host,
-  }));
-  const nowcast = (payload?.radar?.nowcast || []).map((frame) => ({
-    time: frame.time,
-    path: frame.path,
-    kind: "future",
-    host,
-  }));
-  const satellite = (payload?.satellite?.infrared || []).map((frame) => ({
-    time: frame.time,
-    path: frame.path,
-    kind: "satellite",
-    host,
-  }));
-
-  return {
-    host,
-    generated: payload.generated,
-    past,
-    nowcast,
-    radar: [...past, ...nowcast],
-    satellite,
-  };
+  return response.json();
 }
 
 export function rainViewerTileUrl(frame, z, x, y, color = 2) {

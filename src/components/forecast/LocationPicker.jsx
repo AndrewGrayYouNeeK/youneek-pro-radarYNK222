@@ -33,17 +33,9 @@ export default function LocationPicker({ compact = false }) {
         matches = [];
       }
       if (!matches.length) {
-        const response = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query.trim())}&count=8&language=en&format=json`
-        );
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(query.trim())}`);
         const payload = await response.json();
-        matches = (payload.results || []).map((result) => ({
-          label: [result.name, result.admin1, result.country].filter(Boolean).join(", "),
-          city: result.name,
-          state: result.admin1 || result.country_code,
-          lat: result.latitude,
-          lon: result.longitude,
-        }));
+        matches = payload.results || [];
       }
       setResults(matches);
       if (!matches.length) setError("No matches found");
