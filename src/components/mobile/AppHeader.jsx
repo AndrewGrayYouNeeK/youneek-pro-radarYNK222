@@ -5,7 +5,10 @@ import { useNavigationStack } from "@/lib/NavigationStack";
 const TITLES = {
   "/Radar": "Radar",
   "/Forecast": "Forecast",
-  "/Globe": "Globe",
+  "/Globe": "3D Radar Globe",
+  "/Hurricanes": "Hurricane Center",
+  "/Fires": "Fire Center",
+  "/Briefing": "Weather Briefing",
   "/Contacts": "Contacts",
   "/Settings": "Settings",
   "/Privacy": "Privacy",

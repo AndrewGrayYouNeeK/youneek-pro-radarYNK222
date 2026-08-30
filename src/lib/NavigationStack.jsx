@@ -13,7 +13,14 @@ const DEFAULT_TABS = {
 };
 
 function getTabKey(pathname) {
-  if (pathname.startsWith("/Forecast")) return "Forecast";
+  if (
+    pathname.startsWith("/Forecast") ||
+    pathname.startsWith("/Hurricanes") ||
+    pathname.startsWith("/Fires") ||
+    pathname.startsWith("/Briefing")
+  ) {
+    return "Forecast";
+  }
   if (pathname.startsWith("/Globe")) return "Globe";
   if (pathname.startsWith("/Contacts")) return "Contacts";
   if (pathname.startsWith("/Settings") || pathname.startsWith("/Privacy")) return "Settings";

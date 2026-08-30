@@ -9,6 +9,7 @@ import Landing from "./pages/Landing";
 import RadarApp from "./pages/RadarApp";
 import { LocationProvider } from "@/components/landing/LocationContext";
 import { AuthProvider } from "@/lib/AuthContext";
+import { UnitsProvider } from "@/lib/UnitsContext";
 import { NavigationStackProvider } from "@/lib/NavigationStack";
 import OnboardingModal from "@/components/radar/OnboardingModal";
 
@@ -18,6 +19,9 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Forecast = lazy(() => import("./pages/Forecast"));
 const Globe = lazy(() => import("./pages/Globe"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const Hurricanes = lazy(() => import("./pages/Hurricanes"));
+const Fires = lazy(() => import("./pages/Fires"));
+const Briefing = lazy(() => import("./pages/Briefing"));
 
 const Spinner = () => (
   <div className="flex h-full items-center justify-center bg-slate-950">
@@ -57,6 +61,7 @@ function App() {
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <LocationProvider>
+          <UnitsProvider>
           <Router>
             <Routes>
               <Route path="/" element={<Landing />} />
@@ -72,6 +77,9 @@ function App() {
                 <Route path="/Radar" element={<Radar />} />
                 <Route path="/Forecast" element={<Forecast />} />
                 <Route path="/Globe" element={<Globe />} />
+                <Route path="/Hurricanes" element={<Hurricanes />} />
+                <Route path="/Fires" element={<Fires />} />
+                <Route path="/Briefing" element={<Briefing />} />
                 <Route path="/Contacts" element={<Contacts />} />
                 <Route path="/Settings" element={<Settings />} />
                 <Route path="/Privacy" element={<Privacy />} />
@@ -80,6 +88,7 @@ function App() {
             </Routes>
             <Toaster />
           </Router>
+          </UnitsProvider>
         </LocationProvider>
       </QueryClientProvider>
     </AuthProvider>

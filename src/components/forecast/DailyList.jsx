@@ -1,12 +1,15 @@
 import { describeWeatherCode, formatDayLabel } from "@/lib/weather/conditions";
+import { formatTemp } from "@/lib/weather/units";
+import { useUnits } from "@/lib/UnitsContext";
 
 export default function DailyList({ days = [] }) {
+  const { units } = useUnits();
   if (!days.length) return null;
 
   return (
     <section>
       <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-        10-Day Outlook
+        {days.length}-Day Outlook
       </h2>
       <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
         {days.map((day, index) => {
@@ -22,8 +25,8 @@ export default function DailyList({ days = [] }) {
               <div className="min-w-0 flex-1 truncate text-xs text-slate-400">{day.label}</div>
               <div className="shrink-0 text-[11px] text-slate-500">{day.pop}%</div>
               <div className="flex shrink-0 items-center gap-2 text-sm tabular-nums">
-                <span className="font-semibold text-white">{day.high}°</span>
-                <span className="text-slate-500">{day.low}°</span>
+                <span className="font-semibold text-white">{formatTemp(day.high, units.temp)}</span>
+                <span className="text-slate-500">{formatTemp(day.low, units.temp)}</span>
               </div>
             </div>
           );

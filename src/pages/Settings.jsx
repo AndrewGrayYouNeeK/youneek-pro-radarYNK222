@@ -6,8 +6,10 @@ import BottomTab from "@/components/radar/BottomTab";
 import AppHeader from "@/components/mobile/AppHeader";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle } from "lucide-react";
+import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap } from "lucide-react";
 import { setPref } from "@/lib/prefs";
+import { UNIT_OPTIONS } from "@/lib/weather/units";
+import { useUnits } from "@/lib/UnitsContext";
 
 const APP_VERSION = "1.0.0";
 
@@ -23,11 +25,11 @@ function Section({ title, children }) {
 }
 
 function SettingRow({ icon: Icon, label, sublabel, right, onClick, danger }) {
+  const Tag = onClick ? "button" : "div";
   return (
-    <button
-      type="button"
+    <Tag
+      type={onClick ? "button" : undefined}
       onClick={onClick}
-      disabled={!onClick}
       className={`flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors ${
         onClick ? "hover:bg-white/5 active:bg-white/10" : "cursor-default"
       } ${danger ? "text-red-300" : "text-white"}`}
@@ -46,7 +48,7 @@ function SettingRow({ icon: Icon, label, sublabel, right, onClick, danger }) {
       ) : onClick ? (
         <ChevronRight className="h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
       ) : null}
-    </button>
+    </Tag>
   );
 }
 
@@ -54,8 +56,13 @@ export default function Settings() {
   useTabPageMemory("Settings");
   const navigate = useNavigate();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
+  const { units, setUnits } = useUnits();
   const [notifyRain, setNotifyRain] = useState(() => localStorage.getItem("pref_notifyRain") !== "false");
   const [notifyTornado, setNotifyTornado] = useState(() => localStorage.getItem("pref_notifyTornado") !== "false");
+  const [notifyLightning, setNotifyLightning] = useState(() => localStorage.getItem("pref_notifyLightning") !== "false");
+  const [notifyPollen, setNotifyPollen] = useState(() => localStorage.getItem("pref_notifyPollen") !== "false");
+  const [notifyAqi, setNotifyAqi] = useState(() => localStorage.getItem("pref_notifyAqi") !== "false");
+  const [notifyPrecip24, setNotifyPrecip24] = useState(() => localStorage.getItem("pref_notifyPrecip24") !== "false");
   const [autoTune, setAutoTune] = useState(() => localStorage.getItem("pref_autoTune") !== "false");
   const [showAbout, setShowAbout] = useState(false);
 
@@ -102,6 +109,79 @@ export default function Settings() {
                 />
               }
             />
+            <SettingRow
+              icon={Zap}
+              label="Lightning proximity"
+              sublabel="Spark-style heads-up when strikes are nearby"
+              right={
+                <Switch
+                  checked={notifyLightning}
+                  onCheckedChange={handleToggle("pref_notifyLightning", setNotifyLightning)}
+                  aria-label="Toggle lightning proximity alerts"
+                />
+              }
+            />
+            <SettingRow
+              icon={Bell}
+              label="Next 24-hour precipitation"
+              sublabel="Daily rain/snow outlook on Forecast"
+              right={
+                <Switch
+                  checked={notifyPrecip24}
+                  onCheckedChange={handleToggle("pref_notifyPrecip24", setNotifyPrecip24)}
+                  aria-label="Toggle 24-hour precipitation alerts"
+                />
+              }
+            />
+            <SettingRow
+              icon={Bell}
+              label="Pollen notices"
+              sublabel="Keep pollen detail visible on Forecast"
+              right={
+                <Switch
+                  checked={notifyPollen}
+                  onCheckedChange={handleToggle("pref_notifyPollen", setNotifyPollen)}
+                  aria-label="Toggle pollen notices"
+                />
+              }
+            />
+            <SettingRow
+              icon={Bell}
+              label="Air quality notices"
+              sublabel="Keep AQI detail visible on Forecast"
+              right={
+                <Switch
+                  checked={notifyAqi}
+                  onCheckedChange={handleToggle("pref_notifyAqi", setNotifyAqi)}
+                  aria-label="Toggle air quality notices"
+                />
+              }
+            />
+          </Section>
+
+          <Section title="Units">
+            {Object.entries(UNIT_OPTIONS).map(([key, options]) => (
+              <SettingRow
+                key={key}
+                icon={Gauge}
+                label={key === "temp" ? "Temperature" : key === "wind" ? "Wind" : key === "pressure" ? "Pressure" : "Precipitation"}
+                sublabel="Included — same options as WeatherBug premium"
+                right={
+                  <select
+                    value={units[key]}
+                    onChange={(event) => setUnits({ [key]: event.target.value })}
+                    aria-label={`Choose ${key} unit`}
+                    className="rounded-lg border border-white/10 bg-slate-900 px-2 py-1 text-xs text-white"
+                  >
+                    {options.map((option) => (
+                      <option key={option.value} value={option.value}>
+                        {option.label}
+                      </option>
+                    ))}
+                  </select>
+                }
+              />
+            ))}
           </Section>
 
           <Section title="NOAA Radio">
@@ -130,9 +210,11 @@ export default function Settings() {
             {showAbout && (
               <div className="space-y-2 px-4 pb-4 pt-1 text-xs leading-relaxed text-slate-400">
                 <p>
-                  Included with the app: live NEXRAD + radar loops, lightning reports, tropical cyclones,
-                  satellite, NOAA Weather Radio, Emergency and I&apos;m Safe texts, WeatherKit forecasts, air quality,
-                  and a 3D globe. No premium upsell.
+                  Included with the app: live NEXRAD, global + future radar, 3D radar globe, lightning
+                  proximity, tropical cyclones, wildfires, satellite, NOAA Weather Radio, Emergency and
+                  I&apos;m Safe texts, 168-hour / 16-day forecasts, minute precipitation, AQI, pollen, UV,
+                  SPC storm risk, hurricane and fire centers, and unit conversion. Every WeatherBug-class
+                  premium layer ships unlocked.
                 </p>
                 <p className="text-slate-500">
                   Data sources: Iowa Mesonet · RainViewer · NHC · api.weather.gov · Apple WeatherKit · Open-Meteo
