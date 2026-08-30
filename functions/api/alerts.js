@@ -16,6 +16,10 @@ const ALERT_EVENTS = {
     "Blizzard Watch",
     "Winter Storm Watch",
   ],
+  heat: ["Heat Advisory", "Excessive Heat Warning", "Excessive Heat Watch"],
+  wind: ["High Wind Warning", "High Wind Watch", "Wind Advisory"],
+  fire: ["Red Flag Warning", "Fire Weather Watch"],
+  fog: ["Dense Fog Advisory"],
 };
 
 async function fetchEvents(events) {
@@ -51,15 +55,38 @@ async function fetchEvents(events) {
   };
 }
 
-export async function onRequestGet(context) {
-  const type = new URL(context.request.url).searchParams.get("type") || "tornado";
-  const events = ALERT_EVENTS[type];
-
-  if (!events) {
-    return Response.json({ error: `Unknown alert type: ${type}` }, { status: 400 });
+async function fetchPointAlerts(point) {
+  const url = `https://api.weather.gov/alerts/active?status=actual&point=${encodeURIComponent(point)}`;
+  const response = await fetch(url, { headers: NWS_HEADERS });
+  if (!response.ok) {
+    throw new Error(`NWS ${response.status} for point alerts`);
   }
+  const payload = await response.json();
+  return {
+    type: "FeatureCollection",
+    features: payload?.features || [],
+    title: "Active local alerts",
+    updated: new Date().toISOString(),
+  };
+}
+
+export async function onRequestGet(context) {
+  const search = new URL(context.request.url).searchParams;
+  const point = search.get("point");
+  const type = search.get("type") || "tornado";
 
   try {
+    if (point) {
+      return Response.json(await fetchPointAlerts(point), {
+        headers: { "Cache-Control": "public, max-age=60" },
+      });
+    }
+
+    const events = ALERT_EVENTS[type];
+    if (!events) {
+      return Response.json({ error: `Unknown alert type: ${type}` }, { status: 400 });
+    }
+
     return Response.json(await fetchEvents(events), {
       headers: {
         "Cache-Control": "public, max-age=60",

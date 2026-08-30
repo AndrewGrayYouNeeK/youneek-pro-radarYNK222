@@ -1,39 +1,29 @@
-import { useCallback, useEffect, useState } from "react";
+import { useLocation as useAppLocation } from "@/components/landing/LocationContext";
 
 export default function useWeatherLocation() {
-  const [coords, setCoords] = useState(null);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const { location, locating, gpsStatus, detectGPS } = useAppLocation();
+  const coords =
+    location && Number.isFinite(Number(location.lat)) && Number.isFinite(Number(location.lon))
+      ? {
+          latitude: Number(location.lat),
+          longitude: Number(location.lon),
+          label: location.label || "",
+        }
+      : null;
 
-  const requestLocation = useCallback(() => {
-    setLoading(true);
-    setError("");
+  let error = "";
+  if (!locating && !coords) {
+    if (gpsStatus === "denied") error = "Allow location or search for a city to load the forecast.";
+    else if (gpsStatus === "unavailable") error = "Location services are not available on this device.";
+    else error = "Set a location to load weather for your area.";
+  }
 
-    if (!navigator.geolocation) {
-      setError("Location services are not available on this device.");
-      setLoading(false);
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setCoords({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        });
-        setLoading(false);
-      },
-      () => {
-        setError("Allow location access to load WeatherKit forecasts for your area.");
-        setLoading(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  }, []);
-
-  useEffect(() => {
-    requestLocation();
-  }, [requestLocation]);
-
-  return { coords, error, loading, retry: requestLocation };
+  return {
+    coords,
+    error,
+    loading: locating && !coords,
+    retry: detectGPS,
+    label: location?.label || "",
+    gpsStatus,
+  };
 }

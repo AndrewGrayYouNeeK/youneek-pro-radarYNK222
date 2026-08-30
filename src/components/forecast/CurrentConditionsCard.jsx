@@ -1,6 +1,9 @@
 import { describeWeatherCode, degToCardinal } from "@/lib/weather/conditions";
+import { formatPrecip, formatPressure, formatTemp, formatWind, tempSuffix } from "@/lib/weather/units";
+import { useUnits } from "@/lib/UnitsContext";
 
 export default function CurrentConditionsCard({ data }) {
+  const { units } = useUnits();
   if (!data) return null;
 
   const current = data.current || {};
@@ -23,13 +26,13 @@ export default function CurrentConditionsCard({ data }) {
           </div>
           <div className="mt-3 flex items-baseline gap-2">
             <span className="text-6xl font-extralight leading-none tabular-nums text-white">
-              {Math.round(current.temperature_2m ?? 0)}°
+              {formatTemp(current.temperature_2m, units.temp).replace("°", "")}°
             </span>
-            <span className="text-base text-slate-400">F</span>
+            <span className="text-base text-slate-400">{tempSuffix(units.temp)}</span>
           </div>
           <div className="mt-1 text-sm text-slate-200">{current.condition_label || code.label}</div>
           <div className="text-xs text-slate-400">
-            Feels like {Math.round(current.apparent_temperature ?? 0)}°
+            Feels like {formatTemp(current.apparent_temperature, units.temp)}
             {current.daylight === false ? " · Night" : ""}
           </div>
         </div>
@@ -37,20 +40,20 @@ export default function CurrentConditionsCard({ data }) {
       </div>
 
       <div className="relative mt-5 grid grid-cols-2 gap-3 text-xs sm:grid-cols-3">
-        <Stat label="High" value={`${Math.round(daily.temperature_2m_max?.[0] ?? 0)}°`} />
-        <Stat label="Low" value={`${Math.round(daily.temperature_2m_min?.[0] ?? 0)}°`} />
+        <Stat label="High" value={formatTemp(daily.temperature_2m_max?.[0], units.temp)} />
+        <Stat label="Low" value={formatTemp(daily.temperature_2m_min?.[0], units.temp)} />
         <Stat
           label="Wind"
-          value={`${Math.round(current.wind_speed_10m ?? 0)} mph ${degToCardinal(current.wind_direction_10m)}`}
+          value={`${formatWind(current.wind_speed_10m, units.wind)} ${degToCardinal(current.wind_direction_10m)}`}
         />
         <Stat
           label="Gusts"
-          value={current.wind_gusts_10m != null ? `${Math.round(current.wind_gusts_10m)} mph` : "—"}
+          value={current.wind_gusts_10m != null ? formatWind(current.wind_gusts_10m, units.wind) : "—"}
         />
         <Stat label="Humidity" value={`${Math.round(current.relative_humidity_2m ?? 0)}%`} />
         <Stat
           label="Dew point"
-          value={current.dew_point != null ? `${Math.round(current.dew_point)}°` : "—"}
+          value={current.dew_point != null ? formatTemp(current.dew_point, units.temp) : "—"}
         />
         <Stat label="UV" value={current.uv_index != null ? String(current.uv_index) : "—"} />
         <Stat label="Visibility" value={vis} />
@@ -58,7 +61,7 @@ export default function CurrentConditionsCard({ data }) {
           label="Pressure"
           value={
             current.pressure_msl != null
-              ? `${Math.round(current.pressure_msl)} mb${trend ? ` ${trend}` : ""}`
+              ? `${formatPressure(current.pressure_msl, units.pressure)}${trend ? ` ${trend}` : ""}`
               : "—"
           }
         />
@@ -67,7 +70,7 @@ export default function CurrentConditionsCard({ data }) {
           label="Precip rate"
           value={
             current.precipitation_intensity != null
-              ? `${Number(current.precipitation_intensity).toFixed(2)} in/hr`
+              ? `${formatPrecip(current.precipitation_intensity, units.precip)}/hr`
               : "—"
           }
         />
