@@ -6,10 +6,12 @@ import BottomTab from "@/components/radar/BottomTab";
 import AppHeader from "@/components/mobile/AppHeader";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle } from "lucide-react";
+import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Sparkles, Wind, Flame } from "lucide-react";
 import { setPref } from "@/lib/prefs";
+import { UNIT_OPTIONS } from "@/lib/units";
+import { useUnits } from "@/lib/UnitsContext";
 
-const APP_VERSION = "1.0.0";
+const APP_VERSION = "1.2.0";
 
 function Section({ title, children }) {
   return (
@@ -50,12 +52,37 @@ function SettingRow({ icon: Icon, label, sublabel, right, onClick, danger }) {
   );
 }
 
+function UnitSelect({ value, options, onChange, label }) {
+  return (
+    <label className="flex items-center justify-between gap-3 px-4 py-3">
+      <span className="text-sm text-white">{label}</span>
+      <select
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+        className="rounded-lg border border-white/10 bg-slate-900 px-2 py-1 text-xs text-white"
+        aria-label={label}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 export default function Settings() {
   useTabPageMemory("Settings");
   const navigate = useNavigate();
+  const { units, setUnits } = useUnits();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const [notifyRain, setNotifyRain] = useState(() => localStorage.getItem("pref_notifyRain") !== "false");
   const [notifyTornado, setNotifyTornado] = useState(() => localStorage.getItem("pref_notifyTornado") !== "false");
+  const [notifyLightning, setNotifyLightning] = useState(() => localStorage.getItem("pref_notifyLightning") !== "false");
+  const [notifyPollen, setNotifyPollen] = useState(() => localStorage.getItem("pref_notifyPollen") !== "false");
+  const [notifyAqi, setNotifyAqi] = useState(() => localStorage.getItem("pref_notifyAqi") !== "false");
+  const [notifyHurricane, setNotifyHurricane] = useState(() => localStorage.getItem("pref_notifyHurricane") !== "false");
   const [autoTune, setAutoTune] = useState(() => localStorage.getItem("pref_autoTune") !== "false");
   const [showAbout, setShowAbout] = useState(false);
 
@@ -77,30 +104,58 @@ export default function Settings() {
       <AppHeader title="Settings" />
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-5">
         <div className="mx-auto max-w-md space-y-4">
+          <div className="rounded-3xl border border-cyan-400/20 bg-cyan-950/30 p-4">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-cyan-200">YouNeeK Pro — unlocked</div>
+            <p className="mt-1 text-xs leading-relaxed text-slate-300">
+              Future radar, lightning, hurricanes, 3D globe radar, air quality, pollen, cameras, and wildfires are all
+              included. There is nothing to buy.
+            </p>
+          </div>
+
+          <Section title="Units">
+            <UnitSelect label="Temperature" value={units.temp} options={UNIT_OPTIONS.temp} onChange={(value) => setUnits({ temp: value })} />
+            <UnitSelect label="Wind" value={units.wind} options={UNIT_OPTIONS.wind} onChange={(value) => setUnits({ wind: value })} />
+            <UnitSelect label="Pressure" value={units.pressure} options={UNIT_OPTIONS.pressure} onChange={(value) => setUnits({ pressure: value })} />
+            <UnitSelect label="Precipitation" value={units.precip} options={UNIT_OPTIONS.precip} onChange={(value) => setUnits({ precip: value })} />
+            <UnitSelect label="Distance" value={units.distance} options={UNIT_OPTIONS.distance} onChange={(value) => setUnits({ distance: value })} />
+          </Section>
+
           <Section title="Notifications">
             <SettingRow
               icon={Bell}
               label="Rain arrival alerts"
               sublabel="Heads-up before rain reaches your location"
-              right={
-                <Switch
-                  checked={notifyRain}
-                  onCheckedChange={handleToggle("pref_notifyRain", setNotifyRain)}
-                  aria-label="Toggle rain arrival alerts"
-                />
-              }
+              right={<Switch checked={notifyRain} onCheckedChange={handleToggle("pref_notifyRain", setNotifyRain)} aria-label="Toggle rain arrival alerts" />}
             />
             <SettingRow
               icon={AlertTriangle}
               label="Tornado & severe weather"
               sublabel="Show the shelter card when warnings are active"
-              right={
-                <Switch
-                  checked={notifyTornado}
-                  onCheckedChange={handleToggle("pref_notifyTornado", setNotifyTornado)}
-                  aria-label="Toggle tornado warning alerts"
-                />
-              }
+              right={<Switch checked={notifyTornado} onCheckedChange={handleToggle("pref_notifyTornado", setNotifyTornado)} aria-label="Toggle tornado warning alerts" />}
+            />
+            <SettingRow
+              icon={Sparkles}
+              label="Lightning nearby"
+              sublabel="Surface lightning and storm reports near you"
+              right={<Switch checked={notifyLightning} onCheckedChange={handleToggle("pref_notifyLightning", setNotifyLightning)} aria-label="Toggle lightning alerts" />}
+            />
+            <SettingRow
+              icon={Wind}
+              label="Air quality"
+              sublabel="When US AQI is moderate or worse"
+              right={<Switch checked={notifyAqi} onCheckedChange={handleToggle("pref_notifyAqi", setNotifyAqi)} aria-label="Toggle air quality alerts" />}
+            />
+            <SettingRow
+              icon={Sparkles}
+              label="Pollen"
+              sublabel="When pollen is high"
+              right={<Switch checked={notifyPollen} onCheckedChange={handleToggle("pref_notifyPollen", setNotifyPollen)} aria-label="Toggle pollen alerts" />}
+            />
+            <SettingRow
+              icon={Flame}
+              label="Hurricane tracker"
+              sublabel="When NHC is tracking an active cyclone"
+              right={<Switch checked={notifyHurricane} onCheckedChange={handleToggle("pref_notifyHurricane", setNotifyHurricane)} aria-label="Toggle hurricane alerts" />}
             />
           </Section>
 
@@ -130,12 +185,13 @@ export default function Settings() {
             {showAbout && (
               <div className="space-y-2 px-4 pb-4 pt-1 text-xs leading-relaxed text-slate-400">
                 <p>
-                  Included with the app: live NEXRAD + radar loops, lightning reports, tropical cyclones,
-                  satellite, NOAA Weather Radio, Emergency and I&apos;m Safe texts, WeatherKit forecasts, air quality,
-                  and a 3D globe. No premium upsell.
+                  Included with the app: live NEXRAD + global radar loops + future nowcast, lightning reports, tropical
+                  cyclones, satellite, NOAA Weather Radio, Emergency and I&apos;m Safe texts, WeatherKit + Open-Meteo
+                  forecasts, air quality, pollen, cameras, wildfires, and a 3D radar globe. No premium upsell.
                 </p>
                 <p className="text-slate-500">
-                  Data sources: Iowa Mesonet · RainViewer · NHC · api.weather.gov · Apple WeatherKit · Open-Meteo
+                  Data sources: Iowa Mesonet · RainViewer · NHC · api.weather.gov · Apple WeatherKit · Open-Meteo · NASA
+                  EONET · NOAA GOES
                 </p>
                 <p className="text-slate-500">© 2026 Andrew Gray · YouNeeK</p>
               </div>

@@ -1,152 +1,138 @@
-import { useEffect, useRef } from "react";
-import * as THREE from "three";
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+import { useCallback, useState } from "react";
+import { Flame, LocateFixed, Pause, Play, Satellite, Zap } from "lucide-react";
 import AppHeader from "@/components/mobile/AppHeader";
 import BottomTab from "@/components/radar/BottomTab";
+import WeatherGlobeCanvas from "@/components/globe/WeatherGlobeCanvas";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
-
-function latLonToVector3(lat, lon, radius) {
-  const phi = (90 - lat) * (Math.PI / 180);
-  const theta = (lon + 180) * (Math.PI / 180);
-  return new THREE.Vector3(
-    -radius * Math.sin(phi) * Math.cos(theta),
-    radius * Math.cos(phi),
-    radius * Math.sin(phi) * Math.sin(theta)
-  );
-}
+import useWeatherLocation from "@/hooks/useWeatherLocation";
 
 export default function Globe() {
   useTabPageMemory("Globe");
-  const mountRef = useRef(null);
+  const { coords, setLocation, retry } = useWeatherLocation();
+  const [layer, setLayer] = useState("radar");
+  const [playing, setPlaying] = useState(true);
+  const [showLightning, setShowLightning] = useState(true);
+  const [showStorms, setShowStorms] = useState(true);
+  const [showFires, setShowFires] = useState(true);
+  const [flyToken, setFlyToken] = useState(0);
+  const [status, setStatus] = useState({ frameLabel: "Loading radar…", kind: "live" });
 
-  useEffect(() => {
-    const mount = mountRef.current;
-    if (!mount) return undefined;
-
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x020617);
-    const camera = new THREE.PerspectiveCamera(45, mount.clientWidth / mount.clientHeight, 0.1, 100);
-    camera.position.z = 3.2;
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(mount.clientWidth, mount.clientHeight);
-    mount.appendChild(renderer.domElement);
-
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.minDistance = 1.8;
-    controls.maxDistance = 6;
-
-    scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.2);
-    sun.position.set(5, 2, 3);
-    scene.add(sun);
-
-    const earth = new THREE.Mesh(
-      new THREE.SphereGeometry(1, 64, 64),
-      new THREE.MeshPhongMaterial({
-        color: 0x1d4ed8,
-        emissive: 0x0f172a,
-        shininess: 8,
-      })
-    );
-    scene.add(earth);
-
-    const clouds = new THREE.Mesh(
-      new THREE.SphereGeometry(1.02, 48, 48),
-      new THREE.MeshPhongMaterial({
-        color: 0xe2e8f0,
-        transparent: true,
-        opacity: 0.12,
-      })
-    );
-    scene.add(clouds);
-
-    const strikesGroup = new THREE.Group();
-    scene.add(strikesGroup);
-    const stormsGroup = new THREE.Group();
-    scene.add(stormsGroup);
-
-    const textureLoader = new THREE.TextureLoader();
-    textureLoader.setCrossOrigin("anonymous");
-    textureLoader.load(
-      "https://unpkg.com/three-globe@2.31.1/example/img/earth-night.jpg",
-      (texture) => {
-        earth.material.map = texture;
-        earth.material.color = new THREE.Color(0xffffff);
-        earth.material.needsUpdate = true;
-      }
-    );
-
-    fetch("/api/lightning")
-      .then((response) => response.json())
-      .then((payload) => {
-        (payload.strikes || []).slice(0, 80).forEach((strike) => {
-          const marker = new THREE.Mesh(
-            new THREE.SphereGeometry(0.012, 8, 8),
-            new THREE.MeshBasicMaterial({ color: 0xfacc15 })
-          );
-          marker.position.copy(latLonToVector3(strike.lat, strike.lon, 1.04));
-          strikesGroup.add(marker);
-        });
-      })
-      .catch(() => {});
-
-    fetch("/api/getActiveStorms")
-      .then((response) => response.json())
-      .then((payload) => {
-        const storms = payload.activeStorms || payload.currentStorms || [];
-        storms.forEach((storm) => {
-          const lat = Number(storm.latitude ?? storm.lat);
-          const lon = Number(storm.longitude ?? storm.lon);
-          if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
-          const marker = new THREE.Mesh(
-            new THREE.SphereGeometry(0.03, 12, 12),
-            new THREE.MeshBasicMaterial({ color: 0xfb7185 })
-          );
-          marker.position.copy(latLonToVector3(lat, lon, 1.05));
-          stormsGroup.add(marker);
-        });
-      })
-      .catch(() => {});
-
-    let frame = 0;
-    const animate = () => {
-      frame = requestAnimationFrame(animate);
-      earth.rotation.y += 0.0012;
-      clouds.rotation.y += 0.0016;
-      controls.update();
-      renderer.render(scene, camera);
-    };
-    animate();
-
-    const onResize = () => {
-      camera.aspect = mount.clientWidth / mount.clientHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(mount.clientWidth, mount.clientHeight);
-    };
-    window.addEventListener("resize", onResize);
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("resize", onResize);
-      controls.dispose();
-      renderer.dispose();
-      mount.removeChild(renderer.domElement);
-    };
+  const handleStatus = useCallback((next) => {
+    setStatus(next);
   }, []);
 
   return (
     <div className="flex h-[100dvh] flex-col bg-slate-950 pb-0">
-      <AppHeader title="Globe" />
+      <AppHeader title="3D Radar Globe" />
       <div className="relative min-h-0 flex-1 pb-16">
-        <div ref={mountRef} className="h-full w-full" />
-        <div className="pointer-events-none absolute left-4 top-4 max-w-xs rounded-2xl border border-white/10 bg-slate-950/70 p-3 text-xs text-slate-300">
-          Drag to rotate. Lightning reports and active tropical cyclones plot on a night-side Earth — not a clone of another app’s globe.
+        <WeatherGlobeCanvas
+          coords={coords}
+          layer={layer}
+          playing={playing}
+          showLightning={showLightning}
+          showStorms={showStorms}
+          showFires={showFires}
+          flyToken={flyToken}
+          onStatus={handleStatus}
+        />
+
+        <div className="pointer-events-none absolute left-3 top-3 max-w-[16rem] rounded-2xl border border-white/10 bg-slate-950/75 p-3 text-xs text-slate-200 backdrop-blur-md">
+          <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-sky-300">
+            {layer === "satellite" ? "Infrared satellite" : "Global weather radar"}
+          </div>
+          <div className="mt-1 text-sm font-medium text-white">
+            {status.frameLabel || "Live"}
+            {status.kind === "nowcast" ? " · Future" : ""}
+          </div>
+          <p className="mt-1 text-[11px] leading-relaxed text-slate-400">
+            Drag to rotate. Pinch or scroll to zoom. Radar and future nowcast are included — no premium unlock.
+          </p>
+        </div>
+
+        <div className="pointer-events-auto absolute right-3 top-3 flex flex-col gap-2">
+          <button
+            type="button"
+            onClick={() => setPlaying((value) => !value)}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-white backdrop-blur-md"
+            aria-label={playing ? "Pause radar loop" : "Play radar loop"}
+          >
+            {playing ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              retry();
+              setFlyToken((value) => value + 1);
+            }}
+            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/10 bg-slate-950/80 text-white backdrop-blur-md"
+            aria-label="Fly globe to my location"
+          >
+            <LocateFixed className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="pointer-events-auto absolute inset-x-3 bottom-24 flex flex-col gap-2">
+          <div className="flex gap-2 overflow-x-auto">
+            <LayerChip
+              active={layer === "radar"}
+              onClick={() => setLayer("radar")}
+              label="Radar + nowcast"
+            />
+            <LayerChip
+              active={layer === "satellite"}
+              onClick={() => setLayer("satellite")}
+              icon={Satellite}
+              label="Satellite"
+            />
+          </div>
+          <div className="flex gap-2 overflow-x-auto">
+            <LayerChip
+              active={showLightning}
+              onClick={() => setShowLightning((value) => !value)}
+              icon={Zap}
+              label="Lightning"
+            />
+            <LayerChip
+              active={showStorms}
+              onClick={() => setShowStorms((value) => !value)}
+              label="Hurricanes"
+            />
+            <LayerChip
+              active={showFires}
+              onClick={() => setShowFires((value) => !value)}
+              icon={Flame}
+              label="Wildfires"
+            />
+            {coords?.label && (
+              <button
+                type="button"
+                onClick={() => setLocation(coords)}
+                className="rounded-full border border-white/10 bg-slate-950/80 px-3 py-1.5 text-[11px] text-slate-300"
+              >
+                {coords.label}
+              </button>
+            )}
+          </div>
         </div>
       </div>
       <BottomTab />
     </div>
+  );
+}
+
+function LayerChip({ active, onClick, label, icon: Icon }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-medium backdrop-blur-md ${
+        active
+          ? "border-sky-400/40 bg-sky-500/20 text-white"
+          : "border-white/10 bg-slate-950/75 text-slate-400"
+      }`}
+    >
+      {Icon && <Icon className="h-3.5 w-3.5" aria-hidden="true" />}
+      {label}
+    </button>
   );
 }

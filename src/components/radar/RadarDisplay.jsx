@@ -98,7 +98,7 @@ function isFeatureNearLocation(feature, userLocation, maxDistanceKm = 150) {
   return points.some(([lon, lat]) => haversineKm(lat, lon, userLocation.lat, userLocation.lon) <= maxDistanceKm);
 }
 
-const ACTIVE_PRODUCT = getRadarProduct("reflectivity");
+const DEFAULT_PRODUCT = getRadarProduct("reflectivity");
 
 export default function RadarDisplay({
   settings,
@@ -132,6 +132,8 @@ export default function RadarDisplay({
   const [showLightning, setShowLightning] = useState(true);
   const [showHurricanes, setShowHurricanes] = useState(true);
   const [showSatellite, setShowSatellite] = useState(false);
+  const [globalTileUrl, setGlobalTileUrl] = useState(null);
+  const activeProduct = getRadarProduct(settings.product);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopPlaying, setLoopPlaying] = useState(false);
   const [loopSpeed, setLoopSpeed] = useState(400);
@@ -288,7 +290,10 @@ export default function RadarDisplay({
       return undefined;
     }
 
-    let tileUrl = "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png";
+    let tileUrl = activeProduct.tileUrl || DEFAULT_PRODUCT.tileUrl;
+    if (activeProduct.id === "global" && globalTileUrl) {
+      tileUrl = globalTileUrl;
+    }
     if (loopEnabled && loopFrames[loopIndex]?.tileUrl) {
       tileUrl = loopFrames[loopIndex].tileUrl;
     }
@@ -300,10 +305,10 @@ export default function RadarDisplay({
 
     radarLayerRef.current = L.tileLayer(tileUrl, {
       attribution: loopEnabled ? "Radar loop via RainViewer" : "NEXRAD data from Iowa Environmental Mesonet",
-      opacity: ACTIVE_PRODUCT.opacity,
-      minZoom: 4,
+      opacity: activeProduct.opacity,
+      minZoom: 3,
       maxZoom: 12,
-      maxNativeZoom: 12,
+      maxNativeZoom: activeProduct.maxNativeZoom || 12,
       crossOrigin: "anonymous",
     }).addTo(leafletMap.current);
 
@@ -313,7 +318,25 @@ export default function RadarDisplay({
         radarLayerRef.current = null;
       }
     };
-  }, [showNexrad, isMapReady, loopEnabled, loopIndex, loopFrames]);
+  }, [showNexrad, isMapReady, loopEnabled, loopIndex, loopFrames, activeProduct, globalTileUrl]);
+
+  useEffect(() => {
+    if (activeProduct.id !== "global") return undefined;
+    let cancelled = false;
+    fetch("https://api.rainviewer.com/public/weather-maps.json")
+      .then((response) => response.json())
+      .then((payload) => {
+        if (cancelled) return;
+        const host = payload.host || "https://tilecache.rainviewer.com";
+        const past = payload?.radar?.past || [];
+        const live = past[past.length - 1];
+        if (live) setGlobalTileUrl(`${host}${live.path}/256/{z}/{x}/{y}/2/1_1.png`);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [activeProduct.id]);
 
   useEffect(() => {
     if (!loopEnabled) return undefined;
@@ -508,7 +531,7 @@ export default function RadarDisplay({
       const tileUrl = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png';
       radarLayerRef.current = L.tileLayer(tileUrl, {
         attribution: "NEXRAD data from Iowa Environmental Mesonet",
-        opacity: ACTIVE_PRODUCT.opacity,
+        opacity: activeProduct.opacity,
         minZoom: 4,
         maxZoom: 12,
         maxNativeZoom: 12,
@@ -579,13 +602,15 @@ export default function RadarDisplay({
         onShowHurricanesChange={setShowHurricanes}
         onShowSatelliteChange={setShowSatellite}
         onAlertToggleChange={handleAlertToggleChange}
+        productId={settings.product}
+        onProductChange={(product) => onSettingsChange({ ...settings, product })}
       />
       <LightningLayer map={leafletMap.current} enabled={showLightning && isMapReady} />
       <HurricaneLayer map={leafletMap.current} enabled={showHurricanes && isMapReady} />
       <WindSpeedDisplay windData={windData} />
-      <ProLegend productLabel={ACTIVE_PRODUCT.label} />
+      <ProLegend productLabel={activeProduct.label} />
       <RadarStatusBar
-        productLabel={ACTIVE_PRODUCT.label}
+        productLabel={activeProduct.label}
         isLooping={loopEnabled && loopPlaying}
         frameLabel={
           loopEnabled && loopFrames[loopIndex]?.time
@@ -599,7 +624,7 @@ export default function RadarDisplay({
         {stormData && (
           <StormToolsPanel stormData={stormData} onClose={() => setStormData(null)} />
         )}
-        {inspector?.active && <RadarInspectorPanel inspector={inspector} productLabel={ACTIVE_PRODUCT.label} />}
+        {inspector?.active && <RadarInspectorPanel inspector={inspector} productLabel={activeProduct.label} />}
         <RadarQuickActions
           show={showTools}
           onConus={handleConusView}
@@ -620,7 +645,7 @@ export default function RadarDisplay({
                       }
                     : null
                 }
-                productLabel={ACTIVE_PRODUCT.label}
+                productLabel={activeProduct.label}
                 station={settings.station}
               />
               <TargetList

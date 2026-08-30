@@ -8,14 +8,28 @@ const DEFAULT_TABS = {
   Radar: { path: "/Radar", search: "", scrollY: 0 },
   Forecast: { path: "/Forecast", search: "", scrollY: 0 },
   Globe: { path: "/Globe", search: "", scrollY: 0 },
-  Contacts: { path: "/Contacts", search: "", scrollY: 0 },
+  More: { path: "/More", search: "", scrollY: 0 },
   Settings: { path: "/Settings", search: "", scrollY: 0 },
 };
+
+const MORE_PREFIXES = [
+  "/More",
+  "/Contacts",
+  "/AirQuality",
+  "/Pollen",
+  "/Lightning",
+  "/Hurricanes",
+  "/Cameras",
+  "/Wildfire",
+  "/Health",
+  "/News",
+  "/Astronomy",
+];
 
 function getTabKey(pathname) {
   if (pathname.startsWith("/Forecast")) return "Forecast";
   if (pathname.startsWith("/Globe")) return "Globe";
-  if (pathname.startsWith("/Contacts")) return "Contacts";
+  if (MORE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return "More";
   if (pathname.startsWith("/Settings") || pathname.startsWith("/Privacy")) return "Settings";
   return "Radar";
 }

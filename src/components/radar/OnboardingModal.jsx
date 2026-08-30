@@ -6,12 +6,17 @@ const SLIDES = [
   {
     icon: "🌩️",
     title: "Live NEXRAD Radar",
-    body: "See live NEXRAD, play a radar loop, overlay lightning reports, tropical cyclones, and satellite. Everything ships with the app — no extra paywall.",
+    body: "See live NEXRAD, global radar, velocity, future nowcast, lightning reports, tropical cyclones, and satellite. Everything ships with the app — no extra paywall.",
+  },
+  {
+    icon: "🌍",
+    title: "3D Radar Globe",
+    body: "Spin a live weather globe with radar, infrared satellite, lightning, hurricanes, and wildfires. The same premium globe view — unlocked for everyone.",
   },
   {
     icon: "☀️",
-    title: "Apple WeatherKit",
-    body: "Current conditions, next-hour precipitation, hourly and 10-day forecasts, and official WeatherKit alerts — all in the Forecast tab.",
+    title: "Full forecast desk",
+    body: "Current conditions, next-hour precipitation, hourly and 14-day outlooks, AQI, pollen, UV, sports scores, and alerts. Works with or without WeatherKit.",
   },
   {
     icon: "🚨",

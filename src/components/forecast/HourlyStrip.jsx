@@ -1,6 +1,9 @@
 import { describeWeatherCode, formatHourTime } from "@/lib/weather/conditions";
+import { formatTempShort } from "@/lib/units";
+import { useUnits } from "@/lib/UnitsContext";
 
 export default function HourlyStrip({ hours = [] }) {
+  const { units } = useUnits();
   if (!hours.length) return null;
 
   return (
@@ -19,7 +22,7 @@ export default function HourlyStrip({ hours = [] }) {
             >
               <div className="text-[11px] text-slate-400">{formatHourTime(hour.time)}</div>
               <Icon className="mx-auto my-2 h-5 w-5 text-sky-300" aria-hidden="true" />
-              <div className="text-sm font-semibold text-white">{hour.temperature}°</div>
+              <div className="text-sm font-semibold text-white">{formatTempShort(hour.temperature, units)}</div>
               <div className="mt-1 text-[10px] text-slate-500">{hour.pop}%</div>
             </div>
           );

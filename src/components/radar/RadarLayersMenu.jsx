@@ -3,6 +3,7 @@ import { ChevronDown, ChevronUp } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import AccountActions from "./AccountActions";
 import RadioControls from "./RadioControls";
+import { RADAR_PRODUCTS } from "./radarProducts";
 
 function ToggleRow({ label, checked, onCheckedChange, ariaLabel }) {
   return (
@@ -28,6 +29,8 @@ export default function RadarLayersMenu({
   onShowHurricanesChange,
   onShowSatelliteChange,
   onAlertToggleChange,
+  productId,
+  onProductChange,
 }) {
   const [showAlerts, setShowAlerts] = useState(false);
   const menuRef = useRef(null);
@@ -70,11 +73,26 @@ export default function RadarLayersMenu({
             <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3">
               <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Radar</div>
               <ToggleRow
-                label="📡 Live NEXRAD"
+                label="📡 Live radar"
                 checked={showNexrad}
                 onCheckedChange={onShowNexradChange}
-                ariaLabel="Toggle live NEXRAD radar layer"
+                ariaLabel="Toggle live radar layer"
               />
+              <label className="block">
+                <span className="text-[11px] text-slate-400">Product</span>
+                <select
+                  value={productId || "reflectivity"}
+                  onChange={(event) => onProductChange?.(event.target.value)}
+                  className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900 px-2 py-1.5 text-[13px] text-white"
+                  aria-label="Radar product"
+                >
+                  {RADAR_PRODUCTS.map((product) => (
+                    <option key={product.id} value={product.id}>
+                      {product.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <ToggleRow
                 label="🛰️ Satellite"
                 checked={showSatellite}

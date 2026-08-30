@@ -4,6 +4,9 @@ import { defineConfig, loadEnv } from "vite";
 import { nwsApiMiddleware } from "./server/nwsApi.js";
 import { onRequestGet as getWeather } from "./functions/api/weather.js";
 import { onRequestGet as getLightning } from "./functions/api/lightning.js";
+import { onRequestGet as getNews } from "./functions/api/news.js";
+import { onRequestGet as getWildfires } from "./functions/api/wildfires.js";
+import { onRequestGet as getTile } from "./functions/api/tile.js";
 
 const NWS_HEADERS = { Accept: "application/geo+json", "User-Agent": "YouNeeKProRadar/1.0 (alerts)" };
 
@@ -120,6 +123,38 @@ function attachRadarApi(server, mode) {
       headers[key] = value;
     });
     return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/news", async () => {
+    const response = await getNews();
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/wildfires", async () => {
+    const response = await getWildfires();
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  server.middlewares.use("/api/tile", async (req, res) => {
+    try {
+      const request = new Request(`http://localhost${req.url}`, { method: req.method });
+      const response = await getTile({ request });
+      res.statusCode = response.status;
+      response.headers.forEach((value, key) => res.setHeader(key, value));
+      const buffer = Buffer.from(await response.arrayBuffer());
+      res.end(buffer);
+    } catch {
+      res.statusCode = 502;
+      res.end();
+    }
   });
 }
 

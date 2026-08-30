@@ -3,10 +3,11 @@
 Cinematic landing site **and** live radar product in one app. Slogan: **MAKING IT RAIN**.
 
 - **`/`** — storm landing (GPS location, neon signs, NWS conditions, SOS)
-- **`/Radar`** (also `/app`) — NEXRAD map, loops, lightning, tropical cyclones
-- **`/Forecast`** — Apple WeatherKit current / hourly / 10-day (needs credentials)
-- **`/Globe`** — 3D globe
-- **`/Contacts`** and **`/Settings`** — emergency SMS drafts and preferences
+- **`/Radar`** (also `/app`) — NEXRAD, velocity, global radar, loops, lightning, tropical cyclones
+- **`/Forecast`** — current / hourly / 10–14 day, AQI, pollen, UV, sports, alerts (WeatherKit when configured, Open-Meteo otherwise)
+- **`/Globe`** — 3D globe with live weather radar, satellite, lightning, hurricanes, and wildfires
+- **`/More`** — air quality, pollen, lightning, hurricanes, cameras, wildfires, health, news, sun & moon, safety contacts
+- **`/Contacts`** and **`/Settings`** — emergency SMS drafts, units, and preferences
 
 ## Local Development
 
@@ -37,8 +38,10 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 
 - [NOAA National Weather Service API](https://www.weather.gov/documentation/services-web-api) — alerts, forecasts, observations
 - [Iowa State Mesonet](https://mesonet.agron.iastate.edu/) — NEXRAD mosaics and storm attributes
-- [Apple WeatherKit](https://developer.apple.com/weatherkit/) — Forecast tab (optional)
-- [Open-Meteo Geocoding](https://open-meteo.com/) — location search
+- [Apple WeatherKit](https://developer.apple.com/weatherkit/) — Forecast tab when credentials are set
+- [Open-Meteo](https://open-meteo.com/) — forecast fallback, geocoding, air quality, pollen, UV
+- [RainViewer](https://www.rainviewer.com/api.html) — global radar, future nowcast, and 3D globe overlay
+- [NASA EONET](https://eonet.gsfc.nasa.gov/) — wildfire events
 
 ## Merged from
 
