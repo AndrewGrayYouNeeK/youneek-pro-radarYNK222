@@ -4,6 +4,10 @@ import { Menu, X } from 'lucide-react';
 import NBoltLogo from './NBoltLogo';
 
 const NAV = [
+  { label: 'Radar', href: '/app' },
+  { label: 'Alerts', href: '/app#alerts' },
+  { label: 'Stations', href: '/app#stations' },
+  { label: 'SOS', href: '/app#sos' },
   { label: 'Radar', href: '/Radar' },
   { label: 'Forecast', href: '/Forecast' },
   { label: 'Globe', href: '/Globe' },
@@ -40,6 +44,16 @@ export default function TopBar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-1">
+          {NAV.map((item) => (
+            <a
+              key={item.label}
+              href={item.href}
+              className="relative px-4 py-2 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] transition group"
+            >
+              <span className="relative z-10">{item.label}</span>
+              <span className="absolute inset-x-3 bottom-1 h-px bg-[#00ff9c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+            </a>
+          ))}
           {NAV.map((item) =>
             item.href.startsWith("#") ? (
               <a
@@ -91,6 +105,16 @@ export default function TopBar() {
           {/* Slide-in panel from top-right */}
           <div className="md:hidden fixed top-28 right-0 z-[250] w-72 max-w-[85vw] max-h-[calc(100vh-7rem)] overflow-y-auto bg-black border-l border-b border-[#00ff9c]/30 shadow-[0_0_40px_rgba(0,255,156,0.2)] animate-[slideInRight_0.25s_ease-out]">
             <nav className="flex flex-col p-4 gap-2">
+              {NAV.map((item) => (
+                <a
+                  key={item.label}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className="px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] border border-white/5 hover:border-[#00ff9c]/40 transition"
+                >
+                  {item.label}
+                </a>
+              ))}
               {NAV.map((item) =>
                 item.href.startsWith("#") ? (
                   <a
