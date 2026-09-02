@@ -57,8 +57,11 @@ export default function HeroSection() {
               <LocationBar />
             </div>
 
-            {/* Title with glitch */}
-            <h1 className="relative z-[59] font-bold leading-[0.9] tracking-tight" style={{ isolation: 'isolate' }}>
+            {/* Title — only visible while the landing lightning flash is on */}
+            <h1
+              className="hero-title-strike relative z-[66] font-bold leading-[0.9] tracking-tight"
+              style={{ isolation: 'isolate' }}
+            >
               <span className="block text-[11vw] md:text-[5rem] lg:text-[6rem] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)]">
                 YouNeeK
               </span>
@@ -170,17 +173,26 @@ export default function HeroSection() {
           94% { transform: translate(-2px, 1px); }
           96% { transform: translate(1px, 2px); }
         }
-        @keyframes lightning {
-          0%, 92%, 96%, 100% { opacity: 0; }
-          93% { opacity: 0.4; }
-          94% { opacity: 0; }
-          95% { opacity: 0.2; }
+        /* Locked to LightningFlash: 8s loop, bolts at 91% / 93% / 95% */
+        .hero-title-strike {
+          opacity: 0;
+          mix-blend-mode: difference;
+          animation: titleStrike 8s ease-in-out infinite;
         }
-        @keyframes signature {
-          0%, 92%, 96%, 100% { color: rgba(255,255,255,0); }
-          93% { color: rgba(255,255,255,0.85); }
-          94% { color: rgba(255,255,255,0); }
-          95% { color: rgba(255,255,255,0.5); }
+        @keyframes titleStrike {
+          0%, 90%, 96%, 100% { opacity: 0; }
+          91% { opacity: 1; }
+          92% { opacity: 0.12; }
+          93% { opacity: 1; }
+          94% { opacity: 0; }
+          95% { opacity: 0.65; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .hero-title-strike {
+            animation: none;
+            opacity: 1;
+            mix-blend-mode: normal;
+          }
         }
       `}</style>
     </section>
