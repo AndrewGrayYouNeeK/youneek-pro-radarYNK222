@@ -20,10 +20,10 @@ export default function Landing() {
       <RainOverlay />
       <LightningFlash />
       <HeroSection />
-      <NeonBrandShowcase />
+      <CurrentConditions />
       <LiveRadar />
       <LiveAlerts />
-      <CurrentConditions />
+      <NeonBrandShowcase />
       <NoaaRadioSection />
       <FeaturesSection />
       <LandingFooter />

@@ -5,6 +5,7 @@ import TopBar from './TopBar';
 import RadarSweep from './RadarSweep';
 import { WindPanel, DbzPanel, AlertPanel, SystemPanel } from './HudPanels';
 import LocationBar from './LocationBar';
+import HeroWeather from './HeroWeather';
 import TornadoAlertBanner from './TornadoAlertBanner';
 import { useLocation } from './LocationContext';
 
@@ -53,9 +54,11 @@ export default function HeroSection() {
             </div>
 
             {/* Location selector — directly under SYS_ONLINE */}
-            <div className="relative z-[70] mb-8" style={{ isolation: 'isolate' }}>
+            <div className="relative z-[70] mb-4" style={{ isolation: 'isolate' }}>
               <LocationBar />
             </div>
+
+            <HeroWeather />
 
             {/* Title — only visible while the landing lightning flash is on */}
             <h1
@@ -90,7 +93,7 @@ export default function HeroSection() {
             </div>
 
             <p className="mt-8 max-w-md text-sm md:text-base text-white/70 leading-relaxed border-l-2 border-[#00ff9c]/40 pl-4">
-              Live NEXRAD, NOAA alerts, and GPS-locked conditions for wherever you actually are.
+              Live NEXRAD, a WeatherBug-class forecast desk, NOAA alerts, and GPS-locked conditions — the same weather on landing, radar, and Forecast.
             </p>
 
             {/* CTAs */}
@@ -103,6 +106,12 @@ export default function HeroSection() {
                 Launch Radar
                 <ChevronRight className="w-4 h-4" />
               </Link>
+              <Link
+                to="/Forecast"
+                className="inline-flex items-center gap-2 px-6 py-3.5 border border-[#00ff9c]/40 text-[#00ff9c] text-xs tracking-[0.25em] uppercase hover:bg-[#00ff9c]/10 transition"
+              >
+                Forecast
+              </Link>
               <a
                 href="#features"
                 className="inline-flex items-center gap-2 px-6 py-3.5 border border-white/30 text-white/80 text-xs tracking-[0.25em] uppercase hover:border-[#00ff9c] hover:text-[#00ff9c] transition"
@@ -112,19 +121,18 @@ export default function HeroSection() {
               </a>
             </div>
 
-            {/* Mini stats */}
             <div className="mt-10 grid grid-cols-3 gap-3 max-w-md">
               <div>
-                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Stations</div>
-                <div className="text-2xl font-bold text-[#00ff9c] tabular-nums">15+</div>
+                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Forecast</div>
+                <div className="text-2xl font-bold text-[#00ff9c] tabular-nums">16d</div>
               </div>
               <div>
-                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Refresh</div>
-                <div className="text-2xl font-bold text-white tabular-nums">2.4s</div>
+                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Hourly</div>
+                <div className="text-2xl font-bold text-white tabular-nums">168h</div>
               </div>
               <div>
-                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Coverage</div>
-                <div className="text-2xl font-bold text-[#ff00d4] tabular-nums">CONUS</div>
+                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Radar</div>
+                <div className="text-2xl font-bold text-[#ff00d4] tabular-nums">LIVE</div>
               </div>
             </div>
           </div>
