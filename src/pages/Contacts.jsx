@@ -34,7 +34,7 @@ function formatDisplay(phone) {
 }
 
 export default function Contacts() {
-  useTabPageMemory("Contacts");
+  useTabPageMemory("More");
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
   const [name, setName] = useState("");

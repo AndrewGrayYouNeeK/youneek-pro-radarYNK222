@@ -1,4 +1,4 @@
-import { Activity, CloudSun, Globe2, Settings, Users, Layers } from "lucide-react";
+import { Activity, CloudSun, Globe2, Settings, LayoutGrid, Layers } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useNavigationStack } from "@/lib/NavigationStack";
 
@@ -6,7 +6,7 @@ const TABS = [
   { label: "Radar", path: "/Radar", icon: Activity },
   { label: "Forecast", path: "/Forecast", icon: CloudSun },
   { label: "Globe", path: "/Globe", icon: Globe2 },
-  { label: "Contacts", path: "/Contacts", icon: Users },
+  { label: "More", path: "/More", icon: LayoutGrid },
   { label: "Settings", path: "/Settings", icon: Settings },
 ];
 
@@ -22,7 +22,23 @@ export default function BottomTab({ onToolsClick, showTools }) {
     >
       <div className="mx-auto flex max-w-lg items-center justify-around px-2 py-1.5">
         {TABS.map(({ label, path, icon: Icon }) => {
-          const active = location.pathname === path;
+          const active =
+            location.pathname === path ||
+            (path === "/More" &&
+              [
+                "/Contacts",
+                "/AirQuality",
+                "/Pollen",
+                "/Lightning",
+                "/Hurricanes",
+                "/Fires",
+                "/Briefing",
+                "/Cameras",
+                "/Wildfire",
+                "/Health",
+                "/News",
+                "/Astronomy",
+              ].some((item) => location.pathname.startsWith(item)));
           return (
             <button
               key={path}

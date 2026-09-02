@@ -5,6 +5,8 @@ import { nwsApiMiddleware } from "./server/nwsApi.js";
 import { onRequestGet as getWeather } from "./functions/api/weather.js";
 import { onRequestGet as getLightning } from "./functions/api/lightning.js";
 import { onRequestGet as getFires } from "./functions/api/fires.js";
+import { onRequestGet as getWildfires } from "./functions/api/wildfires.js";
+import { onRequestGet as getNews } from "./functions/api/news.js";
 import { onRequestGet as getOutlook } from "./functions/api/outlook.js";
 import { onRequestGet as getTile } from "./functions/api/tile.js";
 import { onRequestGet as getAlertsWorker } from "./functions/api/alerts.js";
@@ -81,6 +83,24 @@ function attachRadarApi(server, mode) {
 
   attachJsonRoute(server, "/api/fires", async () => {
     const response = await getFires();
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/wildfires", async () => {
+    const response = await getWildfires();
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/news", async () => {
+    const response = await getNews();
     const headers = {};
     response.headers.forEach((value, key) => {
       headers[key] = value;

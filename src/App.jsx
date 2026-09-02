@@ -19,9 +19,18 @@ const Settings = lazy(() => import("./pages/Settings"));
 const Forecast = lazy(() => import("./pages/Forecast"));
 const Globe = lazy(() => import("./pages/Globe"));
 const Privacy = lazy(() => import("./pages/Privacy"));
+const More = lazy(() => import("./pages/More"));
+const AirQuality = lazy(() => import("./pages/AirQuality"));
+const Pollen = lazy(() => import("./pages/Pollen"));
+const Lightning = lazy(() => import("./pages/Lightning"));
 const Hurricanes = lazy(() => import("./pages/Hurricanes"));
 const Fires = lazy(() => import("./pages/Fires"));
 const Briefing = lazy(() => import("./pages/Briefing"));
+const Cameras = lazy(() => import("./pages/Cameras"));
+const Wildfire = lazy(() => import("./pages/Wildfire"));
+const Health = lazy(() => import("./pages/Health"));
+const News = lazy(() => import("./pages/News"));
+const Astronomy = lazy(() => import("./pages/Astronomy"));
 
 const Spinner = () => (
   <div className="flex h-full items-center justify-center bg-slate-950">
@@ -59,9 +68,9 @@ function AppShell() {
 function App() {
   return (
     <AuthProvider>
+      <UnitsProvider>
       <QueryClientProvider client={queryClientInstance}>
         <LocationProvider>
-          <UnitsProvider>
           <Router>
             <Routes>
               <Route path="/" element={<Landing />} />
@@ -77,9 +86,18 @@ function App() {
                 <Route path="/Radar" element={<Radar />} />
                 <Route path="/Forecast" element={<Forecast />} />
                 <Route path="/Globe" element={<Globe />} />
+                <Route path="/More" element={<More />} />
+                <Route path="/AirQuality" element={<AirQuality />} />
+                <Route path="/Pollen" element={<Pollen />} />
+                <Route path="/Lightning" element={<Lightning />} />
                 <Route path="/Hurricanes" element={<Hurricanes />} />
                 <Route path="/Fires" element={<Fires />} />
                 <Route path="/Briefing" element={<Briefing />} />
+                <Route path="/Cameras" element={<Cameras />} />
+                <Route path="/Wildfire" element={<Wildfire />} />
+                <Route path="/Health" element={<Health />} />
+                <Route path="/News" element={<News />} />
+                <Route path="/Astronomy" element={<Astronomy />} />
                 <Route path="/Contacts" element={<Contacts />} />
                 <Route path="/Settings" element={<Settings />} />
                 <Route path="/Privacy" element={<Privacy />} />
@@ -88,9 +106,9 @@ function App() {
             </Routes>
             <Toaster />
           </Router>
-          </UnitsProvider>
         </LocationProvider>
       </QueryClientProvider>
+      </UnitsProvider>
     </AuthProvider>
   );
 }

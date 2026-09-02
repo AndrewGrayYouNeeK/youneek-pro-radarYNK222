@@ -5,6 +5,7 @@ const LINKS = [
   { to: "/Hurricanes", label: "Hurricane Center", detail: "Live NHC tracks", icon: RadioTower },
   { to: "/Fires", label: "Fire Center", detail: "VIIRS + EONET", icon: Flame },
   { to: "/Briefing", label: "Weather briefing", detail: "Outlooks & local alerts", icon: Newspaper },
+  { to: "/More", label: "More toolkit", detail: "AQI, pollen, cameras, news", icon: Orbit },
   { to: "/Globe", label: "3D radar globe", detail: "Live + future radar", icon: Orbit },
 ];
 

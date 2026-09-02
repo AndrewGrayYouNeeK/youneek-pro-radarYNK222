@@ -5,28 +5,33 @@ import { ChevronRight } from "lucide-react";
 const SLIDES = [
   {
     icon: "🌩️",
-    title: "Live + future radar",
-    body: "NEXRAD, global RainViewer, future nowcast, lightning, tropical cyclones, wildfires, and satellite. The same premium map stack — unlocked.",
+    title: "Live NEXRAD Radar",
+    body: "See live NEXRAD, global radar, velocity, future nowcast, lightning reports, tropical cyclones, and satellite. Everything ships with the app — no extra paywall.",
   },
   {
     icon: "🌍",
-    title: "3D radar globe",
-    body: "Spin a live Earth with weather radar painted on the sphere, plus future radar, satellite IR, lightning, hurricanes, and fires.",
+    title: "3D Radar Globe",
+    body: "Spin a live weather globe with radar, infrared satellite, lightning, hurricanes, and wildfires. The same premium globe view — unlocked for everyone.",
   },
   {
     icon: "☀️",
     title: "Full forecast desk",
-    body: "Current conditions, next-hour precip, 168-hour hourly, 16-day outlook, AQI, pollen, UV, snow depth, and yesterday-vs-today. WeatherKit if you have it; Open-Meteo always.",
+    body: "Current conditions, next-hour precipitation, hourly and 16-day outlooks, AQI, pollen, UV, storm risk, and alerts. Works with or without WeatherKit.",
   },
   {
     icon: "🚨",
-    title: "Severe weather + storm risk",
-    body: "NWS watches and warnings, SPC Day 1 outlook, lightning proximity, hurricane and fire centers. No alert paywall.",
+    title: "Severe Weather Alerts",
+    body: "Tornado, thunderstorm, flood, and winter alerts are pulled live from the National Weather Service and drawn directly on your map.",
+  },
+  {
+    icon: "📻",
+    title: "NOAA Weather Radio",
+    body: "Open Tools, then Layers, to stream your nearest NOAA Weather Radio station. Auto-tune can be turned off in Settings.",
   },
   {
     icon: "🏠",
-    title: "Radio + shelter texts",
-    body: "NOAA Weather Radio, Emergency and I'm Safe drafts with GPS. Add contacts, then stay in control of what you send.",
+    title: "Shelter Notifications",
+    body: "Add contacts, then send an Emergency text or an I'm Safe text with your GPS location. Drafts open in Messages so you stay in control.",
   },
 ];
 

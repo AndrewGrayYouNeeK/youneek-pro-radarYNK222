@@ -5,20 +5,14 @@ import { Radio, ShieldAlert, Tv, MapPin, Siren, CloudLightning } from 'lucide-re
 const FEATURES = [
   {
     icon: Tv,
-    title: 'NEXRAD + Future Radar',
-    desc: 'Live CONUS radar, global mosaic, future nowcast, satellite, lightning, hurricanes, and wildfires.',
-    accent: '#00ff9c',
-  },
-  {
-    icon: CloudLightning,
-    title: '3D Radar Globe',
-    desc: 'Spin the planet with live and future radar painted on a real globe — plus storms and fire detections.',
+    title: 'NEXRAD + 3D Globe',
+    desc: 'Time-lapse loops, velocity, global radar, and a live 3D weather globe — all unlocked.',
     accent: '#00ff9c',
   },
   {
     icon: ShieldAlert,
     title: 'Severe Tracking',
-    desc: 'NWS alerts, SPC Day 1 risk, lightning proximity, hurricane center, and fire center. No premium gate.',
+    desc: 'NWS alerts, SPC outlooks, and storm cell intelligence pushed instantly.',
     accent: '#ff00d4',
   },
   {
@@ -35,9 +29,15 @@ const FEATURES = [
   },
   {
     icon: MapPin,
-    title: 'Forecast Desk',
-    desc: '168-hour hourly, 16-day outlook, AQI, pollen, UV, snow, and yesterday vs today — all included.',
+    title: 'Hyperlocal Data',
+    desc: 'Wind, dew point, pressure, UV, AQI — calibrated to your exact GPS.',
     accent: '#ffea00',
+  },
+  {
+    icon: CloudLightning,
+    title: 'Storm Cells',
+    desc: 'DBZ-coded cells, lightning strikes, and movement vectors visualized.',
+    accent: '#00ff9c',
   },
 ];
 
