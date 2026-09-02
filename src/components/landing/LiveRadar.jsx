@@ -9,7 +9,7 @@ import { useLocation } from './LocationContext';
 const NEXRAD_BASE = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913';
 // Archived 5-minute frames: ridge::USCOMP-N0Q-YYYYMMDDHHMM (UTC, rounded to 5 min)
 const NEXRAD_ARCHIVE = 'https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/ridge::USCOMP-N0Q-';
-const DARK_BASE = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+const DARK_BASE = 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 
 // Build last N timestamps (UTC), every 5 min, ending ~10 min ago to ensure availability
 const buildFrameTimestamps = (count = 10) => {

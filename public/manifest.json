@@ -1,0 +1,22 @@
+{
+  "name": "YouNeeK Pro Radar",
+  "short_name": "ProRadar",
+  "description": "YouNeeK Pro Radar — MAKING IT RAIN. Live NEXRAD, WeatherKit forecasts, NWS alerts, NOAA radio, and shelter notifications.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#020617",
+  "theme_color": "#020617",
+  "lang": "en-US",
+  "categories": ["weather", "utilities"],
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "prefer_related_applications": false
+}

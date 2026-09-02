@@ -5,8 +5,8 @@ import { Radio, ShieldAlert, Tv, MapPin, Siren, CloudLightning } from 'lucide-re
 const FEATURES = [
   {
     icon: Tv,
-    title: 'NEXRAD Live',
-    desc: 'Time-lapse loops, multiple radar layers, hurricane overlays — all real-time.',
+    title: 'NEXRAD + 3D Globe',
+    desc: 'Time-lapse loops, velocity, global radar, and a live 3D weather globe — all unlocked.',
     accent: '#00ff9c',
   },
   {

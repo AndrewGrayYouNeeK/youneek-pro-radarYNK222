@@ -8,6 +8,10 @@ const NAV = [
   { label: 'Alerts', href: '/app#alerts' },
   { label: 'Stations', href: '/app#stations' },
   { label: 'SOS', href: '/app#sos' },
+  { label: 'Radar', href: '/Radar' },
+  { label: 'Forecast', href: '/Forecast' },
+  { label: 'Globe', href: '/Globe' },
+  { label: 'SOS', href: '/Contacts' },
   { label: 'About', href: '#about' },
 ];
 
@@ -50,6 +54,27 @@ export default function TopBar() {
               <span className="absolute inset-x-3 bottom-1 h-px bg-[#00ff9c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
             </a>
           ))}
+          {NAV.map((item) =>
+            item.href.startsWith("#") ? (
+              <a
+                key={item.label}
+                href={item.href}
+                className="relative px-4 py-2 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] transition group"
+              >
+                <span className="relative z-10">{item.label}</span>
+                <span className="absolute inset-x-3 bottom-1 h-px bg-[#00ff9c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+              </a>
+            ) : (
+              <Link
+                key={item.label}
+                to={item.href}
+                className="relative px-4 py-2 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] transition group"
+              >
+                <span className="relative z-10">{item.label}</span>
+                <span className="absolute inset-x-3 bottom-1 h-px bg-[#00ff9c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
+              </Link>
+            )
+          )}
           <Link
             to="/app"
             className="ml-4 relative px-5 py-2 text-xs uppercase tracking-[0.25em] font-bold text-black bg-[#00ff9c] hover:bg-white transition-colors"
@@ -90,6 +115,27 @@ export default function TopBar() {
                   {item.label}
                 </a>
               ))}
+              {NAV.map((item) =>
+                item.href.startsWith("#") ? (
+                  <a
+                    key={item.label}
+                    href={item.href}
+                    onClick={() => setOpen(false)}
+                    className="px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] border border-white/5 hover:border-[#00ff9c]/40 transition"
+                  >
+                    {item.label}
+                  </a>
+                ) : (
+                  <Link
+                    key={item.label}
+                    to={item.href}
+                    onClick={() => setOpen(false)}
+                    className="px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] border border-white/5 hover:border-[#00ff9c]/40 transition"
+                  >
+                    {item.label}
+                  </Link>
+                )
+              )}
               <Link
                 to="/app"
                 onClick={() => setOpen(false)}

@@ -171,3 +171,21 @@
 .project-card .drip {
   display: none;
 }
+
+@layer utilities {
+  .safe-screen {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .app-shell {
+    color-scheme: dark;
+    overscroll-behavior: none;
+  }
+
+  .app-shell button,
+  .app-shell .select-none-ui {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+}
