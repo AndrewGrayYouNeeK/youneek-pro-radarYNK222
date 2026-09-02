@@ -59,7 +59,7 @@ export default function CurrentConditions() {
               <span>
                 {location?.label || "Waiting for GPS…"}
                 <span className="ml-3 font-mono text-[10px] uppercase tracking-[0.25em] text-[#00ff9c]">
-                  {sourceLabel}
+                  · {sourceLabel}
                 </span>
               </span>
             </div>
@@ -79,7 +79,7 @@ export default function CurrentConditions() {
           </div>
         )}
 
-        {(error || locationError) && !waiting && (
+        {(locationError || (error && !current)) && !waiting && (
           <div className="mb-6 border border-[#ff00d4]/40 bg-[#ff00d4]/5 p-4 text-sm text-[#ff00d4]">
             {locationError || error.message || "Failed to load weather"}
             <button type="button" onClick={locationError ? retry : () => refetch()} className="ml-3 text-[#00ff9c]">

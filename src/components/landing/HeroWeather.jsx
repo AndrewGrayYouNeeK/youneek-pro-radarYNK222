@@ -13,16 +13,19 @@ export default function HeroWeather() {
     source,
     isLoading,
     isFetching,
+    error,
     locationError,
     locationLoading,
     label,
     coords,
     retry,
+    refetch,
   } = useUnifiedWeather();
 
   const waiting = locationLoading || (Boolean(coords) && isLoading && !current);
   const code = describeWeatherCode(current?.weather_code);
   const Icon = code.icon;
+  const weatherError = locationError || (!current && error?.message) || "";
 
   return (
     <div className="relative z-[70] mb-8 max-w-md border border-[#00ff9c]/30 bg-black/80 backdrop-blur-md">
@@ -43,20 +46,20 @@ export default function HeroWeather() {
         </div>
       )}
 
-      {!waiting && locationError && (
+      {!waiting && weatherError && (
         <div className="space-y-3 px-4 py-5">
-          <p className="text-sm text-[#ffea00]">{locationError}</p>
+          <p className="text-sm text-[#ffea00]">{weatherError}</p>
           <button
             type="button"
-            onClick={retry}
+            onClick={() => (locationError ? retry() : refetch())}
             className="text-[10px] uppercase tracking-[0.25em] text-[#00ff9c] hover:text-white"
           >
-            Use my GPS
+            {locationError ? "Use my GPS" : "Retry weather"}
           </button>
         </div>
       )}
 
-      {!waiting && !locationError && current && (
+      {!waiting && !weatherError && current && (
         <div className="px-4 py-4">
           <div className="flex items-start justify-between gap-3">
             <div>

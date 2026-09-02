@@ -25,6 +25,7 @@ export default function useUnifiedWeather() {
     enabled: Boolean(coords),
     staleTime: 180000,
     refetchInterval: 600000,
+    retry: 2,
     queryFn: () => fetchUnifiedWeather(lat, lon),
   });
 
