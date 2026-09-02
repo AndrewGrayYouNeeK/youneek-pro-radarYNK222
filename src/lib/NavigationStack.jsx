@@ -19,6 +19,8 @@ const MORE_PREFIXES = [
   "/Pollen",
   "/Lightning",
   "/Hurricanes",
+  "/Fires",
+  "/Briefing",
   "/Cameras",
   "/Wildfire",
   "/Health",

@@ -1,74 +1,47 @@
-import { useCallback, useEffect, useState } from "react";
-import {
-  FALLBACK_LOCATION,
-  loadActiveLocation,
-  saveActiveLocation,
-} from "@/lib/locationStore";
+import { useCallback } from "react";
+import { useLocation as useAppLocation } from "@/components/landing/LocationContext";
 
 export default function useWeatherLocation() {
-  const [coords, setCoords] = useState(() => loadActiveLocation());
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(!coords);
-
-  const applyLocation = useCallback((next) => {
-    const location = {
-      latitude: next.latitude,
-      longitude: next.longitude,
-      label: next.label || "Selected location",
-      source: next.source || "manual",
-    };
-    setCoords(location);
-    saveActiveLocation(location);
-    setError("");
-    setLoading(false);
-  }, []);
-
-  const requestLocation = useCallback(() => {
-    setLoading(true);
-    setError("");
-
-    if (!navigator.geolocation) {
-      applyLocation({ ...FALLBACK_LOCATION, source: "fallback" });
-      setError("Location services are not available. Showing a US overview — search any city.");
-      return;
-    }
-
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        applyLocation({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          label: "My location",
-          source: "gps",
-        });
-      },
-      () => {
-        const previous = loadActiveLocation();
-        if (previous) {
-          applyLocation(previous);
-          setError("Using your last saved place. Allow location or search to change it.");
-          return;
+  const { location, locating, gpsStatus, detectGPS, setLocation: setAppLocation } = useAppLocation();
+  const coords =
+    location && Number.isFinite(Number(location.lat)) && Number.isFinite(Number(location.lon))
+      ? {
+          latitude: Number(location.lat),
+          longitude: Number(location.lon),
+          label: location.label || "",
+          source: location.source || "",
         }
-        applyLocation({ ...FALLBACK_LOCATION, source: "fallback" });
-        setError("Allow location or search a city to get a local forecast.");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 300000 }
-    );
-  }, [applyLocation]);
+      : null;
 
-  useEffect(() => {
-    if (coords?.source === "search" || coords?.source === "saved") {
-      setLoading(false);
-      return;
-    }
-    requestLocation();
-  }, [coords?.source, requestLocation]);
+  let error = "";
+  if (!locating && !coords) {
+    if (gpsStatus === "denied") error = "Allow location or search for a city to load the forecast.";
+    else if (gpsStatus === "unavailable") error = "Location services are not available on this device.";
+    else error = "Set a location to load weather for your area.";
+  }
+
+  const setLocation = useCallback(
+    (next) => {
+      if (!next || !setAppLocation) return;
+      setAppLocation({
+        label: next.label || "Selected location",
+        city: next.city || "",
+        state: next.state || "",
+        lat: Number(next.latitude ?? next.lat),
+        lon: Number(next.longitude ?? next.lon),
+        source: next.source || "search",
+      });
+    },
+    [setAppLocation]
+  );
 
   return {
     coords,
     error,
-    loading,
-    retry: requestLocation,
-    setLocation: applyLocation,
+    loading: locating && !coords,
+    retry: detectGPS,
+    setLocation,
+    label: location?.label || "",
+    gpsStatus,
   };
 }

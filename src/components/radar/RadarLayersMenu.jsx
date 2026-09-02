@@ -22,12 +22,18 @@ export default function RadarLayersMenu({
   showLightning,
   showHurricanes,
   showSatellite,
+  showGlobalRadar,
+  showFutureRadar,
+  showFires,
   alertToggles,
   onShowNexradChange,
   onShowRadioChange,
   onShowLightningChange,
   onShowHurricanesChange,
   onShowSatelliteChange,
+  onShowGlobalRadarChange,
+  onShowFutureRadarChange,
+  onShowFiresChange,
   onAlertToggleChange,
   productId,
   onProductChange,
@@ -94,6 +100,18 @@ export default function RadarLayersMenu({
                 </select>
               </label>
               <ToggleRow
+                label="🌍 Global radar"
+                checked={showGlobalRadar}
+                onCheckedChange={onShowGlobalRadarChange}
+                ariaLabel="Toggle global RainViewer radar"
+              />
+              <ToggleRow
+                label="⏭️ Future radar"
+                checked={showFutureRadar}
+                onCheckedChange={onShowFutureRadarChange}
+                ariaLabel="Toggle future radar nowcast"
+              />
+              <ToggleRow
                 label="🛰️ Satellite"
                 checked={showSatellite}
                 onCheckedChange={onShowSatelliteChange}
@@ -111,7 +129,13 @@ export default function RadarLayersMenu({
                 onCheckedChange={onShowHurricanesChange}
                 ariaLabel="Toggle tropical cyclone markers"
               />
-              <div className="text-[11px] text-slate-500">Loop control sits on the map. NOAA radio is below.</div>
+              <ToggleRow
+                label="🔥 Wildfires"
+                checked={showFires}
+                onCheckedChange={onShowFiresChange}
+                ariaLabel="Toggle wildfire detections"
+              />
+              <div className="text-[11px] text-slate-500">Loop control sits on the map. Future radar is included — no paywall.</div>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/5 p-3">
@@ -150,6 +174,24 @@ export default function RadarLayersMenu({
                     checked={alertToggles.winter}
                     onCheckedChange={(value) => onAlertToggleChange("winter", value)}
                     ariaLabel="Toggle winter advisories layer"
+                  />
+                  <ToggleRow
+                    label="🥵 Heat"
+                    checked={alertToggles.heat}
+                    onCheckedChange={(value) => onAlertToggleChange("heat", value)}
+                    ariaLabel="Toggle heat alerts layer"
+                  />
+                  <ToggleRow
+                    label="💨 High wind"
+                    checked={alertToggles.wind}
+                    onCheckedChange={(value) => onAlertToggleChange("wind", value)}
+                    ariaLabel="Toggle wind alerts layer"
+                  />
+                  <ToggleRow
+                    label="🚩 Red flag"
+                    checked={alertToggles.fire}
+                    onCheckedChange={(value) => onAlertToggleChange("fire", value)}
+                    ariaLabel="Toggle fire weather alerts layer"
                   />
                 </div>
               )}

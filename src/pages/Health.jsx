@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import PageScaffold, { StatGrid } from "@/components/more/PageScaffold";
-import LocationSearch from "@/components/location/LocationSearch";
+import LocationPicker from "@/components/forecast/LocationPicker";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { fetchEnvironment } from "@/lib/api/environment";
 import { fetchOpenMeteo } from "@/lib/api/openMeteo";
@@ -8,7 +8,7 @@ import { adaptOpenMeteoCurrent } from "@/lib/weather/openmeteo-adapters";
 import { coldFluRisk, outdoorScores, scoreLabel, uvCategory } from "@/lib/weather/lifestyle";
 
 export default function Health() {
-  const { coords, setLocation } = useWeatherLocation();
+  const { coords } = useWeatherLocation();
   const { data } = useQuery({
     queryKey: ["health", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
@@ -28,7 +28,7 @@ export default function Health() {
 
   return (
     <PageScaffold title="Health & sports">
-      <LocationSearch current={coords} onSelect={setLocation} />
+      <LocationPicker />
       <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
         <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">UV index</div>
         <div className="mt-2 text-4xl font-extralight text-white">

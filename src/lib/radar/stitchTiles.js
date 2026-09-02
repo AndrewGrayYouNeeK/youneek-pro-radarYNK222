@@ -14,7 +14,7 @@ async function loadImageWithProxy(url) {
   try {
     return await loadImage(url);
   } catch {
-    const proxy = `/api/tile?url=${encodeURIComponent(url)}`;
+    const proxy = `/api/tile?u=${encodeURIComponent(url)}`;
     return loadImage(proxy);
   }
 }

@@ -24,6 +24,8 @@ const AirQuality = lazy(() => import("./pages/AirQuality"));
 const Pollen = lazy(() => import("./pages/Pollen"));
 const Lightning = lazy(() => import("./pages/Lightning"));
 const Hurricanes = lazy(() => import("./pages/Hurricanes"));
+const Fires = lazy(() => import("./pages/Fires"));
+const Briefing = lazy(() => import("./pages/Briefing"));
 const Cameras = lazy(() => import("./pages/Cameras"));
 const Wildfire = lazy(() => import("./pages/Wildfire"));
 const Health = lazy(() => import("./pages/Health"));
@@ -89,6 +91,8 @@ function App() {
                 <Route path="/Pollen" element={<Pollen />} />
                 <Route path="/Lightning" element={<Lightning />} />
                 <Route path="/Hurricanes" element={<Hurricanes />} />
+                <Route path="/Fires" element={<Fires />} />
+                <Route path="/Briefing" element={<Briefing />} />
                 <Route path="/Cameras" element={<Cameras />} />
                 <Route path="/Wildfire" element={<Wildfire />} />
                 <Route path="/Health" element={<Health />} />

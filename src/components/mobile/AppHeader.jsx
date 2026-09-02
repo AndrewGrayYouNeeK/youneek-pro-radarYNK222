@@ -11,6 +11,8 @@ const TITLES = {
   "/Pollen": "Pollen & allergy",
   "/Lightning": "Lightning",
   "/Hurricanes": "Hurricane tracker",
+  "/Fires": "Fire Center",
+  "/Briefing": "Weather briefing",
   "/Cameras": "Weather cameras",
   "/Wildfire": "Wildfires",
   "/Health": "Health & sports",

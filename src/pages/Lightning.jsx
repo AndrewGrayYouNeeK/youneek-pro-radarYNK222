@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import PageScaffold from "@/components/more/PageScaffold";
-import LocationSearch from "@/components/location/LocationSearch";
+import LocationPicker from "@/components/forecast/LocationPicker";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { haversineMiles } from "@/lib/globe/math";
 import { formatDistance } from "@/lib/units";
 import { useUnits } from "@/lib/UnitsContext";
 
 export default function Lightning() {
-  const { coords, setLocation } = useWeatherLocation();
+  const { coords } = useWeatherLocation();
   const { units } = useUnits();
   const { data } = useQuery({
     queryKey: ["lightning"],
@@ -31,7 +31,7 @@ export default function Lightning() {
 
   return (
     <PageScaffold title="Lightning">
-      <LocationSearch current={coords} onSelect={setLocation} />
+      <LocationPicker />
       <div className="rounded-3xl border border-amber-400/20 bg-amber-950/20 p-5">
         <div className="text-[11px] uppercase tracking-[0.16em] text-amber-200/70">Closest report</div>
         <div className="mt-2 text-3xl font-light text-white">

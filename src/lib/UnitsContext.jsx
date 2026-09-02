@@ -1,24 +1,31 @@
 import { createContext, useContext, useMemo, useState } from "react";
-import { loadUnits, saveUnits } from "@/lib/units";
+import { DEFAULT_UNITS } from "@/lib/weather/units";
 
+const STORAGE_KEY = "ynk_units_v1";
 const UnitsContext = createContext(null);
 
-export function UnitsProvider({ children }) {
-  const [units, setUnitsState] = useState(() => loadUnits());
+function loadUnits() {
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+    return { ...DEFAULT_UNITS, ...(parsed || {}) };
+  } catch {
+    return { ...DEFAULT_UNITS };
+  }
+}
 
-  const value = useMemo(
-    () => ({
-      units,
-      setUnits: (patch) => {
-        setUnitsState((current) => {
-          const next = { ...current, ...patch };
-          saveUnits(next);
-          return next;
-        });
-      },
-    }),
-    [units]
-  );
+export function UnitsProvider({ children }) {
+  const [units, setUnitsState] = useState(loadUnits);
+
+  const value = useMemo(() => {
+    const setUnits = (patch) => {
+      setUnitsState((current) => {
+        const next = { ...current, ...patch };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+        return next;
+      });
+    };
+    return { units, setUnits };
+  }, [units]);
 
   return <UnitsContext.Provider value={value}>{children}</UnitsContext.Provider>;
 }
@@ -26,7 +33,7 @@ export function UnitsProvider({ children }) {
 export function useUnits() {
   const context = useContext(UnitsContext);
   if (!context) {
-    throw new Error("useUnits must be used within a UnitsProvider");
+    return { units: DEFAULT_UNITS, setUnits: () => {} };
   }
   return context;
 }

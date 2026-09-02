@@ -16,7 +16,7 @@ const SLIDES = [
   {
     icon: "☀️",
     title: "Full forecast desk",
-    body: "Current conditions, next-hour precipitation, hourly and 14-day outlooks, AQI, pollen, UV, sports scores, and alerts. Works with or without WeatherKit.",
+    body: "Current conditions, next-hour precipitation, hourly and 16-day outlooks, AQI, pollen, UV, storm risk, and alerts. Works with or without WeatherKit.",
   },
   {
     icon: "🚨",

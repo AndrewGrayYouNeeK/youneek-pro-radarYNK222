@@ -2,17 +2,17 @@ import { camerasNear } from "@/lib/api/cameras";
 import { formatDistance } from "@/lib/units";
 import { useUnits } from "@/lib/UnitsContext";
 import PageScaffold from "@/components/more/PageScaffold";
-import LocationSearch from "@/components/location/LocationSearch";
+import LocationPicker from "@/components/forecast/LocationPicker";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 
 export default function Cameras() {
-  const { coords, setLocation } = useWeatherLocation();
+  const { coords } = useWeatherLocation();
   const { units } = useUnits();
   const cameras = camerasNear(coords, 10);
 
   return (
     <PageScaffold title="Weather cameras">
-      <LocationSearch current={coords} onSelect={setLocation} />
+      <LocationPicker />
       <p className="text-xs text-slate-400">
         Live NOAA GOES GeoColor sectors and the national NWS radar mosaic, sorted by distance from you.
       </p>

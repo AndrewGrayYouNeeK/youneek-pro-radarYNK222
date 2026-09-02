@@ -22,6 +22,8 @@ const ITEMS = [
   { to: "/Pollen", icon: Sparkles, title: "Pollen & allergy", desc: "Species breakdown and 3-day outlook" },
   { to: "/Lightning", icon: Zap, title: "Lightning map", desc: "Closest strikes and live storm reports" },
   { to: "/Hurricanes", icon: Activity, title: "Hurricane tracker", desc: "Active tropical cyclones from NHC" },
+  { to: "/Fires", icon: Flame, title: "Fire Center", desc: "VIIRS + EONET wildfire detections" },
+  { to: "/Briefing", icon: Newspaper, title: "Weather briefing", desc: "Outlooks and local alerts" },
   { to: "/Cameras", icon: Camera, title: "Weather cameras", desc: "GOES GeoColor sectors and NWS mosaics" },
   { to: "/Wildfire", icon: Flame, title: "Wildfire updates", desc: "Open fires from NASA EONET" },
   { to: "/Health", icon: HeartPulse, title: "Health & sports", desc: "UV, cold & flu risk, outdoor scores" },

@@ -3,10 +3,11 @@
 Cinematic landing site **and** live radar product in one app. Slogan: **MAKING IT RAIN**.
 
 - **`/`** — storm landing (GPS location, neon signs, NWS conditions, SOS)
-- **`/Radar`** (also `/app`) — NEXRAD, velocity, global radar, loops, lightning, tropical cyclones
-- **`/Forecast`** — current / hourly / 10–14 day, AQI, pollen, UV, sports, alerts (WeatherKit when configured, Open-Meteo otherwise)
-- **`/Globe`** — 3D globe with live weather radar, satellite, lightning, hurricanes, and wildfires
-- **`/More`** — air quality, pollen, lightning, hurricanes, cameras, wildfires, health, news, sun & moon, safety contacts
+- **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires
+- **`/Forecast`** — current / hourly (168h) / 16-day, AQI, pollen, UV, storm risk, winter, history
+- **`/Globe`** — 3D globe with live and future weather radar, lightning, hurricanes, and wildfires
+- **`/More`** — air quality, pollen, lightning, cameras, wildfires, health, news, sun & moon, safety contacts
+- **`/Hurricanes`**, **`/Fires`**, **`/Briefing`** — WeatherBug-class centers, all included
 - **`/Contacts`** and **`/Settings`** — emergency SMS drafts, units, and preferences
 
 ## Local Development

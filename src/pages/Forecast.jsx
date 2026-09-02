@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import AppHeader from "@/components/mobile/AppHeader";
@@ -9,84 +10,39 @@ import EnvironmentCards from "@/components/forecast/EnvironmentCards";
 import MinutePrecipitation from "@/components/forecast/MinutePrecipitation";
 import WeatherAlertsCard from "@/components/forecast/WeatherAlertsCard";
 import WeatherKitSetupNotice from "@/components/forecast/WeatherKitSetupNotice";
-import LifestyleStrip from "@/components/forecast/LifestyleStrip";
-import MoreShortcuts from "@/components/forecast/MoreShortcuts";
-import NotifyBanners from "@/components/forecast/NotifyBanners";
-import LocationSearch from "@/components/location/LocationSearch";
+import LocationPicker from "@/components/forecast/LocationPicker";
+import StormRiskCard from "@/components/forecast/StormRiskCard";
+import WinterCard from "@/components/forecast/WinterCard";
+import HistoricalCard from "@/components/forecast/HistoricalCard";
+import PrecipOutlookCard from "@/components/forecast/PrecipOutlookCard";
+import LightningProximityCard from "@/components/forecast/LightningProximityCard";
+import HubLinks from "@/components/forecast/HubLinks";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
-import { fetchWeatherKit } from "@/lib/api/weatherkit";
-import { fetchEnvironment } from "@/lib/api/environment";
-import { fetchNwsPointAlerts, fetchOpenMeteo } from "@/lib/api/openMeteo";
-import {
-  adaptWeatherKitAlerts,
-  adaptWeatherKitCurrent,
-  adaptWeatherKitDaily,
-  adaptWeatherKitHourly,
-  adaptWeatherKitNextHour,
-} from "@/lib/weather/weatherkit-adapters";
-import {
-  adaptOpenMeteoCurrent,
-  adaptOpenMeteoDaily,
-  adaptOpenMeteoHourly,
-  adaptOpenMeteoNextHour,
-} from "@/lib/weather/openmeteo-adapters";
+import { fetchUnifiedWeather, isMissingWeatherKit } from "@/lib/api/unifiedWeather";
+import { fetchPointAlerts } from "@/lib/api/outlook";
 
-function uniqueAlerts(alerts) {
-  const seen = new Set();
-  return alerts.filter((alert) => {
-    const key = alert.id || `${alert.name}-${alert.issued}`;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
+function adaptNwsAlerts(payload) {
+  return (payload?.features || []).map((feature) => {
+    const properties = feature.properties || {};
+    return {
+      id: feature.id || properties.id,
+      name: properties.event || properties.headline || "Weather alert",
+      description: properties.headline || properties.description || "",
+      source: properties.senderName || "NWS",
+      severity: properties.severity,
+      urgency: properties.urgency,
+      certainty: properties.certainty,
+      issued: properties.sent || properties.effective,
+      expires: properties.expires || properties.ends,
+      url: properties.id,
+    };
   });
-}
-
-async function loadForecast(latitude, longitude) {
-  const extrasPromise = Promise.allSettled([
-    fetchOpenMeteo(latitude, longitude),
-    fetchNwsPointAlerts(latitude, longitude),
-    fetchEnvironment({ latitude, longitude }),
-  ]);
-
-  try {
-    const weatherkit = await fetchWeatherKit(latitude, longitude);
-    const extras = await extrasPromise;
-    return {
-      source: "weatherkit",
-      current: adaptWeatherKitCurrent(weatherkit),
-      hourly: adaptWeatherKitHourly(weatherkit),
-      daily: adaptWeatherKitDaily(weatherkit),
-      minutes: adaptWeatherKitNextHour(weatherkit),
-      alerts: uniqueAlerts([
-        ...adaptWeatherKitAlerts(weatherkit),
-        ...(extras[1].status === "fulfilled" ? extras[1].value : []),
-      ]),
-      openMeteo: extras[0].status === "fulfilled" ? extras[0].value : null,
-      environment: extras[2].status === "fulfilled" ? extras[2].value : null,
-    };
-  } catch {
-    const extras = await extrasPromise;
-    if (extras[0].status !== "fulfilled") {
-      throw extras[0].reason || new Error("Forecast unavailable");
-    }
-    const openMeteo = extras[0].value;
-    return {
-      source: "open-meteo",
-      current: adaptOpenMeteoCurrent(openMeteo),
-      hourly: adaptOpenMeteoHourly(openMeteo),
-      daily: adaptOpenMeteoDaily(openMeteo),
-      minutes: adaptOpenMeteoNextHour(openMeteo),
-      alerts: uniqueAlerts(extras[1].status === "fulfilled" ? extras[1].value : []),
-      openMeteo,
-      environment: extras[2].status === "fulfilled" ? extras[2].value : null,
-    };
-  }
 }
 
 export default function Forecast() {
   useTabPageMemory("Forecast");
-  const { coords, error: locationError, loading: locationLoading, retry, setLocation } = useWeatherLocation();
+  const { coords, error: locationError, loading: locationLoading, retry } = useWeatherLocation();
 
   const {
     data,
@@ -95,15 +51,33 @@ export default function Forecast() {
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["forecast-bundle", coords?.latitude, coords?.longitude],
+    queryKey: ["unified-weather", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
-    staleTime: 300000,
+    staleTime: 180000,
     refetchInterval: 600000,
-    queryFn: () => loadForecast(coords.latitude, coords.longitude),
+    queryFn: () => fetchUnifiedWeather(coords.latitude, coords.longitude),
   });
 
+  const alertsQuery = useQuery({
+    queryKey: ["point-alerts", coords?.latitude, coords?.longitude],
+    enabled: Boolean(coords),
+    staleTime: 120000,
+    queryFn: () => fetchPointAlerts(coords.latitude, coords.longitude),
+  });
+
+  const alerts = useMemo(() => {
+    const nws = adaptNwsAlerts(alertsQuery.data);
+    const kit = data?.alerts || [];
+    const seen = new Set();
+    return [...nws, ...kit].filter((alert) => {
+      const key = alert.name + (alert.issued || "");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [alertsQuery.data, data?.alerts]);
+
   const showLoading = locationLoading || (Boolean(coords) && isLoading && !data);
-  const todayRain = data?.openMeteo?.daily?.precipitation_sum?.[0];
 
   return (
     <div className="flex h-[100dvh] flex-col bg-slate-950">
@@ -111,13 +85,12 @@ export default function Forecast() {
 
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 pb-28">
         <div className="mx-auto flex max-w-md flex-col gap-5">
-          <LocationSearch current={coords} onSelect={setLocation} />
-
+          <LocationPicker />
           <div className="flex items-center justify-between">
             <p className="text-xs text-slate-500">
               {data?.source === "weatherkit"
-                ? "Powered by Apple WeatherKit + Open-Meteo extras"
-                : "Live forecast via Open-Meteo · all Pro layers included"}
+                ? "Apple WeatherKit + Open-Meteo extras · all layers included"
+                : "Open-Meteo + NWS · WeatherBug-class features included"}
             </p>
             {isFetching && !showLoading && (
               <span className="inline-flex items-center gap-1 text-[11px] text-slate-500">
@@ -133,11 +106,11 @@ export default function Forecast() {
             </div>
           )}
 
-          {!showLoading && locationError && !data && (
+          {!showLoading && locationError && (
             <WeatherKitSetupNotice type="location" message={locationError} onRetry={retry} />
           )}
 
-          {!showLoading && !data && error && (
+          {!showLoading && !locationError && error && (
             <WeatherKitSetupNotice
               type="error"
               message={error.message}
@@ -145,20 +118,29 @@ export default function Forecast() {
             />
           )}
 
-          {!showLoading && data && (
+          {!showLoading && !locationError && !error && data && (
             <>
-              {locationError && (
-                <p className="text-[11px] text-amber-200/80">{locationError}</p>
+              {isMissingWeatherKit(data.weatherkitError) && (
+                <p className="text-[11px] text-slate-500">
+                  WeatherKit credentials are optional. Full forecast, future radar, and 16-day outlook still load.
+                </p>
               )}
-              <NotifyBanners coords={coords} environment={data.environment} />
-              <WeatherAlertsCard alerts={data.alerts} />
-              <CurrentConditionsCard data={data.current} extras={{ todayRain }} />
+              <WeatherAlertsCard alerts={alerts} />
+              <CurrentConditionsCard data={data.current} />
+              <LightningProximityCard coords={coords} />
+              <PrecipOutlookCard extras={data.extras} />
               <MinutePrecipitation minutes={data.minutes} />
+              <StormRiskCard coords={coords} />
               <EnvironmentCards coords={coords} />
-              <LifestyleStrip current={data.current?.current} environment={data.environment} />
+              <WinterCard extras={data.extras} />
+              <HistoricalCard
+                extras={data.extras}
+                todayHigh={data.daily?.[0]?.high}
+                todayLow={data.daily?.[0]?.low}
+              />
               <HourlyStrip hours={data.hourly} />
               <DailyList days={data.daily} />
-              <MoreShortcuts />
+              <HubLinks />
             </>
           )}
         </div>

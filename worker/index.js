@@ -4,6 +4,8 @@ import { onRequestGet as getWeather } from "../functions/api/weather.js";
 import { onRequestGet as getLightning } from "../functions/api/lightning.js";
 import { onRequestGet as getNews } from "../functions/api/news.js";
 import { onRequestGet as getWildfires } from "../functions/api/wildfires.js";
+import { onRequestGet as getFires } from "../functions/api/fires.js";
+import { onRequestGet as getOutlook } from "../functions/api/outlook.js";
 import { onRequestGet as getTile } from "../functions/api/tile.js";
 import { handleNwsRequest } from "../server/nwsApi.js";
 
@@ -33,6 +35,14 @@ export default {
 
     if (request.method === "GET" && pathname === "/api/wildfires") {
       return getWildfires();
+    }
+
+    if (request.method === "GET" && pathname === "/api/fires") {
+      return getFires();
+    }
+
+    if (request.method === "GET" && pathname === "/api/outlook") {
+      return getOutlook({ request });
     }
 
     if (request.method === "GET" && pathname === "/api/tile") {

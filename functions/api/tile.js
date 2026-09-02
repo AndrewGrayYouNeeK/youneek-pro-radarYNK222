@@ -4,11 +4,16 @@ const ALLOWED_HOSTS = new Set([
   "cdn.star.nesdis.noaa.gov",
 ]);
 
-export async function onRequestGet({ request }) {
-  const target = new URL(request.url).searchParams.get("url");
-  if (!target) {
-    return Response.json({ error: "url is required" }, { status: 400 });
-  }
+const ALLOWED_PATTERNS = [
+  /^https:\/\/tilecache\.rainviewer\.com\//,
+  /^https:\/\/cdn[0-9]*\.rainviewer\.com\//,
+  /^https:\/\/cdn\.star\.nesdis\.noaa\.gov\//,
+];
+
+export async function onRequestGet(context) {
+  const request = context.request || context;
+  const search = new URL(request.url).searchParams;
+  const target = search.get("u") || search.get("url") || "";
 
   let parsed;
   try {
@@ -17,7 +22,11 @@ export async function onRequestGet({ request }) {
     return Response.json({ error: "invalid url" }, { status: 400 });
   }
 
-  if (parsed.protocol !== "https:" || !ALLOWED_HOSTS.has(parsed.hostname)) {
+  const allowed =
+    (parsed.protocol === "https:" && ALLOWED_HOSTS.has(parsed.hostname)) ||
+    ALLOWED_PATTERNS.some((rule) => rule.test(target));
+
+  if (!allowed) {
     return Response.json({ error: "host not allowed" }, { status: 400 });
   }
 
@@ -28,7 +37,7 @@ export async function onRequestGet({ request }) {
   return new Response(upstream.body, {
     status: upstream.status,
     headers: {
-      "Content-Type": upstream.headers.get("content-type") || "image/png",
+      "Content-Type": upstream.headers.get("content-type") || upstream.headers.get("Content-Type") || "image/png",
       "Cache-Control": "public, max-age=120",
       "Access-Control-Allow-Origin": "*",
     },

@@ -1,13 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import PageScaffold, { StatGrid } from "@/components/more/PageScaffold";
-import LocationSearch from "@/components/location/LocationSearch";
+import LocationPicker from "@/components/forecast/LocationPicker";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { fetchOpenMeteo } from "@/lib/api/openMeteo";
 import { adaptOpenMeteoCurrent } from "@/lib/weather/openmeteo-adapters";
 import { getMoonPhase } from "@/lib/weather/moon";
 
 export default function Astronomy() {
-  const { coords, setLocation } = useWeatherLocation();
+  const { coords } = useWeatherLocation();
   const moon = getMoonPhase();
   const { data } = useQuery({
     queryKey: ["astronomy", coords?.latitude, coords?.longitude],
@@ -21,7 +21,7 @@ export default function Astronomy() {
 
   return (
     <PageScaffold title="Sun & moon">
-      <LocationSearch current={coords} onSelect={setLocation} />
+      <LocationPicker />
       <div className="rounded-3xl border border-white/10 bg-white/5 p-5 text-center">
         <div className="text-5xl">{moon.emoji}</div>
         <div className="mt-2 text-xl font-semibold text-white">{moon.name}</div>

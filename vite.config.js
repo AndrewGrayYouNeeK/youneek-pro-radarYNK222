@@ -4,60 +4,12 @@ import { defineConfig, loadEnv } from "vite";
 import { nwsApiMiddleware } from "./server/nwsApi.js";
 import { onRequestGet as getWeather } from "./functions/api/weather.js";
 import { onRequestGet as getLightning } from "./functions/api/lightning.js";
-import { onRequestGet as getNews } from "./functions/api/news.js";
+import { onRequestGet as getFires } from "./functions/api/fires.js";
 import { onRequestGet as getWildfires } from "./functions/api/wildfires.js";
+import { onRequestGet as getNews } from "./functions/api/news.js";
+import { onRequestGet as getOutlook } from "./functions/api/outlook.js";
 import { onRequestGet as getTile } from "./functions/api/tile.js";
-
-const NWS_HEADERS = { Accept: "application/geo+json", "User-Agent": "YouNeeKProRadar/1.0 (alerts)" };
-
-const ALERT_EVENTS = {
-  tornado: ["Tornado Warning"],
-  tornado_watch: ["Tornado Watch"],
-  thunderstorm: ["Severe Thunderstorm Warning"],
-  flood: ["Flood Warning", "Flash Flood Warning", "Flood Watch", "Flash Flood Watch"],
-  winter: [
-    "Winter Storm Warning",
-    "Blizzard Warning",
-    "Ice Storm Warning",
-    "Winter Weather Advisory",
-    "Blizzard Watch",
-    "Winter Storm Watch",
-  ],
-};
-
-async function fetchNwsAlerts(type) {
-  const events = ALERT_EVENTS[type];
-  if (!events) {
-    return { status: 400, body: { error: `Unknown alert type: ${type}` } };
-  }
-
-  const features = [];
-  const seen = new Set();
-
-  for (const event of events) {
-    const url = `https://api.weather.gov/alerts/active?status=actual&event=${encodeURIComponent(event)}`;
-    const response = await fetch(url, { headers: NWS_HEADERS });
-    if (!response.ok) continue;
-    const payload = await response.json();
-    for (const feature of payload?.features || []) {
-      const id = feature?.id || feature?.properties?.id;
-      const key = id || JSON.stringify(feature?.geometry?.coordinates?.[0]?.[0]);
-      if (seen.has(key)) continue;
-      seen.add(key);
-      features.push(feature);
-    }
-  }
-
-  return {
-    status: 200,
-    body: {
-      type: "FeatureCollection",
-      features,
-      title: "Active weather alerts",
-      updated: new Date().toISOString(),
-    },
-  };
-}
+import { onRequestGet as getAlertsWorker } from "./functions/api/alerts.js";
 
 function attachJsonRoute(server, route, handler) {
   server.middlewares.use(route, async (req, res) => {
@@ -101,9 +53,13 @@ function attachRadarApi(server, mode) {
   };
 
   attachJsonRoute(server, "/api/alerts", async (req) => {
-    const url = new URL(req.url || "", "http://localhost");
-    const type = url.searchParams.get("type") || "tornado";
-    return fetchNwsAlerts(type);
+    const request = new Request(`http://localhost${req.url}`, { method: req.method });
+    const response = await getAlertsWorker({ request });
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
   });
 
   attachJsonRoute(server, "/api/weather", async (req) => {
@@ -125,8 +81,8 @@ function attachRadarApi(server, mode) {
     return { status: response.status, body: await response.text(), contentType: "application/json", headers };
   });
 
-  attachJsonRoute(server, "/api/news", async () => {
-    const response = await getNews();
+  attachJsonRoute(server, "/api/fires", async () => {
+    const response = await getFires();
     const headers = {};
     response.headers.forEach((value, key) => {
       headers[key] = value;
@@ -143,17 +99,38 @@ function attachRadarApi(server, mode) {
     return { status: response.status, body: await response.text(), contentType: "application/json", headers };
   });
 
+  attachJsonRoute(server, "/api/news", async () => {
+    const response = await getNews();
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/outlook", async (req) => {
+    const request = new Request(`http://localhost${req.url}`, { method: req.method });
+    const response = await getOutlook({ request });
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
   server.middlewares.use("/api/tile", async (req, res) => {
     try {
       const request = new Request(`http://localhost${req.url}`, { method: req.method });
       const response = await getTile({ request });
       res.statusCode = response.status;
-      response.headers.forEach((value, key) => res.setHeader(key, value));
+      response.headers.forEach((value, key) => {
+        res.setHeader(key, value);
+      });
       const buffer = Buffer.from(await response.arrayBuffer());
       res.end(buffer);
     } catch {
       res.statusCode = 502;
-      res.end();
+      res.end("");
     }
   });
 }

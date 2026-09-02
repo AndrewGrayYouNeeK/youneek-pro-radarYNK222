@@ -31,6 +31,8 @@ export default function BottomTab({ onToolsClick, showTools }) {
                 "/Pollen",
                 "/Lightning",
                 "/Hurricanes",
+                "/Fires",
+                "/Briefing",
                 "/Cameras",
                 "/Wildfire",
                 "/Health",
