@@ -1,5 +1,6 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { invokeNwsData } from '@/api/nwsData';
+import { saveActiveLocation } from '@/lib/locationStore';
 
 const LocationCtx = createContext(null);
 
@@ -113,6 +114,14 @@ export function LocationProvider({ children }) {
 
   const persistAll = useCallback((loc, profile) => {
     persist({ location: loc, sos: profile });
+    if (loc?.lat != null && loc?.lon != null) {
+      saveActiveLocation({
+        latitude: loc.lat,
+        longitude: loc.lon,
+        label: loc.label || "",
+        source: loc.source || "",
+      });
+    }
   }, []);
 
   const updateLocation = useCallback((loc) => {

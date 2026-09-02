@@ -29,8 +29,8 @@ const FEATURES = [
   },
   {
     icon: MapPin,
-    title: 'Hyperlocal Data',
-    desc: 'Wind, dew point, pressure, UV, AQI — calibrated to your exact GPS.',
+    title: 'WeatherBug-class desk',
+    desc: 'Same live temp, hourly, and 16-day outlook on landing, Forecast, and radar — units follow Settings.',
     accent: '#ffea00',
   },
   {
@@ -43,7 +43,7 @@ const FEATURES = [
 
 export default function FeaturesSection() {
   return (
-    <section id="features" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden">
+    <section id="features" className="relative bg-black py-24 px-5 md:px-8 overflow-hidden scroll-mt-32">
       {/* Grid bg */}
       <div className="absolute inset-0 opacity-20 pointer-events-none"
         style={{

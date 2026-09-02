@@ -1,6 +1,10 @@
 import React from 'react';
 import { Wind, AlertTriangle, Activity, Loader2 } from 'lucide-react';
 import useLiveStormData from './useLiveStormData';
+import useUnifiedWeather from '@/hooks/useUnifiedWeather';
+import { degToCardinal } from '@/lib/weather/conditions';
+import { convertWindMph, formatNumber, windSuffix } from '@/lib/weather/units';
+import { useUnits } from '@/lib/UnitsContext';
 
 const Panel = ({ children, className = '' }) => (
   <div className={`relative z-[40] bg-black/70 backdrop-blur-md border border-[#00ff9c]/30 p-3 ${className}`}>
@@ -12,46 +16,27 @@ const Panel = ({ children, className = '' }) => (
   </div>
 );
 
-const cardinal = (deg) => {
-  if (deg == null || isNaN(deg)) return '—';
-  const dirs = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
-  return dirs[Math.round(deg / 22.5) % 16];
-};
-
-// Generic stat panel (still used for hardcoded labels like "DBZ_PEAK" fallback)
-export const StatPanel = ({ icon: Icon, label, value, unit, accent = '#00ff9c' }) => (
-  <Panel>
-    <div className="flex items-center gap-2 mb-1">
-      <Icon className="w-3 h-3" style={{ color: accent }} />
-      <span className="text-[9px] uppercase tracking-[0.25em] text-white/50">{label}</span>
-    </div>
-    <div className="flex items-baseline gap-1">
-      <span className="text-2xl font-bold text-white tabular-nums">{value}</span>
-      <span className="text-[10px] text-white/50">{unit}</span>
-    </div>
-  </Panel>
-);
-
-// LIVE wind from NWS station observations
+// LIVE wind from the same WeatherBug-class feed as Forecast
 export const WindPanel = () => {
-  const { obs, loading } = useLiveStormData();
-  const mph = obs?.windMps != null ? Math.round(obs.windMps * 2.23694) : null;
-  const dir = cardinal(obs?.windDir);
+  const { units } = useUnits();
+  const { current, isLoading, source } = useUnifiedWeather();
+  const windValue = convertWindMph(current?.wind_speed_10m, units.wind);
+  const dir = degToCardinal(current?.wind_direction_10m);
   return (
     <Panel>
       <div className="flex items-center gap-2 mb-1">
         <Wind className="w-3 h-3 text-[#00ff9c]" />
         <span className="text-[9px] uppercase tracking-[0.25em] text-white/50">WIND</span>
-        {loading && <Loader2 className="w-3 h-3 animate-spin text-white/30 ml-auto" />}
+        {isLoading && <Loader2 className="w-3 h-3 animate-spin text-white/30 ml-auto" />}
       </div>
       <div className="flex items-baseline gap-1">
         <span className="text-2xl font-bold text-white tabular-nums">
-          {mph != null ? mph : '—'}
+          {windValue != null ? formatNumber(windValue, units.wind === "mps" ? 1 : 0) : "—"}
         </span>
-        <span className="text-[10px] text-white/50">MPH {dir}</span>
+        <span className="text-[10px] text-white/50">{windSuffix(units.wind)} {dir}</span>
       </div>
       <div className="text-[9px] text-white/40 font-mono mt-1">
-        {obs?.station ? `KSTN ${obs.station}` : 'No station data'}
+        {source === "weatherkit" ? "WeatherKit" : source === "open-meteo" ? "Open-Meteo" : "No wind data"}
       </div>
     </Panel>
   );
@@ -127,7 +112,7 @@ export const AlertPanel = () => {
       <div className="text-[10px] text-white/50 mt-1">
         DBZ peak: {nearest.dbz != null ? Math.round(nearest.dbz) : '—'}
         {nearest.stormSpeedKt != null && (
-          <> · Movement: {Math.round(nearest.stormSpeedKt * 1.15078)}mph {cardinal(nearest.stormHeading)}</>
+          <> · Movement: {Math.round(nearest.stormSpeedKt * 1.15078)}mph {degToCardinal(nearest.stormHeading)}</>
         )}
       </div>
       {(nearest.tvs || nearest.meso) && (
@@ -167,7 +152,7 @@ export const SystemPanel = () => {
       <div className="space-y-1 font-mono text-[10px] text-white/60">
         <div>&gt; tile.0/n0q ........ <span className="text-[#00ff9c]">OK</span></div>
         <div>&gt; nexrad.attr ....... <span className={ok ? 'text-[#00ff9c]' : 'text-[#ff0033]'}>{ok ? 'OK' : 'ERR'}</span></div>
-        <div>&gt; nws.observations .. <span className={ok ? 'text-[#00ff9c]' : 'text-[#ff0033]'}>{ok ? 'OK' : 'ERR'}</span></div>
+        <div>&gt; unified.weather ... <span className={ok ? 'text-[#00ff9c]' : 'text-[#ff0033]'}>{ok ? 'OK' : 'ERR'}</span></div>
         <div>&gt; sweep.refresh ...... <span className="text-[#ffea00]">{loading ? '…' : '5m'}</span></div>
       </div>
     </Panel>

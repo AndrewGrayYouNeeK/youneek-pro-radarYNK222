@@ -18,8 +18,8 @@ import PrecipOutlookCard from "@/components/forecast/PrecipOutlookCard";
 import LightningProximityCard from "@/components/forecast/LightningProximityCard";
 import HubLinks from "@/components/forecast/HubLinks";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
-import useWeatherLocation from "@/hooks/useWeatherLocation";
-import { fetchUnifiedWeather, isMissingWeatherKit } from "@/lib/api/unifiedWeather";
+import useUnifiedWeather from "@/hooks/useUnifiedWeather";
+import { isMissingWeatherKit } from "@/lib/api/unifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
 
 function adaptNwsAlerts(payload) {
@@ -42,21 +42,17 @@ function adaptNwsAlerts(payload) {
 
 export default function Forecast() {
   useTabPageMemory("Forecast");
-  const { coords, error: locationError, loading: locationLoading, retry } = useWeatherLocation();
-
   const {
+    coords,
+    locationError,
+    locationLoading,
+    retry,
     data,
     isLoading,
     error,
     refetch,
     isFetching,
-  } = useQuery({
-    queryKey: ["unified-weather", coords?.latitude, coords?.longitude],
-    enabled: Boolean(coords),
-    staleTime: 180000,
-    refetchInterval: 600000,
-    queryFn: () => fetchUnifiedWeather(coords.latitude, coords.longitude),
-  });
+  } = useUnifiedWeather();
 
   const alertsQuery = useQuery({
     queryKey: ["point-alerts", coords?.latitude, coords?.longitude],
