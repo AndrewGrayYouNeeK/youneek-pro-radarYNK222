@@ -2,7 +2,7 @@
 
 Cinematic landing site **and** live radar product in one app. Slogan: **MAKING IT RAIN**.
 
-- **`/`** — storm landing (GPS location, neon signs, NWS conditions, SOS)
+- **`/`** — storm landing (GPS location, neon signs, WeatherBug-class conditions, SOS)
 - **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires
 - **`/Forecast`** — current / hourly (168h) / 16-day, AQI, pollen, UV, storm risk, winter, history
 - **`/Globe`** — 3D globe with live and future weather radar, lightning, hurricanes, and wildfires

@@ -53,11 +53,12 @@ export default function SosButton() {
 
   return (
     <>
-      {/* Floating SOS button — only appears when GPS is inside an active tornado warning polygon */}
+      {/* Floating SOS — id used by the tornado banner #sos jump */}
+      <div id="sos" className="fixed bottom-5 right-5 z-[200]">
       {inWarning && (
         <button
           onClick={openPanel}
-          className="fixed bottom-5 right-5 z-[200] group"
+          className="group relative"
           aria-label="Emergency SOS — Tornado Warning in your area"
         >
           <span className="absolute inset-0 rounded-full bg-[#ff0033] opacity-60 animate-ping" />
@@ -77,12 +78,13 @@ export default function SosButton() {
       {!inWarning && (
         <button
           onClick={() => { setOpen(true); setMode('settings'); }}
-          className="fixed bottom-5 right-5 z-[200] inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-black/70 backdrop-blur border border-white/20 text-white/50 hover:text-[#00ff9c] hover:border-[#00ff9c]/50 text-[9px] tracking-[0.25em] uppercase font-mono transition"
+          className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-black/70 backdrop-blur border border-white/20 text-white/50 hover:text-[#00ff9c] hover:border-[#00ff9c]/50 text-[9px] tracking-[0.25em] uppercase font-mono transition"
           aria-label="Pre-configure SOS"
         >
           <Settings className="w-3 h-3" /> SOS_SETUP
         </button>
       )}
+      </div>
 
       {/* Modal */}
       {open && (

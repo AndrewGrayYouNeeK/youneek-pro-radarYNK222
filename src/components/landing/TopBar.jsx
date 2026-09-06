@@ -7,7 +7,7 @@ const NAV = [
   { label: 'Radar', href: '/Radar' },
   { label: 'Forecast', href: '/Forecast' },
   { label: 'Globe', href: '/Globe' },
-  { label: 'SOS', href: '/Contacts' },
+  { label: 'Settings', href: '/Settings' },
   { label: 'About', href: '#about' },
 ];
 

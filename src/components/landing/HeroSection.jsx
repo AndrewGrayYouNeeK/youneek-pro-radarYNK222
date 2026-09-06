@@ -5,6 +5,7 @@ import TopBar from './TopBar';
 import RadarSweep from './RadarSweep';
 import { WindPanel, DbzPanel, AlertPanel, SystemPanel } from './HudPanels';
 import LocationBar from './LocationBar';
+import HeroWeather from './HeroWeather';
 import TornadoAlertBanner from './TornadoAlertBanner';
 import { useLocation } from './LocationContext';
 
@@ -20,17 +21,10 @@ export default function HeroSection() {
       {/* Color grade (no photo — storm overlays sit on black) */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-[#0a0014]/70 to-black" />
       <div className="absolute inset-0 bg-gradient-to-r from-[#0a0014]/80 via-transparent to-[#001a14]/80" />
-
-      {/* Vignette */}
       <div className="absolute inset-0 [background:radial-gradient(ellipse_at_center,transparent_30%,rgba(0,0,0,0.85)_100%)]" />
-
-
-
-      {/* Scanlines */}
       <div className="absolute inset-0 pointer-events-none opacity-30 z-20 [background:repeating-linear-gradient(0deg,transparent,transparent_2px,rgba(0,255,156,0.06)_2px,rgba(0,255,156,0.06)_3px)]" />
-
-      {/* Grid Floor */}
-      <div className="absolute bottom-0 left-0 right-0 h-1/3 pointer-events-none opacity-30"
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1/3 pointer-events-none opacity-30"
         style={{
           background:
             'linear-gradient(to bottom, transparent, rgba(0,255,156,0.05)), repeating-linear-gradient(90deg, rgba(0,255,156,0.3) 0 1px, transparent 1px 80px), repeating-linear-gradient(0deg, rgba(0,255,156,0.3) 0 1px, transparent 1px 60px)',
@@ -39,125 +33,127 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Content */}
-      <div className="relative max-w-7xl mx-auto px-5 md:px-8 pt-36 pb-20 min-h-screen flex flex-col">
-        <div className="grid lg:grid-cols-2 gap-10 items-center flex-1">
-          {/* LEFT — Copy */}
-          <div className="relative">
-            {/* Status Bar */}
-            <div className="relative inline-flex items-center gap-3 px-3 py-1.5 border border-[#00ff9c]/40 bg-black/80 backdrop-blur mb-4">
-              <span className="w-2 h-2 rounded-full bg-[#00ff9c] animate-pulse shadow-[0_0_8px_#00ff9c]" />
-              <span className="text-[10px] tracking-[0.3em] uppercase text-[#00ff9c]">SYS_ONLINE</span>
-              <span className="text-white/40 text-[10px]">|</span>
-              <span className="text-[10px] tracking-[0.3em] uppercase text-white/60">NEXRAD_v2.4</span>
+      {/* Lightning title overlay — does not reserve layout space */}
+      <h1
+        className="hero-title-strike pointer-events-none absolute inset-x-0 top-[38%] z-[66] px-5 text-center font-bold leading-[0.9] tracking-tight md:px-8"
+        aria-hidden="true"
+      >
+        <span className="block text-[12vw] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)] md:text-[5.5rem] lg:text-[6.5rem]">
+          YouNeeK
+        </span>
+        <span
+          className="block text-[12vw] bg-clip-text text-transparent md:text-[5.5rem] lg:text-[6.5rem]"
+          style={{
+            backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #c0c0c0 50%, #707070 100%)',
+            WebkitTextStroke: '1px rgba(0,255,156,0.3)',
+          }}
+        >
+          PRO
+        </span>
+        <span className="relative mx-auto block text-[12vw] md:text-[5.5rem] lg:text-[6.5rem]">
+          <span className="absolute inset-0 text-[#ff00d4] translate-x-[3px] translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite]">
+            RADAR
+          </span>
+          <span className="absolute inset-0 text-[#00ff9c] -translate-x-[3px] -translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite_reverse]">
+            RADAR
+          </span>
+          <span className="relative text-white">RADAR</span>
+        </span>
+      </h1>
+
+      {/* Content — WeatherBug-style: location + now-card first, no empty title hole */}
+      <div className="relative z-[40] mx-auto flex min-h-screen max-w-7xl flex-col px-5 pb-16 pt-32 md:px-8 md:pt-36">
+        <div className="grid flex-1 items-start gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
+          {/* LEFT — live weather desk */}
+          <div className="relative flex max-w-xl flex-col">
+            <div className="mb-3 inline-flex w-fit items-center gap-3 border border-[#00ff9c]/40 bg-black/80 px-3 py-1.5 backdrop-blur">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-[#00ff9c] shadow-[0_0_8px_#00ff9c]" />
+              <span className="text-[10px] uppercase tracking-[0.3em] text-[#00ff9c]">SYS_ONLINE</span>
+              <span className="text-[10px] text-white/40">|</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-white/60">NEXRAD_v2.4</span>
             </div>
 
-            {/* Location selector — directly under SYS_ONLINE */}
-            <div className="relative z-[70] mb-8" style={{ isolation: 'isolate' }}>
+            <div className="relative z-[70] mb-3" style={{ isolation: 'isolate' }}>
               <LocationBar />
             </div>
 
-            {/* Title — only visible while the landing lightning flash is on */}
-            <h1
-              className="hero-title-strike relative z-[66] font-bold leading-[0.9] tracking-tight"
-              style={{ isolation: 'isolate' }}
-            >
-              <span className="block text-[11vw] md:text-[5rem] lg:text-[6rem] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)]">
-                YouNeeK
-              </span>
-              <span
-                className="block text-[11vw] md:text-[5rem] lg:text-[6rem] bg-clip-text text-transparent"
-                style={{
-                  backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #c0c0c0 50%, #707070 100%)',
-                  WebkitTextStroke: '1px rgba(0,255,156,0.3)',
-                }}
-              >
-                PRO
-              </span>
-              <span className="relative block text-[11vw] md:text-[5rem] lg:text-[6rem]">
-                <span className="absolute inset-0 text-[#ff00d4] translate-x-[3px] translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite]">
-                  RADAR
-                </span>
-                <span className="absolute inset-0 text-[#00ff9c] -translate-x-[3px] -translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite_reverse]">
-                  RADAR
-                </span>
-                <span className="relative text-white">RADAR</span>
-              </span>
-            </h1>
+            <HeroWeather />
 
-            <div className="mt-5 text-xl md:text-3xl font-bold tracking-[0.28em] uppercase text-[#00ff9c] drop-shadow-[0_0_18px_rgba(0,255,156,0.55)]">
+            <div className="mt-5 text-xl font-bold uppercase tracking-[0.28em] text-[#00ff9c] drop-shadow-[0_0_18px_rgba(0,255,156,0.55)] md:text-2xl">
               Making it rain
             </div>
-
-            <p className="mt-8 max-w-md text-sm md:text-base text-white/70 leading-relaxed border-l-2 border-[#00ff9c]/40 pl-4">
-              Live NEXRAD, NOAA alerts, and GPS-locked conditions for wherever you actually are.
+            <p className="mt-3 max-w-md border-l-2 border-[#00ff9c]/40 pl-4 text-sm leading-relaxed text-white/70 md:text-base">
+              Same live conditions on landing, Forecast, and radar — WeatherBug-class desk, unlocked.
             </p>
 
-            {/* CTAs */}
-            <div className="mt-10 flex flex-wrap items-center gap-4">
+            <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link
                 to="/app"
-                className="group relative inline-flex items-center gap-2 px-6 py-3.5 bg-[#00ff9c] text-black font-bold text-xs tracking-[0.25em] uppercase hover:bg-white transition-colors"
+                className="group relative inline-flex items-center gap-2 bg-[#00ff9c] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white"
               >
-                <span className="absolute inset-0 bg-[#ff00d4] -translate-x-1.5 -translate-y-1.5 -z-10 group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform" />
+                <span className="absolute inset-0 -z-10 -translate-x-1.5 -translate-y-1.5 bg-[#ff00d4] transition-transform group-hover:-translate-x-2 group-hover:-translate-y-2" />
                 Launch Radar
-                <ChevronRight className="w-4 h-4" />
+                <ChevronRight className="h-4 w-4" />
+              </Link>
+              <Link
+                to="/Forecast"
+                className="inline-flex items-center gap-2 border border-[#00ff9c]/40 px-5 py-3.5 text-xs uppercase tracking-[0.25em] text-[#00ff9c] transition hover:bg-[#00ff9c]/10"
+              >
+                Forecast
               </Link>
               <a
-                href="#features"
-                className="inline-flex items-center gap-2 px-6 py-3.5 border border-white/30 text-white/80 text-xs tracking-[0.25em] uppercase hover:border-[#00ff9c] hover:text-[#00ff9c] transition"
+                href="#conditions"
+                className="inline-flex items-center gap-2 border border-white/30 px-5 py-3.5 text-xs uppercase tracking-[0.25em] text-white/80 transition hover:border-[#00ff9c] hover:text-[#00ff9c]"
               >
-                <Zap className="w-4 h-4" />
-                See Features
+                <Zap className="h-4 w-4" />
+                Hourly &amp; 10-day
               </a>
             </div>
 
-            {/* Mini stats */}
-            <div className="mt-10 grid grid-cols-3 gap-3 max-w-md">
+            <div className="mt-6 grid max-w-md grid-cols-3 gap-3">
               <div>
-                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Stations</div>
-                <div className="text-2xl font-bold text-[#00ff9c] tabular-nums">15+</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Forecast</div>
+                <div className="text-2xl font-bold tabular-nums text-[#00ff9c]">16d</div>
               </div>
               <div>
-                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Refresh</div>
-                <div className="text-2xl font-bold text-white tabular-nums">2.4s</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Hourly</div>
+                <div className="text-2xl font-bold tabular-nums text-white">168h</div>
               </div>
               <div>
-                <div className="text-[10px] tracking-[0.2em] uppercase text-white/40">Coverage</div>
-                <div className="text-2xl font-bold text-[#ff00d4] tabular-nums">CONUS</div>
+                <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Radar</div>
+                <div className="text-2xl font-bold tabular-nums text-[#ff00d4]">LIVE</div>
               </div>
             </div>
           </div>
 
           {/* RIGHT — Radar HUD */}
-          <div className="relative">
-            <div className="relative">
+          <div className="relative lg:justify-self-end">
+            <div className="relative mx-auto max-w-lg lg:max-w-none">
               <RadarSweep />
 
-              {/* Floating HUD panels */}
-              <div className="absolute -top-4 -left-2 md:-left-8 w-40 hidden md:block">
+              <div className="absolute -left-2 -top-4 hidden w-40 md:block md:-left-8">
                 <WindPanel />
               </div>
-              <div className="absolute top-1/4 -right-2 md:-right-8 w-44 hidden md:block">
+              <div className="absolute -right-2 top-1/4 hidden w-44 md:block md:-right-8">
                 <AlertPanel />
               </div>
-              <div className="absolute -bottom-4 left-0 md:-left-12 w-44 hidden md:block">
+              <div className="absolute -bottom-4 left-0 hidden w-44 md:block md:-left-12">
                 <SystemPanel />
               </div>
-              <div className="absolute -bottom-2 right-0 md:-right-6 w-40 hidden md:block">
+              <div className="absolute -bottom-2 right-0 hidden w-40 md:block md:-right-6">
                 <DbzPanel />
               </div>
             </div>
 
-            {/* Mobile HUD row */}
-            <div className="grid grid-cols-2 gap-3 mt-6 md:hidden">
+            <div className="mt-6 grid grid-cols-2 gap-3 md:hidden">
               <WindPanel />
               <DbzPanel />
-              <div className="col-span-2"><AlertPanel /></div>
+              <div className="col-span-2">
+                <AlertPanel />
+              </div>
             </div>
 
-            {/* Coordinates ticker */}
-            <div className="mt-8 hidden md:flex items-center justify-between text-[10px] tracking-[0.25em] text-white/40 font-mono">
+            <div className="mt-8 hidden items-center justify-between font-mono text-[10px] tracking-[0.25em] text-white/40 md:flex">
               <span>{latLabel}</span>
               <span className="text-[#00ff9c]">// SCAN_ACTIVE //</span>
               <span>{lonLabel}</span>
@@ -190,7 +186,7 @@ export default function HeroSection() {
         @media (prefers-reduced-motion: reduce) {
           .hero-title-strike {
             animation: none;
-            opacity: 1;
+            opacity: 0.35;
             mix-blend-mode: normal;
           }
         }

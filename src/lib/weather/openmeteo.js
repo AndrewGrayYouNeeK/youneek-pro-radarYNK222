@@ -69,8 +69,21 @@ export async function fetchOpenMeteo(lat, lon) {
   url.searchParams.set("forecast_minutely_15", "8");
 
   const response = await fetch(url.toString());
-  if (!response.ok) throw new Error("Forecast unavailable");
-  return response.json();
+  const text = await response.text();
+  let payload;
+  try {
+    payload = JSON.parse(text);
+  } catch {
+    throw new Error(
+      response.ok
+        ? "Forecast response was not JSON"
+        : `Forecast unavailable (${response.status})`
+    );
+  }
+  if (!response.ok || payload?.error) {
+    throw new Error(payload?.reason || payload?.error || `Forecast unavailable (${response.status})`);
+  }
+  return payload;
 }
 
 export function adaptOpenMeteoCurrent(payload) {

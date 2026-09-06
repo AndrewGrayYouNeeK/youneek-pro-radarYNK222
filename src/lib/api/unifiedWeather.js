@@ -39,16 +39,19 @@ function mergeDaily(primary, extra) {
 }
 
 export async function fetchUnifiedWeather(lat, lon) {
-  const [kitResult, openMeteo] = await Promise.all([
+  const [kitResult, omResult] = await Promise.all([
     fetchWeatherKit(lat, lon)
       .then((data) => ({ ok: true, data }))
       .catch((error) => ({ ok: false, error })),
-    fetchOpenMeteo(lat, lon),
+    fetchOpenMeteo(lat, lon)
+      .then((data) => ({ ok: true, data }))
+      .catch((error) => ({ ok: false, error })),
   ]);
 
-  const omHourly = adaptOpenMeteoHourly(openMeteo);
-  const omDaily = adaptOpenMeteoDaily(openMeteo);
-  const extras = adaptOpenMeteoExtras(openMeteo);
+  const openMeteo = omResult.ok ? omResult.data : null;
+  const omHourly = openMeteo ? adaptOpenMeteoHourly(openMeteo) : [];
+  const omDaily = openMeteo ? adaptOpenMeteoDaily(openMeteo) : [];
+  const extras = openMeteo ? adaptOpenMeteoExtras(openMeteo) : null;
 
   if (kitResult.ok) {
     const minutes = adaptWeatherKitNextHour(kitResult.data);
@@ -57,10 +60,14 @@ export async function fetchUnifiedWeather(lat, lon) {
       current: adaptWeatherKitCurrent(kitResult.data),
       hourly: mergeHourly(adaptWeatherKitHourly(kitResult.data), omHourly),
       daily: mergeDaily(adaptWeatherKitDaily(kitResult.data), omDaily),
-      minutes: minutes.length ? minutes : adaptOpenMeteoMinutes(openMeteo),
+      minutes: minutes.length ? minutes : openMeteo ? adaptOpenMeteoMinutes(openMeteo) : [],
       alerts: adaptWeatherKitAlerts(kitResult.data),
       extras,
     };
+  }
+
+  if (!omResult.ok) {
+    throw omResult.error || new Error("Forecast unavailable");
   }
 
   const current = adaptOpenMeteoCurrent(openMeteo);
