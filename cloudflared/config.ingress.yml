@@ -1,0 +1,12 @@
+# Optional hostname-based ingress for the same origin.
+# Use this instead of config.yml when you want an explicit public hostname
+# and a required catch-all rule.
+# https://developers.cloudflare.com/tunnel/advanced/local-management/configuration-file/
+
+tunnel: <Tunnel-UUID>
+credentials-file: /root/.cloudflared/<Tunnel-UUID>.json
+
+ingress:
+  - hostname: <TUNNEL_HOSTNAME>
+    service: http://localhost:8000
+  - service: http_status:404
