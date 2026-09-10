@@ -161,6 +161,13 @@ const frameHeaders = {
   "Content-Security-Policy": "frame-ancestors 'none'",
 };
 
+const tunnelMode = process.env.CLOUDFLARE_TUNNEL === "1";
+const tunnelPort = 8000;
+const tunnelHost = {
+  allowedHosts: true,
+  hmr: { protocol: "wss", clientPort: 443 },
+};
+
 export default defineConfig(({ mode }) => ({
   plugins: [react(), nwsLandingApi(), radarApiDevProxy(mode)],
   resolve: {
@@ -170,16 +177,18 @@ export default defineConfig(({ mode }) => ({
   },
   server: {
     host: true,
-    port: 5173,
+    port: Number(process.env.PORT) || (tunnelMode ? tunnelPort : 5173),
     strictPort: true,
     headers: frameHeaders,
     proxy: hurricaneProxy,
+    ...(tunnelMode ? tunnelHost : {}),
   },
   preview: {
     host: true,
-    port: 4173,
+    port: Number(process.env.PREVIEW_PORT) || (tunnelMode ? tunnelPort : 4173),
     strictPort: true,
     headers: frameHeaders,
     proxy: hurricaneProxy,
+    ...(tunnelMode ? { allowedHosts: true } : {}),
   },
 }));

@@ -38,3 +38,15 @@ Cloudflare project: **`youneek-pro-radarynk222`**.
 npm install
 npm run dev
 ```
+
+## Cloudflare Tunnel (local origin)
+
+To expose a running local or preview server at `http://localhost:8000`:
+
+```yml
+url: http://localhost:8000
+tunnel: <Tunnel-UUID>
+credentials-file: /root/.cloudflared/<Tunnel-UUID>.json
+```
+
+See [TUNNEL.md](./TUNNEL.md) for `cloudflared` login, `tunnel create`, DNS routing, and `npm run dev:tunnel` / `npm run tunnel`.

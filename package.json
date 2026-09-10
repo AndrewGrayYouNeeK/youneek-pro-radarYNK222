@@ -5,6 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:tunnel": "CLOUDFLARE_TUNNEL=1 PORT=8000 vite --port 8000 --strictPort",
+    "preview:tunnel": "CLOUDFLARE_TUNNEL=1 PREVIEW_PORT=8000 vite preview --port 8000 --strictPort",
+    "tunnel": "bash scripts/run-cloudflare-tunnel.sh",
+    "tunnel:config": "bash scripts/write-tunnel-config.sh",
     "build": "vite build",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
