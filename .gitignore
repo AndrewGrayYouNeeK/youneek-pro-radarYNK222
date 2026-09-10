@@ -35,3 +35,4 @@ dist-ssr
 **/.cloudflared/*.json
 **/.cloudflared/cert.pem
 cloudflared/config.local.yml
+.tunnel-url

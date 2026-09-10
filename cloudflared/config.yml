@@ -1,6 +1,6 @@
-# Locally-managed Cloudflare Tunnel — published application.
-# Replace <Tunnel-UUID> with the ID from `cloudflared tunnel create`.
-# Credentials are written by cloudflared and must never be committed.
+# Locally-managed named tunnel (optional).
+# `npm run tunnel` does not need this file — it opens a Quick Tunnel automatically.
+# Fill these in only if you already created a named tunnel.
 
 url: http://localhost:8000
 tunnel: <Tunnel-UUID>
