@@ -1,12 +1,33 @@
-# Cloudflare Tunnel — local origin
+# Cloudflare Tunnel
 
-Expose the YouNeeK Pro Radar app on **`http://localhost:8000`** through a [locally-managed Cloudflare Tunnel](https://developers.cloudflare.com/tunnel/advanced/local-management/create-local-tunnel/).
+Share a running copy of YouNeeK Pro Radar without creating a UUID, logging in, or opening a second terminal.
 
-This is for sharing a running local (or preview) server. Production stays on Workers (`npm run deploy`).
+```bash
+npm install
+npm run tunnel
+```
 
-## Config
+That command:
 
-`cloudflared/config.yml` uses the published-application fields:
+1. Starts the app on **`http://localhost:8000`**
+2. Downloads the official `cloudflared` binary if it is missing
+3. Opens a [Quick Tunnel](https://developers.cloudflare.com/tunnel/setup/#quick-tunnels-development)
+4. Prints a public `https://*.trycloudflare.com` URL
+
+Leave it running. Ctrl+C stops the tunnel. The URL is also written to `.tunnel-url` (gitignored).
+
+Production stays on Workers (`npm run deploy`). Quick tunnels are for development and sharing; they use a random hostname each time.
+
+## Optional named tunnel
+
+Only if you already have a remotely-managed tunnel token:
+
+```bash
+export TUNNEL_TOKEN='...'
+npm run tunnel
+```
+
+Or fill in `cloudflared/config.yml` after `cloudflared tunnel create` and keep the credentials JSON on disk:
 
 ```yml
 url: http://localhost:8000
@@ -14,96 +35,12 @@ tunnel: <Tunnel-UUID>
 credentials-file: /root/.cloudflared/<Tunnel-UUID>.json
 ```
 
-Replace `<Tunnel-UUID>` with the ID printed by `cloudflared tunnel create`. On a user account (not root), set `credentials-file` to `$HOME/.cloudflared/<Tunnel-UUID>.json`.
-
-Optional hostname routing (catch-all required) lives in `cloudflared/config.ingress.yml`.
-
-Never commit `cert.pem`, tunnel credentials JSON, or a filled-in UUID that maps to a live tunnel you want to keep private.
-
-## Prerequisites
-
-- A site on Cloudflare with nameservers pointed at Cloudflare
-- [`cloudflared`](https://developers.cloudflare.com/tunnel/downloads/) on the machine that runs the app
-
-## One-time setup
-
-```bash
-cloudflared tunnel login
-cloudflared tunnel create youneek-pro-radar
-cloudflared tunnel list
-```
-
-Write the config (Linux root path matches Cloudflare's docs):
-
-```bash
-export TUNNEL_UUID='<Tunnel-UUID>'
-./scripts/write-tunnel-config.sh
-```
-
-On macOS or a non-root user:
-
-```bash
-export TUNNEL_UUID='<Tunnel-UUID>'
-export TUNNEL_CREDENTIALS_FILE="$HOME/.cloudflared/${TUNNEL_UUID}.json"
-./scripts/write-tunnel-config.sh
-```
-
-Route a hostname (creates a CNAME to `<UUID>.cfargotunnel.com`):
-
-```bash
-cloudflared tunnel route dns youneek-pro-radar radar.example.com
-```
-
-## Run
-
-Terminal 1 — origin on port **8000**:
-
-```bash
-npm run dev:tunnel
-```
-
-Production-build preview on the same port:
-
-```bash
-npm run build
-npm run preview:tunnel
-```
-
-Terminal 2 — connector:
-
-```bash
-npm run tunnel
-```
-
-Equivalent:
-
-```bash
-cloudflared tunnel --config cloudflared/config.yml run
-```
-
-Confirm the replica is connected:
-
-```bash
-cloudflared tunnel info youneek-pro-radar
-```
-
-Open the hostname you routed. Vite allows the public Host header and uses `wss` on 443 for HMR while `CLOUDFLARE_TUNNEL=1`.
-
-## Quick tunnel (no named UUID)
-
-For a throwaway `*.trycloudflare.com` URL without `config.yml`:
-
-```bash
-npm run dev:tunnel
-cloudflared tunnel --url http://localhost:8000
-```
+`npm run tunnel` uses that named config when the UUID is filled in and the credentials file exists. Otherwise it keeps using a Quick Tunnel.
 
 ## Troubleshooting
 
 | Symptom | What to check |
 |---------|----------------|
-| Origin DNS Error 1016 | `cloudflared` is not running or not connected (`cloudflared tunnel info`) |
-| Vite blocked host | Start the app with `npm run dev:tunnel` (`allowedHosts: true`) |
-| Credentials missing | `ls` the path in `credentials-file`; re-run `cloudflared tunnel create` |
-| Placeholder UUID | `config.yml` still contains `<Tunnel-UUID>` |
-| Connection timeout | Origin must be listening on `http://localhost:8000` |
+| No public URL printed | Wait a few seconds; `cloudflared` has to connect to Cloudflare |
+| Origin DNS Error 1016 | The Node process exited — rerun `npm run tunnel` |
+| Port 8000 already in use | The script reuses that origin; stop the other process if it is not this app |

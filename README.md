@@ -23,12 +23,13 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). Allow location when the browser asks, then Launch Radar.
 
-To share the local app through Cloudflare Tunnel on port **8000**, see [TUNNEL.md](./TUNNEL.md):
+To share the local app on the public internet (no Cloudflare login):
 
 ```bash
-npm run dev:tunnel
 npm run tunnel
 ```
+
+That starts the app on port **8000** and prints a `https://*.trycloudflare.com` URL. See [TUNNEL.md](./TUNNEL.md).
 
 WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` and follow [WEATHERKIT.md](./WEATHERKIT.md). Radar, NWS alerts, and NOAA radio work without them.
 
@@ -37,8 +38,8 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 | Command | Description |
 |---------|-------------|
 | `npm run dev` | Vite + local NWS / alerts / WeatherKit / lightning proxies |
-| `npm run dev:tunnel` | Same as `dev`, bound to `http://localhost:8000` for Cloudflare Tunnel |
-| `npm run tunnel` | Run `cloudflared` with `cloudflared/config.yml` |
+| `npm run tunnel` | App on port 8000 plus a public Cloudflare Quick Tunnel URL |
+| `npm run dev:tunnel` | Same as `dev`, bound to `http://localhost:8000` (no public URL) |
 | `npm run build` | Production build |
 | `npm run preview` | Preview production build (includes API proxies) |
 | `npm run preview:tunnel` | Preview on port 8000 for Cloudflare Tunnel |
