@@ -64,8 +64,8 @@ export default function HeroSection() {
       {/* Content — WeatherBug-style: location + now-card first, no empty title hole */}
       <div className="relative z-[40] mx-auto flex min-h-screen max-w-7xl flex-col px-5 pb-16 pt-32 md:px-8 md:pt-36">
         <div className="grid flex-1 items-start gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
-          {/* LEFT — live weather desk */}
-          <div className="relative flex max-w-xl flex-col">
+          {/* Weather desk sits after the radar on small screens so it cannot bury the scan */}
+          <div className="relative order-2 flex max-w-xl flex-col lg:order-1">
             <div className="mb-3 inline-flex w-fit items-center gap-3 border border-[#00ff9c]/40 bg-black/80 px-3 py-1.5 backdrop-blur">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#00ff9c] shadow-[0_0_8px_#00ff9c]" />
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#00ff9c]">SYS_ONLINE</span>
@@ -82,7 +82,7 @@ export default function HeroSection() {
             <div className="mt-5 text-xl font-bold uppercase tracking-[0.28em] text-[#00ff9c] drop-shadow-[0_0_18px_rgba(0,255,156,0.55)] md:text-2xl">
               Making it rain
             </div>
-            <p className="mt-3 max-w-md border-l-2 border-[#00ff9c]/40 pl-4 text-sm leading-relaxed text-white/70 md:text-base">
+            <p className="mt-3 hidden max-w-md border-l-2 border-[#00ff9c]/40 pl-4 text-sm leading-relaxed text-white/70 md:block md:text-base">
               Same live conditions on landing, Forecast, and radar — WeatherBug-class desk, unlocked.
             </p>
 
@@ -110,7 +110,7 @@ export default function HeroSection() {
               </a>
             </div>
 
-            <div className="mt-6 grid max-w-md grid-cols-3 gap-3">
+            <div className="mt-6 hidden max-w-md grid-cols-3 gap-3 sm:grid">
               <div>
                 <div className="text-[10px] uppercase tracking-[0.2em] text-white/40">Forecast</div>
                 <div className="text-2xl font-bold tabular-nums text-[#00ff9c]">16d</div>
@@ -126,8 +126,8 @@ export default function HeroSection() {
             </div>
           </div>
 
-          {/* RIGHT — Radar HUD */}
-          <div className="relative lg:justify-self-end">
+          {/* Radar HUD — first on phones so the weather desk cannot cover it */}
+          <div className="relative order-1 lg:order-2 lg:justify-self-end">
             <div className="relative mx-auto max-w-lg lg:max-w-none">
               <RadarSweep />
 

@@ -131,7 +131,10 @@ export default function Radar() {
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-slate-950">
       <AppHeader title="Radar" />
       <WeatherKitStrip />
-      <div className="relative min-h-0 flex-1 overflow-hidden">
+      <div
+        className="relative min-h-0 flex-1 overflow-hidden"
+        style={{ paddingBottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
+      >
         <RainArrivalAlert />
         <Suspense
           fallback={(

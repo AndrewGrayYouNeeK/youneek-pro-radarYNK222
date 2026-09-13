@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ChevronRight, Loader2, MapPin } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, MapPin } from "lucide-react";
 import { describeWeatherCode, degToCardinal, formatHourTime } from "@/lib/weather/conditions";
 import { formatTemp, formatWind, tempSuffix } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
@@ -27,7 +28,8 @@ export default function HeroWeather() {
   const code = describeWeatherCode(current?.weather_code);
   const Icon = code.icon;
   const weatherError = locationError || (!current && error?.message) || "";
-  const nextHours = hourly.slice(0, 8);
+  const [deskOpen, setDeskOpen] = useState(false);
+  const nextHours = hourly.slice(0, deskOpen ? 8 : 0);
 
   return (
     <div className="relative z-[70] w-full border border-[#00ff9c]/30 bg-black/85 backdrop-blur-md">
@@ -66,7 +68,7 @@ export default function HeroWeather() {
           <div className="flex items-start justify-between gap-4">
             <div className="min-w-0">
               <div className="flex items-baseline gap-2">
-                <span className="text-6xl font-bold leading-none tabular-nums text-white md:text-7xl">
+                <span className="text-5xl font-bold leading-none tabular-nums text-white md:text-6xl">
                   {formatTemp(current.temperature_2m, units.temp).replace("°", "")}°
                 </span>
                 <span className="text-sm text-white/50">{tempSuffix(units.temp)}</span>
@@ -87,30 +89,38 @@ export default function HeroWeather() {
             <Icon className="h-16 w-16 shrink-0 text-[#00ff9c] md:h-20 md:w-20" strokeWidth={1.3} aria-hidden="true" />
           </div>
 
-          {nextHours.length > 0 && (
-            <div className="mt-5 border-t border-white/10 pt-4">
-              <div className="mb-2 font-mono text-[9px] uppercase tracking-[0.3em] text-[#ff00d4]">
-                // Next_8_hours
-              </div>
-              <div className="flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                {nextHours.map((hour) => {
-                  const hourCode = describeWeatherCode(hour.weather_code);
-                  const HourIcon = hourCode.icon;
-                  return (
-                    <div
-                      key={hour.time}
-                      className="min-w-[3.5rem] border border-white/10 bg-black/50 px-2 py-2 text-center"
-                    >
-                      <div className="text-[9px] uppercase tracking-wider text-white/40">{formatHourTime(hour.time)}</div>
-                      <HourIcon className="mx-auto my-1.5 h-3.5 w-3.5 text-[#00ff9c]/80" aria-hidden="true" />
-                      <div className="text-sm font-semibold tabular-nums text-white">
-                        {formatTemp(hour.temperature, units.temp)}
+          {hourly.length > 0 && (
+            <div className="mt-4 border-t border-white/10 pt-3">
+              <button
+                type="button"
+                onClick={() => setDeskOpen((open) => !open)}
+                className="inline-flex items-center gap-1 font-mono text-[9px] uppercase tracking-[0.3em] text-[#ff00d4] hover:text-white"
+                aria-expanded={deskOpen}
+              >
+                {deskOpen ? "Hide hourly desk" : "Open hourly desk"}
+                <ChevronDown className={`h-3.5 w-3.5 transition-transform ${deskOpen ? "rotate-180" : ""}`} />
+              </button>
+              {deskOpen && nextHours.length > 0 && (
+                <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                  {nextHours.map((hour) => {
+                    const hourCode = describeWeatherCode(hour.weather_code);
+                    const HourIcon = hourCode.icon;
+                    return (
+                      <div
+                        key={hour.time}
+                        className="min-w-[3.5rem] border border-white/10 bg-black/50 px-2 py-2 text-center"
+                      >
+                        <div className="text-[9px] uppercase tracking-wider text-white/40">{formatHourTime(hour.time)}</div>
+                        <HourIcon className="mx-auto my-1.5 h-3.5 w-3.5 text-[#00ff9c]/80" aria-hidden="true" />
+                        <div className="text-sm font-semibold tabular-nums text-white">
+                          {formatTemp(hour.temperature, units.temp)}
+                        </div>
+                        <div className="text-[9px] text-[#00ff9c]/70">{hour.pop}%</div>
                       </div>
-                      <div className="text-[9px] text-[#00ff9c]/70">{hour.pop}%</div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
