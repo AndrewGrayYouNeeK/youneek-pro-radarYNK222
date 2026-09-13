@@ -35,7 +35,7 @@ export default function HeroSection() {
 
       {/* Lightning title overlay — above weather, hidden between bolts */}
       <h1
-        className="hero-title-strike pointer-events-none absolute inset-x-0 top-[32%] z-[80] px-5 text-center font-bold leading-[0.9] tracking-tight md:px-8"
+        className="hero-title-strike pointer-events-none fixed inset-x-0 top-[22%] z-[80] px-5 text-center font-bold leading-[0.9] tracking-tight md:top-[28%] md:px-8"
         aria-hidden="true"
       >
         <span className="block text-[13vw] text-white md:text-[5.5rem] lg:text-[6.5rem]">
