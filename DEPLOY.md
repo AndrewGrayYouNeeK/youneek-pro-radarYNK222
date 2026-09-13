@@ -10,6 +10,8 @@ This repository is one app:
 
 Cloudflare project: **`youneek-pro-radarynk222`**.
 
+**Production URL:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+
 ## Workers Builds
 
 `wrangler.toml` sets `[assets] directory = "./dist"` and `run_worker_first = ["/api/*"]`.

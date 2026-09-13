@@ -33,28 +33,22 @@ export default function HeroSection() {
         }}
       />
 
-      {/* Lightning title overlay — does not reserve layout space */}
+      {/* Lightning title overlay — above weather, hidden between bolts */}
       <h1
-        className="hero-title-strike pointer-events-none absolute inset-x-0 top-[38%] z-[66] px-5 text-center font-bold leading-[0.9] tracking-tight md:px-8"
+        className="hero-title-strike pointer-events-none absolute inset-x-0 top-[32%] z-[80] px-5 text-center font-bold leading-[0.9] tracking-tight md:px-8"
         aria-hidden="true"
       >
-        <span className="block text-[12vw] text-white drop-shadow-[0_0_30px_rgba(0,255,156,0.4)] md:text-[5.5rem] lg:text-[6.5rem]">
+        <span className="block text-[13vw] text-white md:text-[5.5rem] lg:text-[6.5rem]">
           YouNeeK
         </span>
-        <span
-          className="block text-[12vw] bg-clip-text text-transparent md:text-[5.5rem] lg:text-[6.5rem]"
-          style={{
-            backgroundImage: 'linear-gradient(180deg, #ffffff 0%, #c0c0c0 50%, #707070 100%)',
-            WebkitTextStroke: '1px rgba(0,255,156,0.3)',
-          }}
-        >
+        <span className="block text-[13vw] text-white md:text-[5.5rem] lg:text-[6.5rem]">
           PRO
         </span>
-        <span className="relative mx-auto block text-[12vw] md:text-[5.5rem] lg:text-[6.5rem]">
-          <span className="absolute inset-0 text-[#ff00d4] translate-x-[3px] translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite]">
+        <span className="relative mx-auto block text-[13vw] md:text-[5.5rem] lg:text-[6.5rem]">
+          <span className="absolute inset-0 translate-x-[3px] translate-y-[1px] text-[#ff00d4] opacity-80 animate-[glitch_3s_infinite]">
             RADAR
           </span>
-          <span className="absolute inset-0 text-[#00ff9c] -translate-x-[3px] -translate-y-[1px] mix-blend-screen opacity-80 animate-[glitch_3s_infinite_reverse]">
+          <span className="absolute inset-0 -translate-x-[3px] -translate-y-[1px] text-[#00ff9c] opacity-80 animate-[glitch_3s_infinite_reverse]">
             RADAR
           </span>
           <span className="relative text-white">RADAR</span>
@@ -168,27 +162,6 @@ export default function HeroSection() {
           92% { transform: translate(2px, -1px); }
           94% { transform: translate(-2px, 1px); }
           96% { transform: translate(1px, 2px); }
-        }
-        /* Locked to LightningFlash: 8s loop, bolts at 91% / 93% / 95% */
-        .hero-title-strike {
-          opacity: 0;
-          mix-blend-mode: difference;
-          animation: titleStrike 8s ease-in-out infinite;
-        }
-        @keyframes titleStrike {
-          0%, 90%, 96%, 100% { opacity: 0; }
-          91% { opacity: 1; }
-          92% { opacity: 0.12; }
-          93% { opacity: 1; }
-          94% { opacity: 0; }
-          95% { opacity: 0.65; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-          .hero-title-strike {
-            animation: none;
-            opacity: 0.35;
-            mix-blend-mode: normal;
-          }
         }
       `}</style>
     </section>
