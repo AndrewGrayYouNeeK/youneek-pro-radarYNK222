@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 export default function LightningFlash() {
-  // Sync hard vibration with the CSS lightning animation (8s loop, flash at 93%/95%)
+  // Sync vibration with ynk-lightning in index.css (6s loop, first bolt at 14%)
   useEffect(() => {
     if (typeof navigator === 'undefined' || !navigator.vibrate) return;
 
@@ -12,9 +12,9 @@ export default function LightningFlash() {
       setTimeout(() => navigator.vibrate([180, 40, 90]), 160);
     };
 
-    // Fire once near start, then every 8s to match the @keyframes loop
-    const initial = setTimeout(fireBolt, 7400); // 93% of 8000ms ≈ 7440ms
-    const interval = setInterval(fireBolt, 8000);
+    // Fire with the CSS bolt (14% of 6s ≈ 840ms), then every 6s
+    const initial = setTimeout(fireBolt, 840);
+    const interval = setInterval(fireBolt, 6000);
 
     return () => {
       clearTimeout(initial);
@@ -24,17 +24,9 @@ export default function LightningFlash() {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-white opacity-0 pointer-events-none z-[65] animate-[lightning_8s_ease-in-out_infinite]" style={{ mixBlendMode: 'screen' }}>
-      <style>{`
-        @keyframes lightning {
-          0%, 90%, 96%, 100% { opacity: 0; }
-          91% { opacity: 0.85; }
-          92% { opacity: 0.1; }
-          93% { opacity: 0.95; }
-          94% { opacity: 0; }
-          95% { opacity: 0.5; }
-        }
-      `}</style>
-    </div>
+    <div
+      className="ynk-lightning-overlay pointer-events-none fixed inset-0 z-[65] bg-white opacity-0"
+      style={{ mixBlendMode: 'screen' }}
+    />
   );
 }

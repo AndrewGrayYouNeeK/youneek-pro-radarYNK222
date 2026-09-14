@@ -21,7 +21,9 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173). Allow location when the browser asks, then Launch Radar.
+**Live site:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+
+Open [http://localhost:5173](http://localhost:5173) locally. Allow location when the browser asks, then Launch Radar.
 
 To share the local app on the public internet (no Cloudflare login):
 
