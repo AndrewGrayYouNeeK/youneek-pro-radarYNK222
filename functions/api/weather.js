@@ -30,6 +30,10 @@ export async function onRequestGet(context) {
       },
     });
   } catch (err) {
-    return Response.json({ error: err.message || "WeatherKit request failed" }, { status: 502 });
+    const message = err.message || "WeatherKit request failed";
+    const hint = /PKCS#8|\.p8|private key/i.test(message)
+      ? "Edit WEATHERKIT_PRIVATE_KEY on Worker youneek-pro-radarynk222 and paste the entire .p8 file, then retry the deploy."
+      : undefined;
+    return Response.json({ error: message, hint }, { status: 502 });
   }
 }

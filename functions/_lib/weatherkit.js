@@ -13,15 +13,64 @@ export function isWeatherKitConfigured(env) {
   );
 }
 
-function normalizePrivateKey(key) {
-  return key.replace(/\\n/g, "\n");
+export function normalizePrivateKey(raw) {
+  if (raw == null) return "";
+  let key = String(raw).replace(/^\uFEFF/, "").trim();
+  if (
+    (key.startsWith('"') && key.endsWith('"')) ||
+    (key.startsWith("'") && key.endsWith("'"))
+  ) {
+    key = key.slice(1, -1).trim();
+  }
+  key = key
+    .replace(/\\n/g, "\n")
+    .replace(/\\r/g, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+
+  const beginMatch = key.match(/-----BEGIN ([A-Z0-9 ]+)-----/);
+  const endMatch = key.match(/-----END ([A-Z0-9 ]+)-----/);
+  let label = "PRIVATE KEY";
+  let body = key;
+
+  if (beginMatch && endMatch) {
+    label = beginMatch[1].trim();
+    body = key
+      .slice(key.indexOf(beginMatch[0]) + beginMatch[0].length, key.lastIndexOf(endMatch[0]))
+      .replace(/\s+/g, "");
+  } else {
+    body = key.replace(/\s+/g, "");
+  }
+
+  if (label === "EC PRIVATE KEY") {
+    throw new Error(
+      "WeatherKit needs the .p8 PKCS#8 key (-----BEGIN PRIVATE KEY-----), not an EC PRIVATE KEY"
+    );
+  }
+
+  if (!body) {
+    throw new Error("WeatherKit private key is empty");
+  }
+
+  const folded = body.match(/.{1,64}/g) || [body];
+  return `-----BEGIN ${label}-----\n${folded.join("\n")}\n-----END ${label}-----`;
 }
 
 export async function createWeatherKitToken(env) {
   const teamId = env.WEATHERKIT_TEAM_ID;
   const keyId = env.WEATHERKIT_KEY_ID;
   const serviceId = env.WEATHERKIT_SERVICE_ID;
-  const privateKey = await importPKCS8(normalizePrivateKey(env.WEATHERKIT_PRIVATE_KEY), "ES256");
+  let privateKey;
+  try {
+    privateKey = await importPKCS8(normalizePrivateKey(env.WEATHERKIT_PRIVATE_KEY), "ES256");
+  } catch (error) {
+    if (String(error?.message || "").startsWith("WeatherKit")) {
+      throw error;
+    }
+    throw new Error(
+      "WeatherKit private key is not valid PKCS#8. Re-paste the full AuthKey_*.p8 file into the WEATHERKIT_PRIVATE_KEY secret, including the BEGIN PRIVATE KEY and END PRIVATE KEY lines."
+    );
+  }
 
   return new SignJWT({})
     .setProtectedHeader({
