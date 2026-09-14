@@ -82,7 +82,7 @@ export default function HeroSection() {
 
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <Link
-                to="/app"
+                to="/Radar"
                 className="group relative inline-flex items-center gap-2 bg-[#00ff9c] px-6 py-3.5 text-xs font-bold uppercase tracking-[0.25em] text-black transition-colors hover:bg-white"
               >
                 <span className="absolute inset-0 -z-10 -translate-x-1.5 -translate-y-1.5 bg-[#ff00d4] transition-transform group-hover:-translate-x-2 group-hover:-translate-y-2" />
@@ -124,6 +124,13 @@ export default function HeroSection() {
           <div className="relative order-1 lg:order-2 lg:justify-self-end">
             <div className="relative mx-auto max-w-lg lg:max-w-none">
               <RadarSweep />
+              <Link
+                to="/Radar"
+                className="absolute bottom-4 left-1/2 z-10 flex -translate-x-1/2 items-center gap-1 bg-[#00ff9c] px-5 py-2.5 text-[10px] font-bold uppercase tracking-[0.25em] text-black shadow-[0_0_24px_rgba(0,255,156,0.45)] md:hidden"
+              >
+                Launch Radar
+                <ChevronRight className="h-4 w-4" />
+              </Link>
 
               <div className="absolute -left-2 -top-4 hidden w-40 md:block md:-left-8">
                 <WindPanel />

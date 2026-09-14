@@ -6,7 +6,9 @@ main = "./worker/index.js"
 directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
-run_worker_first = ["/api/*"]
+# Run the Worker on every request so HTML is never CDN-cached and stale
+# hashed /assets/* files 404 instead of returning the SPA shell.
+run_worker_first = true
 
 [vars]
 # WeatherKit secrets: WEATHERKIT_TEAM_ID, WEATHERKIT_KEY_ID, WEATHERKIT_SERVICE_ID, WEATHERKIT_PRIVATE_KEY
