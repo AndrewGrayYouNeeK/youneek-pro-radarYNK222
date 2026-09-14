@@ -2,8 +2,14 @@
   X-Frame-Options: DENY
   Content-Security-Policy: frame-ancestors 'none'
 
+/
+  Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-store
+
 /index.html
   Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-store
 
 /manifest.json
   Cache-Control: no-cache, no-store, must-revalidate
+  CDN-Cache-Control: no-store

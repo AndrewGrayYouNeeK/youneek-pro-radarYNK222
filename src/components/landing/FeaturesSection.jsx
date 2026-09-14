@@ -105,7 +105,7 @@ export default function FeaturesSection() {
               </h3>
             </div>
             <Link
-              to="/app"
+              to="/Radar"
               className="group relative inline-flex items-center gap-2 px-8 py-4 bg-[#00ff9c] text-black font-bold text-xs tracking-[0.3em] uppercase whitespace-nowrap hover:bg-white transition-colors"
             >
               <span className="absolute inset-0 bg-[#ff00d4] -translate-x-1.5 -translate-y-1.5 -z-10 group-hover:-translate-x-2 group-hover:-translate-y-2 transition-transform" />

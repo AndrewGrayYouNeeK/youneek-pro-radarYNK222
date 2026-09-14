@@ -8,6 +8,7 @@ import { onRequestGet as getFires } from "../functions/api/fires.js";
 import { onRequestGet as getOutlook } from "../functions/api/outlook.js";
 import { onRequestGet as getTile } from "../functions/api/tile.js";
 import { handleNwsRequest } from "../server/nwsApi.js";
+import { finalizeAssetResponse } from "./serveAssets.js";
 
 export default {
   async fetch(request, env) {
@@ -62,6 +63,7 @@ export default {
       }
     }
 
-    return env.ASSETS.fetch(request);
+    const assetResponse = await env.ASSETS.fetch(request);
+    return finalizeAssetResponse(request, assetResponse);
   },
 };
