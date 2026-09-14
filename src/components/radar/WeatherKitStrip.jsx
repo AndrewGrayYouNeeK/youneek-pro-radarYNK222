@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { ChevronRight, LoaderCircle } from "lucide-react";
+import { ChevronRight, LoaderCircle, X } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { describeWeatherCode } from "@/lib/weather/conditions";
 import { formatTemp } from "@/lib/weather/units";
@@ -27,6 +28,13 @@ export default function WeatherKitStrip() {
     queryFn: () => fetchPointAlerts(coords.latitude, coords.longitude),
   });
 
+  const [deskOpen, setDeskOpen] = useState(() => {
+    if (typeof window === "undefined") return true;
+    return sessionStorage.getItem("radarDeskHidden") !== "1";
+  });
+
+  if (!deskOpen) return null;
+
   if (locationLoading || (isLoading && coords && !current)) {
     return (
       <div className="border-b border-white/10 bg-slate-950/95 px-4 py-2">
@@ -48,38 +56,51 @@ export default function WeatherKitStrip() {
   const alertCount = alertsQuery.data?.features?.length || 0;
 
   return (
-    <button
-      type="button"
-      onClick={() => navigate("/Forecast")}
-      className="w-full border-b border-white/10 bg-slate-950/95 px-4 py-2 text-left transition-colors hover:bg-white/5"
-    >
-      <div className="mx-auto flex max-w-md items-center justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <Icon className="h-5 w-5 shrink-0 text-sky-300" aria-hidden="true" />
-          <div className="min-w-0">
-            <div className="flex items-baseline gap-2">
-              <span className="text-lg font-semibold tabular-nums text-white">
-                {formatTemp(current.temperature_2m, units.temp)}
-              </span>
-              <span className="truncate text-xs text-slate-400">
-                {current.condition_label || code.label}
-              </span>
-            </div>
-            <div className="text-[11px] text-slate-500">
-              {nextHour
-                ? `Next hour ${formatTemp(nextHour.temperature, units.temp)} · ${nextHour.pop}% rain`
-                : source === "weatherkit"
-                  ? "WeatherKit + Open-Meteo"
-                  : "Open-Meteo + NWS"}
-              {alertCount > 0 ? ` · ${alertCount} alert${alertCount === 1 ? "" : "s"}` : ""}
+    <div className="flex w-full items-stretch border-b border-white/10 bg-slate-950/95">
+      <button
+        type="button"
+        onClick={() => navigate("/Forecast")}
+        className="min-w-0 flex-1 px-4 py-2 text-left transition-colors hover:bg-white/5"
+      >
+        <div className="mx-auto flex max-w-md items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <Icon className="h-5 w-5 shrink-0 text-sky-300" aria-hidden="true" />
+            <div className="min-w-0">
+              <div className="flex items-baseline gap-2">
+                <span className="text-lg font-semibold tabular-nums text-white">
+                  {formatTemp(current.temperature_2m, units.temp)}
+                </span>
+                <span className="truncate text-xs text-slate-400">
+                  {current.condition_label || code.label}
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-500">
+                {nextHour
+                  ? `Next hour ${formatTemp(nextHour.temperature, units.temp)} · ${nextHour.pop}% rain`
+                  : source === "weatherkit"
+                    ? "WeatherKit + Open-Meteo"
+                    : "Open-Meteo + NWS"}
+                {alertCount > 0 ? ` · ${alertCount} alert${alertCount === 1 ? "" : "s"}` : ""}
+              </div>
             </div>
           </div>
+          <div className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-sky-300">
+            Forecast
+            <ChevronRight className="h-4 w-4" aria-hidden="true" />
+          </div>
         </div>
-        <div className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-sky-300">
-          Forecast
-          <ChevronRight className="h-4 w-4" aria-hidden="true" />
-        </div>
-      </div>
-    </button>
+      </button>
+      <button
+        type="button"
+        onClick={() => {
+          sessionStorage.setItem("radarDeskHidden", "1");
+          setDeskOpen(false);
+        }}
+        className="shrink-0 border-l border-white/10 px-3 text-slate-500 transition-colors hover:bg-white/5 hover:text-white"
+        aria-label="Hide weather desk"
+      >
+        <X className="h-4 w-4" aria-hidden="true" />
+      </button>
+    </div>
   );
 }
