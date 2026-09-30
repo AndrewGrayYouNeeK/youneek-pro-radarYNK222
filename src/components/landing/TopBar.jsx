@@ -62,7 +62,7 @@ export default function TopBar() {
             )
           )}
           <Link
-            to="/app"
+            to="/Radar"
             className="ml-4 relative px-5 py-2 text-xs uppercase tracking-[0.25em] font-bold text-black bg-[#00ff9c] hover:bg-white transition-colors"
           >
             <span className="absolute inset-0 bg-[#ff00d4] -translate-x-1 -translate-y-1 -z-10" />
@@ -70,14 +70,22 @@ export default function TopBar() {
           </Link>
         </nav>
 
-        {/* Mobile Toggle */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden relative z-[260] text-[#00ff9c] p-2 border border-[#00ff9c]/40 bg-black"
-          aria-label={open ? 'Close menu' : 'Open menu'}
-        >
-          {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        {/* Mobile: Launch stays on-screen — the desk CTA sits below the radar HUD */}
+        <div className="md:hidden relative z-[260] flex items-center gap-2">
+          <Link
+            to="/Radar"
+            className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black bg-[#00ff9c]"
+          >
+            Launch
+          </Link>
+          <button
+            onClick={() => setOpen(!open)}
+            className="text-[#00ff9c] p-2 border border-[#00ff9c]/40 bg-black"
+            aria-label={open ? 'Close menu' : 'Open menu'}
+          >
+            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu — fixed overlay above rain (z-60) and location bar (z-70) */}
@@ -113,11 +121,11 @@ export default function TopBar() {
                 )
               )}
               <Link
-                to="/app"
+                to="/Radar"
                 onClick={() => setOpen(false)}
                 className="px-4 py-3 text-xs uppercase tracking-[0.25em] text-center font-bold text-black bg-[#00ff9c] hover:bg-white transition"
               >
-                Launch App
+                Launch Radar
               </Link>
             </nav>
           </div>

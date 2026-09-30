@@ -14,7 +14,7 @@ Cloudflare project: **`youneek-pro-radarynk222`**.
 
 ## Workers Builds
 
-`wrangler.toml` sets `[assets] directory = "./dist"` and `run_worker_first = ["/api/*"]`.
+`wrangler.toml` sets `[assets] directory = "./dist"` and `run_worker_first = true` so the Worker can set `no-store` on HTML (the landing shell) and 404 missing hashed assets instead of serving `index.html`.
 
 | Setting | Value |
 |---------|-------|
