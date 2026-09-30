@@ -35,7 +35,7 @@ export default function HeroSection() {
 
       {/* Lightning title overlay — above weather, hidden between bolts */}
       <h1
-        className="hero-title-strike pointer-events-none fixed inset-x-0 top-[22%] z-[80] px-5 text-center font-bold leading-[0.9] tracking-tight md:top-[28%] md:px-8"
+        className="hero-title-strike pointer-events-none absolute inset-x-0 top-[22%] z-[45] px-5 text-center font-bold leading-[0.9] tracking-tight md:top-[28%] md:px-8"
         aria-hidden="true"
       >
         <span className="block text-[13vw] text-white md:text-[5.5rem] lg:text-[6.5rem]">
@@ -60,7 +60,7 @@ export default function HeroSection() {
         <div className="grid flex-1 items-start gap-8 lg:grid-cols-2 lg:items-center lg:gap-12">
           {/* Weather desk sits after the radar on small screens so it cannot bury the scan */}
           <div className="relative order-2 flex max-w-xl flex-col lg:order-1">
-            <div className="mb-3 inline-flex w-fit items-center gap-3 border border-[#00ff9c]/40 bg-black/80 px-3 py-1.5 backdrop-blur">
+            <div className="mb-3 inline-flex w-fit items-center gap-3 border border-[#00ff9c]/40 bg-black/95 px-3 py-1.5">
               <span className="h-2 w-2 animate-pulse rounded-full bg-[#00ff9c] shadow-[0_0_8px_#00ff9c]" />
               <span className="text-[10px] uppercase tracking-[0.3em] text-[#00ff9c]">SYS_ONLINE</span>
               <span className="text-[10px] text-white/40">|</span>

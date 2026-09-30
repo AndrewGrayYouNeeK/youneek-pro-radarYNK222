@@ -25,7 +25,7 @@ export default function LightningFlash() {
 
   return (
     <div
-      className="ynk-lightning-overlay pointer-events-none fixed inset-0 z-[65] bg-white opacity-0"
+      className="ynk-lightning-overlay pointer-events-none fixed inset-0 z-[2] bg-white opacity-0"
       style={{ mixBlendMode: 'screen' }}
     />
   );

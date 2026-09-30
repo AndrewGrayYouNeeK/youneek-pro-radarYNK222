@@ -90,7 +90,7 @@ export default function CurrentConditions() {
 
         {!waiting && current && (
           <>
-            <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border border-[#00ff9c]/20 bg-black/60 p-5">
+            <div className="mb-8 flex flex-wrap items-end justify-between gap-6 border border-[#00ff9c]/20 bg-black/95 p-5">
               <div>
                 <div className="flex items-baseline gap-2">
                   <span className="text-6xl font-bold tabular-nums text-white md:text-7xl">
@@ -143,7 +143,7 @@ export default function CurrentConditions() {
                     const hourCode = describeWeatherCode(hour.weather_code);
                     const HourIcon = hourCode.icon;
                     return (
-                      <div key={hour.time} className="min-w-[4.6rem] border border-[#00ff9c]/20 bg-black/60 p-3 text-center">
+                      <div key={hour.time} className="min-w-[4.6rem] border border-[#00ff9c]/20 bg-black/95 p-3 text-center">
                         <div className="truncate text-[9px] uppercase tracking-[0.2em] text-[#00ff9c]">{formatHourTime(hour.time)}</div>
                         <HourIcon className="mx-auto my-2 h-4 w-4 text-white/70" aria-hidden="true" />
                         <div className="text-lg font-bold tabular-nums text-white">{formatTemp(hour.temperature, units.temp)}</div>
@@ -165,7 +165,7 @@ export default function CurrentConditions() {
                     const dayCode = describeWeatherCode(day.weather_code);
                     const DayIcon = dayCode.icon;
                     return (
-                      <div key={day.date} className="border border-[#00ff9c]/20 bg-black/60 p-3">
+                      <div key={day.date} className="border border-[#00ff9c]/20 bg-black/95 p-3">
                         <div className="mb-2 truncate text-[9px] uppercase tracking-[0.2em] text-[#00ff9c]">
                           {formatDayLabel(day.date)}
                         </div>
@@ -191,7 +191,7 @@ export default function CurrentConditions() {
 
 function Stat({ icon: Icon, label, value, unit, accent }) {
   return (
-    <div className="relative border border-white/10 bg-black/60 p-4">
+    <div className="relative border border-white/10 bg-black/95 p-4">
       <span className="absolute left-0 top-0 h-2 w-2 border-l border-t" style={{ borderColor: accent }} />
       <span className="absolute bottom-0 right-0 h-2 w-2 border-b border-r" style={{ borderColor: accent }} />
       <div className="mb-2 flex items-center gap-2">
