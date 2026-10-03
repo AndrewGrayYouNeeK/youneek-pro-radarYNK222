@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import WeatherLink from "./WeatherLink";
 import {
   ChevronRight,
   Cloud,
@@ -64,13 +64,13 @@ export default function CurrentConditions() {
               </span>
             </div>
           </div>
-          <Link
+          <WeatherLink
             to="/Forecast"
             className="inline-flex items-center gap-2 border border-[#00ff9c]/40 px-4 py-2 text-[10px] uppercase tracking-[0.25em] text-[#00ff9c] hover:bg-[#00ff9c]/10"
           >
             Open forecast desk
             <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          </WeatherLink>
         </div>
 
         {waiting && (

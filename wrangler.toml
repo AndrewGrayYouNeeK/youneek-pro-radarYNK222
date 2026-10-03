@@ -11,5 +11,6 @@ not_found_handling = "single-page-application"
 run_worker_first = true
 
 [vars]
-# WeatherKit secrets: WEATHERKIT_TEAM_ID, WEATHERKIT_KEY_ID, WEATHERKIT_SERVICE_ID, WEATHERKIT_PRIVATE_KEY
-# See WEATHERKIT.md for Apple Developer setup.
+# This Worker is the landing. The weather app is youneekproradar.com
+# (youneekproradarbaby). WeatherKit secrets belong on that Worker.
+# See WEATHERKIT.md.

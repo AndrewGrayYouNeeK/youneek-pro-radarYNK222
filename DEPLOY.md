@@ -1,16 +1,17 @@
 # Deploy guide — landing + radar
 
-This repository is one app:
+This repository is the **MAKING IT RAIN** landing. The live weather app is **[youneekproradar.com](https://youneekproradar.com)** (`youneekproradarbaby` Worker).
 
 | Path | What it is |
 |------|------------|
 | `/` | Cinematic landing (MAKING IT RAIN) |
-| `/Radar` (`/app`) | Live NEXRAD radar product |
-| `/Forecast` `/Globe` `/Contacts` `/Settings` | WeatherKit, globe, safety, prefs |
+| `/app`, `/Radar`, `/Forecast`, `/Hourly`, `/Globe`, `/Settings` | 302 to [youneekproradar.com](https://youneekproradar.com) |
 
 Cloudflare project: **`youneek-pro-radarynk222`**.
 
-**Production URL:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+**Landing URL:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+
+**Weather app:** [https://youneekproradar.com](https://youneekproradar.com)
 
 ## Workers Builds
 

@@ -9,6 +9,7 @@ import { onRequestGet as getOutlook } from "../functions/api/outlook.js";
 import { onRequestGet as getTile } from "../functions/api/tile.js";
 import { handleNwsRequest } from "../server/nwsApi.js";
 import { finalizeAssetResponse } from "./serveAssets.js";
+import { weatherRedirect } from "../src/lib/weatherApp.js";
 
 export default {
   async fetch(request, env) {
@@ -48,6 +49,13 @@ export default {
 
     if (request.method === "GET" && pathname === "/api/tile") {
       return getTile({ request });
+    }
+
+    if (request.method === "GET") {
+      const weatherUrl = weatherRedirect(pathname);
+      if (weatherUrl) {
+        return Response.redirect(weatherUrl, 302);
+      }
     }
 
     if (request.method === "POST" && pathname === "/api/nws") {

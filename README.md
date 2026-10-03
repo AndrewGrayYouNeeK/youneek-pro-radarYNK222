@@ -1,14 +1,11 @@
 # YouNeeK Pro Radar
 
-Cinematic landing site **and** live radar product in one app. Slogan: **MAKING IT RAIN**.
+Cinematic landing site for **YouNeeK Pro Radar**. Slogan: **MAKING IT RAIN**.
 
-- **`/`** — storm landing (GPS location, neon signs, WeatherBug-class conditions, SOS)
-- **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires
-- **`/Forecast`** — current / hourly (168h) / 16-day, AQI, pollen, UV, storm risk, winter, history
-- **`/Globe`** — 3D globe with live and future weather radar, lightning, hurricanes, and wildfires
-- **`/More`** — air quality, pollen, lightning, cameras, wildfires, health, news, sun & moon, safety contacts
-- **`/Hurricanes`**, **`/Fires`**, **`/Briefing`** — WeatherBug-class centers, all included
-- **`/Contacts`** and **`/Settings`** — emergency SMS drafts, units, and preferences
+The live weather app (NOW / Hourly / 10 Day / Maps) is **[youneekproradar.com](https://youneekproradar.com)**. Landing **Launch** opens that site.
+
+- **`/`** — storm landing (GPS location, neon signs, live conditions, SOS)
+- **Launch / `/app` / `/Radar` / `/Forecast`** — [youneekproradar.com](https://youneekproradar.com) (`youneekproradarbaby`)
 
 ## Local Development
 
@@ -21,7 +18,9 @@ npm install
 npm run dev
 ```
 
-**Live site:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+**Landing:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+
+**Weather app:** [https://youneekproradar.com](https://youneekproradar.com)
 
 Open [http://localhost:5173](http://localhost:5173) locally. Allow location when the browser asks, then Launch Radar.
 

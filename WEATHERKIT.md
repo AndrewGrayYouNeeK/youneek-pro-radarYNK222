@@ -72,7 +72,10 @@ This Services ID becomes your `WEATHERKIT_SERVICE_ID`.
 
 ## Step 5 — Production (Cloudflare Worker)
 
-Set secrets on the **`youneek-pro-radarynk222`** Worker (never commit these):
+Set secrets on the Worker that serves the page you are testing (never commit these):
+
+- **[youneekproradar.com](https://youneekproradar.com)** (NOW / Hourly / 10 Day) → **`youneekproradarbaby`**
+- This landing site → **`youneek-pro-radarynk222`**
 
 ```bash
 npx wrangler secret put WEATHERKIT_TEAM_ID
@@ -81,7 +84,7 @@ npx wrangler secret put WEATHERKIT_SERVICE_ID
 npx wrangler secret put WEATHERKIT_PRIVATE_KEY
 ```
 
-Or in the Cloudflare dashboard: **Workers & Pages → youneek-pro-radarynk222 → Settings → Variables and Secrets → Add**.
+Or in the Cloudflare dashboard: **Workers & Pages → youneekproradarbaby** (or **youneek-pro-radarynk222** for this landing) → **Settings → Variables and Secrets → Add**.
 
 For `WEATHERKIT_PRIVATE_KEY`, paste the **entire** `AuthKey_XXXXXX.p8` file, including both of these lines:
 
@@ -110,11 +113,11 @@ GET /api/weather?lat=37.77&lon=-122.42
 
 | Problem | Fix |
 |---|---|
-| `WeatherKit is not configured` | Set all four `WEATHERKIT_*` secrets on **youneek-pro-radarynk222** |
+| `WeatherKit is not configured` | Set all four `WEATHERKIT_*` secrets on **youneekproradarbaby** for youneekproradar.com, or **youneek-pro-radarynk222** for this landing |
 | `PKCS#8` / invalid private key | Re-paste the full `.p8` file into `WEATHERKIT_PRIVATE_KEY` (include BEGIN/END lines). Then retry the Workers deploy. |
 | `401` / `403` from Apple | Verify Team ID, Key ID, Services ID, and that WeatherKit is enabled on both the key and Services ID |
 | Forecast still shows Open-Meteo | Weather still loads from the backup feed. WeatherKit is working when Forecast says **Apple WeatherKit + Open-Meteo extras**. |
-| Works locally but not in production | Confirm secrets are on `youneek-pro-radarynk222`, not an older Worker name |
+| Works locally but not in production | Confirm secrets are on `youneekproradarbaby` (youneekproradar.com) or `youneek-pro-radarynk222` (this landing) |
 
 ## Pricing note
 

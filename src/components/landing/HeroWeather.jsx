@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 import { ChevronDown, ChevronRight, Loader2, MapPin } from "lucide-react";
+import WeatherLink from "./WeatherLink";
 import { describeWeatherCode, degToCardinal, formatHourTime } from "@/lib/weather/conditions";
 import { formatTemp, formatWind, tempSuffix } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
@@ -124,13 +124,13 @@ export default function HeroWeather() {
             </div>
           )}
 
-          <Link
+          <WeatherLink
             to="/Forecast"
             className="mt-4 inline-flex items-center gap-1 text-[10px] uppercase tracking-[0.25em] text-[#00ff9c] hover:text-white"
           >
             Full forecast desk
             <ChevronRight className="h-3.5 w-3.5" />
-          </Link>
+          </WeatherLink>
         </div>
       )}
     </div>
