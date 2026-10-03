@@ -7,7 +7,7 @@ import { convertWindMph, formatNumber, windSuffix } from '@/lib/weather/units';
 import { useUnits } from '@/lib/UnitsContext';
 
 const Panel = ({ children, className = '' }) => (
-  <div className={`relative z-[40] bg-black/70 backdrop-blur-md border border-[#00ff9c]/30 p-3 ${className}`}>
+  <div className={`relative z-[40] bg-black/95 border border-[#00ff9c]/30 p-3 ${className}`}>
     <span className="absolute -top-px -left-px w-3 h-3 border-t border-l border-[#00ff9c]" />
     <span className="absolute -top-px -right-px w-3 h-3 border-t border-r border-[#ff00d4]" />
     <span className="absolute -bottom-px -left-px w-3 h-3 border-b border-l border-[#ff00d4]" />

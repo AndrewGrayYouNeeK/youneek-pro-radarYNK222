@@ -49,7 +49,7 @@ export default function LocationBar() {
     <div className="relative z-[70]">
       <button
         onClick={() => setOpen(!open)}
-        className="relative inline-flex max-w-full items-center gap-2 border border-[#00ff9c]/40 bg-black/80 px-3 py-2 text-left transition hover:bg-[#00ff9c]/10"
+        className="relative inline-flex max-w-full items-center gap-2 border border-[#00ff9c]/40 bg-black/95 px-3 py-2 text-left transition hover:bg-[#00ff9c]/10"
       >
         <MapPin className="h-3.5 w-3.5 shrink-0 text-[#ff00d4]" />
         <span className="shrink-0 font-mono text-[10px] uppercase tracking-[0.25em] text-white/50">Location</span>

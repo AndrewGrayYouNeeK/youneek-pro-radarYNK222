@@ -112,7 +112,7 @@ export default function LiveAlerts() {
         )}
 
         {!loading && alerts.length === 0 && !error && (
-          <div className="relative z-[70] border border-[#00ff9c]/30 bg-black/80 p-8 text-center">
+          <div className="relative z-[70] border border-[#00ff9c]/30 bg-black/95 p-8 text-center">
             <ShieldAlert className="w-6 h-6 text-[#00ff9c] mx-auto mb-3" />
             <div className="text-white text-sm">
               No active alerts {scope === 'local' && location?.state ? `for ${location.state}` : 'across CONUS'}.
@@ -127,7 +127,7 @@ export default function LiveAlerts() {
             return (
               <div
                 key={a.id}
-                className="relative z-[70] border border-white/10 bg-black/80 backdrop-blur p-4 hover:border-[#00ff9c]/40 transition"
+                className="relative z-[70] border border-white/10 bg-black/95 p-4 hover:border-[#00ff9c]/40 transition"
                 style={{ borderLeftColor: color, borderLeftWidth: 3 }}
               >
                 <div className="flex items-start justify-between gap-2 mb-2">

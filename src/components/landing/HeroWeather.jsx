@@ -32,7 +32,7 @@ export default function HeroWeather() {
   const nextHours = hourly.slice(0, deskOpen ? 8 : 0);
 
   return (
-    <div className="relative z-[70] w-full border border-[#00ff9c]/30 bg-black/85 backdrop-blur-md">
+    <div className="relative z-[70] w-full border border-[#00ff9c]/30 bg-black/95">
       <div className="flex items-center justify-between gap-3 border-b border-[#00ff9c]/20 px-4 py-2.5">
         <div className="flex min-w-0 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.28em] text-[#00ff9c]">
           <MapPin className="h-3 w-3 shrink-0 text-[#ff00d4]" />
@@ -108,7 +108,7 @@ export default function HeroWeather() {
                     return (
                       <div
                         key={hour.time}
-                        className="min-w-[3.5rem] border border-white/10 bg-black/50 px-2 py-2 text-center"
+                        className="min-w-[3.5rem] border border-white/10 bg-black px-2 py-2 text-center"
                       >
                         <div className="text-[9px] uppercase tracking-wider text-white/40">{formatHourTime(hour.time)}</div>
                         <HourIcon className="mx-auto my-1.5 h-3.5 w-3.5 text-[#00ff9c]/80" aria-hidden="true" />

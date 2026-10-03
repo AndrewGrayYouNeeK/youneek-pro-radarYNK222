@@ -19,14 +19,16 @@ export default function Landing() {
       <TornadoBackground />
       <RainOverlay />
       <LightningFlash />
-      <HeroSection />
-      <LiveRadar />
-      <CurrentConditions />
-      <LiveAlerts />
-      <NeonBrandShowcase />
-      <NoaaRadioSection />
-      <FeaturesSection />
-      <LandingFooter />
+      <div className="relative z-10">
+        <HeroSection />
+        <LiveRadar />
+        <CurrentConditions />
+        <LiveAlerts />
+        <NeonBrandShowcase />
+        <NoaaRadioSection />
+        <FeaturesSection />
+        <LandingFooter />
+      </div>
       <SosButton />
       <ClickSplash />
     </div>
