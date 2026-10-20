@@ -17,6 +17,10 @@ import HistoricalCard from "@/components/forecast/HistoricalCard";
 import PrecipOutlookCard from "@/components/forecast/PrecipOutlookCard";
 import LightningProximityCard from "@/components/forecast/LightningProximityCard";
 import HubLinks from "@/components/forecast/HubLinks";
+import LifestyleStrip from "@/components/forecast/LifestyleStrip";
+import MoreShortcuts from "@/components/forecast/MoreShortcuts";
+import NotifyBanners from "@/components/forecast/NotifyBanners";
+import { skyTheme } from "@/lib/weather/skyTheme";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { isMissingWeatherKit } from "@/lib/api/unifiedWeather";
@@ -77,6 +81,13 @@ export default function Forecast() {
 
   const emergency = useWeatherEmergency(alerts);
   const showLoading = locationLoading || (Boolean(coords) && isLoading && !data);
+  const current = data?.current?.current;
+  const scene = skyTheme({
+    weatherCode: current?.weather_code,
+    conditionCode: current?.condition_code,
+    daylight: current?.daylight,
+    precipitationIntensity: current?.precipitation_intensity,
+  });
 
   useEffect(() => {
     const id = window.location.hash.replace("#", "");
@@ -143,8 +154,18 @@ export default function Forecast() {
                   <SafetyTextActions compact />
                 </section>
               )}
+              {data && (
+                <div
+                  className="h-2 rounded-full"
+                  style={{ background: scene.background }}
+                  aria-hidden="true"
+                  data-sky={scene.name}
+                />
+              )}
+              <NotifyBanners coords={coords} />
               <WeatherAlertsCard alerts={alerts} />
               <CurrentConditionsCard data={data.current} />
+              <LifestyleStrip current={current} coords={coords} />
               <LightningProximityCard coords={coords} />
               <PrecipOutlookCard extras={data.extras} />
               <MinutePrecipitation minutes={data.minutes} />
@@ -162,6 +183,7 @@ export default function Forecast() {
               <div id="daily" className="scroll-mt-24">
                 <DailyList days={data.daily} />
               </div>
+              <MoreShortcuts />
               <HubLinks />
             </>
           )}

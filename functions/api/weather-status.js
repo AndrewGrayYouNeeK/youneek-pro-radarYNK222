@@ -1,14 +1,13 @@
-import { inspectWeatherKitEnv, weatherKitSecretsHint } from "../_lib/weatherkit-key.js";
+import { probeWeatherKitAuth, weatherKitAuthHint } from "../_lib/weatherkit-auth.js";
 import { jsonWithCors } from "../_lib/cors.js";
 
 export async function onRequestGet({ env }) {
-  const status = inspectWeatherKitEnv(env);
+  const status = await probeWeatherKitAuth(env);
   return jsonWithCors(
     {
       ...status,
-      hint: status.configured
-        ? `Weather website ${status.project} has all four secrets. If forecasts still say Open-Meteo, Apple is rejecting the token or the private key cannot be parsed.`
-        : weatherKitSecretsHint(env),
+      hint: weatherKitAuthHint(status.auth, env, status.error),
+      fallback: ["open-meteo", "nws"],
     },
     {
       headers: { "Cache-Control": "no-store" },

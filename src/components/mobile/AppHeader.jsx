@@ -1,6 +1,7 @@
 import { ChevronLeft, Home } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { useNavigationStack } from "@/lib/NavigationStack";
+import { MARKETING_URL } from "@/lib/sites";
 
 const TITLES = {
   "/Radar": "Radar",
@@ -18,6 +19,7 @@ const TITLES = {
   "/Health": "Health & sports",
   "/News": "Weather news",
   "/Astronomy": "Sun & moon",
+  "/Radio": "NOAA Weather Radio",
   "/Contacts": "Contacts",
   "/Settings": "Settings",
   "/Privacy": "Privacy",
@@ -46,13 +48,13 @@ export default function AppHeader({ title }) {
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
             </button>
           ) : (
-            <Link
-              to="/"
-              aria-label="Back to landing"
+            <a
+              href={MARKETING_URL}
+              aria-label="YouNeeK website"
               className="flex h-11 w-11 items-center justify-center rounded-full text-white transition-colors hover:bg-white/10"
             >
               <Home className="h-5 w-5" aria-hidden="true" />
-            </Link>
+            </a>
           )}
           <h1 className="truncate text-lg font-semibold text-white">{resolvedTitle}</h1>
         </div>

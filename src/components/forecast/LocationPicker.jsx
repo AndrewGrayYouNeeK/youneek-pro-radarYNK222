@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Crosshair, MapPin, Search, Star, X } from "lucide-react";
-import { useLocation as useAppLocation } from "@/components/landing/LocationContext";
+import { useLocation as useAppLocation } from "@/lib/LocationContext";
 import { getSavedLocations, removeSavedLocation, upsertSavedLocation } from "@/lib/savedLocations";
 
 export default function LocationPicker({ compact = false }) {

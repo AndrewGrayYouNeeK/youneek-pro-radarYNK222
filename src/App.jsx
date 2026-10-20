@@ -6,7 +6,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation }
 import { AnimatePresence, motion } from "framer-motion";
 import PageNotFound from "./lib/PageNotFound";
 import RadarApp from "./pages/RadarApp";
-import { LocationProvider } from "@/components/landing/LocationContext";
+import { LocationProvider } from "@/lib/LocationContext";
 import { AuthProvider } from "@/lib/AuthContext";
 import { UnitsProvider } from "@/lib/UnitsContext";
 import { NavigationStackProvider } from "@/lib/NavigationStack";
@@ -76,7 +76,6 @@ function App() {
           <Router>
             <Routes>
               <Route path="/" element={<Navigate to="/Radar" replace />} />
-              <Route path="/landing" element={<Navigate to="/Radar" replace />} />
               <Route path="/app" element={<RadarApp />} />
               <Route
                 element={

@@ -10,7 +10,7 @@ import useWeatherLocation from "@/hooks/useWeatherLocation";
 export default function Wildfire() {
   const { coords } = useWeatherLocation();
   const { units } = useUnits();
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["wildfires"],
     staleTime: 300000,
     queryFn: async () => {
@@ -49,7 +49,9 @@ export default function Wildfire() {
             </div>
           </article>
         ))}
-        {!fires.length && <p className="px-4 py-6 text-sm text-slate-400">No open wildfire events in the feed.</p>}
+        {isLoading && <p className="px-4 py-6 text-sm text-slate-400">Loading NASA EONET wildfires…</p>}
+        {isError && <p className="px-4 py-6 text-sm text-red-300">Wildfire updates are unavailable right now.</p>}
+        {!isLoading && !fires.length && <p className="px-4 py-6 text-sm text-slate-400">No open wildfire events in the feed.</p>}
       </div>
     </PageScaffold>
   );

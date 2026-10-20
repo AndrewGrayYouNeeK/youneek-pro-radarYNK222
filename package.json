@@ -10,17 +10,13 @@
     "tunnel": "node scripts/share-tunnel.mjs",
     "tunnel:config": "bash scripts/write-tunnel-config.sh",
     "build": "vite build",
-    "build:landing": "vite build --mode landing",
-    "dev:landing": "vite --mode landing",
-    "test": "node --test src/lib/weather/weatherkit-units.test.js src/lib/weather/skyTheme.test.js src/lib/safety/weatherEmergency.test.js functions/api/point-alerts.test.js functions/_lib/weatherkit-key.test.js functions/_lib/site.test.js functions/_lib/wrangler-config.test.js scripts/deploy-website.test.js scripts/test-map-desk.mjs",
+    "test": "node --test src/lib/weather/weatherkit-units.test.js src/lib/weather/skyTheme.test.js src/lib/safety/weatherEmergency.test.js functions/api/point-alerts.test.js functions/_lib/weatherkit-key.test.js functions/_lib/weatherkit-auth.test.js functions/_lib/site.test.js functions/_lib/wrangler-config.test.js scripts/test-map-desk.mjs",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
     "preview": "vite preview",
     "deploy": "wrangler deploy",
     "deploy:weather": "wrangler deploy",
-    "deploy:landing": "node scripts/deploy-website.mjs",
-    "deploy:website": "node scripts/deploy-website.mjs",
     "pages:deploy": "npm run build && npm run deploy"
   },
   "dependencies": {

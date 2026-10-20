@@ -13,7 +13,7 @@ import { onRequestGet as getAlertsWorker } from "./functions/api/alerts.js";
 import { onRequestGet as getPointAlerts } from "./functions/api/point-alerts.js";
 import { onRequestGet as getSite } from "./functions/api/site.js";
 import { onRequestGet as getWeatherStatus } from "./functions/api/weather-status.js";
-import { DEFAULT_WEATHER_APP_URL, LANDING_PROJECT, WEATHER_PROJECT } from "./functions/_lib/site.js";
+import { WEATHER_PROJECT } from "./functions/_lib/site.js";
 
 function attachJsonRoute(server, route, handler) {
   server.middlewares.use(route, async (req, res) => {
@@ -136,9 +136,7 @@ function attachRadarApi(server, mode) {
     const response = await getSite({
       env: {
         ...workerEnv,
-        SITE_ROLE: mode === "landing" ? "landing" : "weather",
-        WORKER_PROJECT: mode === "landing" ? LANDING_PROJECT : WEATHER_PROJECT,
-        WEATHER_APP_URL: mode === "landing" ? DEFAULT_WEATHER_APP_URL : "",
+        WORKER_PROJECT: WEATHER_PROJECT,
       },
     });
     const headers = {};
@@ -208,34 +206,14 @@ const tunnelHost = {
 };
 
 export default defineConfig(({ mode }) => {
-  const landing = mode === "landing";
   return {
   plugins: [
     react(),
-    landing
-      ? {
-          name: "landing-entry",
-          transformIndexHtml: {
-            order: "pre",
-            handler(html) {
-              return html.replace("/src/main.jsx", "/src/landing-main.jsx");
-            },
-          },
-        }
-      : null,
     nwsLandingApi(),
     radarApiDevProxy(mode),
-  ].filter(Boolean),
-  define: landing
-    ? {
-        "import.meta.env.VITE_SITE": JSON.stringify("landing"),
-        "import.meta.env.VITE_WEATHER_APP_URL": JSON.stringify(process.env.VITE_WEATHER_APP_URL || DEFAULT_WEATHER_APP_URL),
-      }
-    : {
-        "import.meta.env.VITE_SITE": JSON.stringify("weather"),
-      },
+  ],
   build: {
-    outDir: landing ? "dist-landing" : "dist",
+    outDir: "dist",
     emptyOutDir: true,
   },
   resolve: {

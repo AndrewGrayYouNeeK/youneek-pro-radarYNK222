@@ -1,6 +1,8 @@
 # Apple WeatherKit setup
 
-This app can use [Apple WeatherKit](https://developer.apple.com/weatherkit/) for current conditions and forecasts via `/api/weather`. Radar and NWS alerts work without Apple credentials; WeatherKit is optional but higher quality for forecast data.
+This weather app uses the [Apple WeatherKit REST API](https://developer.apple.com/weatherkit/) for current conditions, hourly, daily, next-hour precipitation, and weather alerts via `/api/weather`. The Cloudflare Worker signs a short-lived ES256 JWT with the `.p8` key. Radar, NWS alerts, and Open-Meteo forecasts work when the key is missing or Apple rejects it.
+
+The marketing site [https://youneekproradar.com](https://youneekproradar.com) is a different Worker. Do not put these secrets there.
 
 ## Requirements
 
@@ -19,16 +21,16 @@ This app can use [Apple WeatherKit](https://developer.apple.com/weatherkit/) for
 2. Click **+** → choose **Services IDs** → Continue
 3. Description: `YouNeeK Pro Radar Weather`
 4. Identifier: `com.youneek.proradar.weather` (must be unique to your account)
-5. Enable **WeatherKit** → Configure if prompted → Save
+5. Enable the **WeatherKit** capability → Configure if prompted → Save
 
-This Services ID becomes your `WEATHERKIT_SERVICE_ID`.
+This Services ID becomes your `WEATHERKIT_SERVICE_ID`. WeatherKit must be enabled on this Services ID, not only on an iOS app identifier.
 
 ## Step 3 — Create a WeatherKit API key
 
 1. Go to [Keys](https://developer.apple.com/account/resources/authkeys/list)
 2. Click **+** to create a key
 3. Name: `YouNeeK Pro Radar WeatherKit`
-4. Enable **WeatherKit**
+4. Enable the **WeatherKit** capability on the key
 5. Register → **Download** the `.p8` file (you can only download it once)
 6. Note the **Key ID** shown on the page → this is `WEATHERKIT_KEY_ID`
 
@@ -72,7 +74,7 @@ This Services ID becomes your `WEATHERKIT_SERVICE_ID`.
 
 ## Step 5 — Production (Cloudflare Worker)
 
-Set secrets on the **`youneek-pro-radarynk222`** Worker (never commit these):
+Set secrets on the **`youneek-pro-radarynk222`** Worker (never commit these, and never paste them into git):
 
 ```bash
 npx wrangler secret put WEATHERKIT_TEAM_ID
@@ -80,6 +82,8 @@ npx wrangler secret put WEATHERKIT_KEY_ID
 npx wrangler secret put WEATHERKIT_SERVICE_ID
 npx wrangler secret put WEATHERKIT_PRIVATE_KEY
 ```
+
+`wrangler secret put` reads `name` from `wrangler.toml`, which is `youneek-pro-radarynk222`. Paste the `.p8` contents when prompted for `WEATHERKIT_PRIVATE_KEY`. Do not store the key in `.env` on the server, and do not commit `.env`.
 
 Or in the Cloudflare dashboard: **Workers & Pages → youneek-pro-radarynk222 → Settings → Variables and Secrets → Add**.
 
@@ -104,7 +108,26 @@ GET /api/weather?lat=37.77&lon=-122.42
 |---|---|---|
 | `lat` | Yes | Latitude |
 | `lon` | Yes | Longitude |
-| `dataSets` | No | Comma-separated WeatherKit data sets. Default: `currentWeather,forecastHourly,forecastDaily,forecastNextHour,weatherAlerts`. The Worker always sends `country=US` so Apple weather alerts can return. |
+| `dataSets` | No | Comma-separated WeatherKit data sets. Default: `currentWeather,forecastHourly,forecastDaily,forecastNextHour,weatherAlerts`. The Worker always sends `units=us`, `timezone=auto`, and `country=US` so Apple weather alerts can return. |
+
+### Auth health check
+
+```
+GET /api/weather-status
+```
+
+This signs a JWT and calls `https://weatherkit.apple.com/api/v1/availability/37.3349/-122.0090`. It does not return the token or any secret value.
+
+| Field | Meaning |
+|---|---|
+| `auth: "ok"` | Apple accepted the token. `appleStatus` is 200. |
+| `auth: "missing"` | One or more of the four secret names is empty. `missing` lists them. |
+| `auth: "invalid_key"` | The `.p8` could not be signed as ES256. |
+| `auth: "rejected"` | Apple answered 401/403 or another error. Secret presence alone is not treated as success. |
+| `auth: "unreachable"` | The Worker could not reach Apple. |
+| `fallback` | Always `open-meteo` and `nws`. The Forecast page uses those when `ok` is false. |
+
+Settings → Weather data shows the same status.
 
 ## Troubleshooting
 
@@ -113,7 +136,7 @@ GET /api/weather?lat=37.77&lon=-122.42
 | `WeatherKit is not configured` | Set all four `WEATHERKIT_*` secrets on **youneek-pro-radarynk222** |
 | `PKCS#8` / invalid private key | Re-paste the full `.p8` file into `WEATHERKIT_PRIVATE_KEY` (include BEGIN/END lines). Then retry the Workers deploy. |
 | `401` / `403` from Apple | Verify Team ID, Key ID, Services ID, and that WeatherKit is enabled on both the key and Services ID |
-| Forecast still shows Open-Meteo | Weather still loads from the backup feed. WeatherKit is working when Forecast says **Apple WeatherKit + Open-Meteo extras**. |
+| Forecast still shows Open-Meteo | Open `/api/weather-status`. WeatherKit is the source only when `auth` is `ok`. Until then, current, hourly, and daily come from Open-Meteo, and alerts come from NWS. |
 | Works locally but not in production | Confirm secrets are on `youneek-pro-radarynk222`, not an older Worker name |
 
 ## Pricing note

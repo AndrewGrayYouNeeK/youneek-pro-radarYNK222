@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { useLocation as useAppLocation } from "@/components/landing/LocationContext";
+import { useLocation as useAppLocation } from "@/lib/LocationContext";
 
 export default function useWeatherLocation() {
   const { location, locating, gpsStatus, detectGPS, setLocation: setAppLocation } = useAppLocation();

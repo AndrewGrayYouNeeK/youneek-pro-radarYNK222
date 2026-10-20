@@ -1,14 +1,14 @@
 # YouNeeK Pro Radar
 
-Live radar product. Slogan: **MAKING IT RAIN**. The marketing landing page is a separate site (`npm run build:landing`).
+Live weather and radar app. Slogan: **MAKING IT RAIN**. This repository is only the weather app. The marketing site is [https://youneekproradar.com](https://youneekproradar.com), served by the youneekproradarBABY Worker.
 
-- **`/`** and **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires, and the customizable pro desk
+- **`/`** opens **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires, and the customizable pro desk
 - **`/Radio`** — NOAA Weather Radio for the nearest station
-- **`/Forecast`** — current / hourly (168h) / 16-day, AQI, pollen, UV, storm risk, winter, history
+- **`/Forecast`** — current / hourly / daily from Apple WeatherKit when auth works, otherwise Open-Meteo, plus NWS alerts, AQI, pollen, UV, storm risk, winter, and history
 - **`/Globe`** — 3D globe with live and future weather radar, lightning, hurricanes, and wildfires
 - **`/More`** — air quality, pollen, lightning, cameras, wildfires, health, news, sun & moon, safety contacts
-- **`/Hurricanes`**, **`/Fires`**, **`/Briefing`** — WeatherBug-class centers, all included
-- **`/Contacts`** and **`/Settings`** — emergency SMS drafts, units, and preferences
+- **`/Hurricanes`**, **`/Fires`**, **`/Briefing`** — storm and fire centers
+- **`/Contacts`** and **`/Settings`** — emergency SMS drafts, units, notification prefs, and WeatherKit auth status
 
 ## Local Development
 
@@ -21,9 +21,9 @@ npm install
 npm run dev
 ```
 
-**Live site:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
+**Weather app:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
 
-Open [http://localhost:5173](http://localhost:5173) locally. Allow location when the browser asks, then Launch Radar.
+Open [http://localhost:5173](http://localhost:5173). The first screen is the radar. Allow location when the browser asks.
 
 To share the local app on the public internet (no Cloudflare login):
 
@@ -33,7 +33,7 @@ npm run tunnel
 
 That starts the app on port **8000** and prints a `https://*.trycloudflare.com` URL. See [TUNNEL.md](./TUNNEL.md).
 
-WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` and follow [WEATHERKIT.md](./WEATHERKIT.md). Radar, NWS alerts, and NOAA radio work without them.
+WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` and follow [WEATHERKIT.md](./WEATHERKIT.md). Radar, NWS alerts, and NOAA radio work without them. If the key is missing or Apple rejects it, Forecast stays on Open-Meteo and NWS.
 
 ## Scripts
 
@@ -43,24 +43,22 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 | `npm run tunnel` | App on port 8000 plus a public Cloudflare Quick Tunnel URL |
 | `npm run dev:tunnel` | Same as `dev`, bound to `http://localhost:8000` (no public URL) |
 | `npm run build` | Production build of the weather app (`dist/`) |
-| `npm run build:landing` | Separate marketing site (`dist-landing/`) |
-| `npm run dev:landing` | Preview the landing site locally |
-| `npm run test` | Unit tests (desk, alerts, safety, two-site deploy) |
+| `npm run test` | Unit tests (desk, alerts, safety, WeatherKit auth) |
 | `npm run preview` | Preview production build (includes API proxies) |
 | `npm run preview:tunnel` | Preview on port 8000 for Cloudflare Tunnel |
-| `npm run deploy` / `deploy:weather` | Deploy the weather app Worker (`youneek-pro-radarynk222`). Does not change DNS. |
-| `npm run deploy:landing` | Deploy the landing site to a separate Worker (`youneek-pro-radar-landing`). Does not attach a custom domain. |
+| `npm run deploy` / `deploy:weather` | Deploy the weather Worker (`youneek-pro-radarynk222`). Does not change DNS. |
 | `npm run lint` | Run ESLint |
 
 ## Data Sources
 
-- [NOAA National Weather Service API](https://www.weather.gov/documentation/services-web-api) — alerts, forecasts, observations
-- [Iowa State Mesonet](https://mesonet.agron.iastate.edu/) — NEXRAD mosaics and storm attributes
-- [Apple WeatherKit](https://developer.apple.com/weatherkit/) — Forecast tab when credentials are set
+- [Apple WeatherKit](https://developer.apple.com/weatherkit/) — current, hourly, daily, minute precipitation, and alerts when `/api/weather-status` reports `auth: "ok"`
 - [Open-Meteo](https://open-meteo.com/) — forecast fallback, geocoding, air quality, pollen, UV
+- [NOAA National Weather Service API](https://www.weather.gov/documentation/services-web-api) — alerts, point alerts, headlines
+- [Iowa State Mesonet](https://mesonet.agron.iastate.edu/) — NEXRAD mosaics and recent storm reports used for lightning proximity
 - [RainViewer](https://www.rainviewer.com/api.html) — global radar, future nowcast, and 3D globe overlay
-- [NASA EONET](https://eonet.gsfc.nasa.gov/) — wildfire events
+- [NASA EONET](https://eonet.gsfc.nasa.gov/) and FIRMS — wildfire events and detections
+- [NHC](https://www.nhc.noaa.gov/) — active tropical cyclones
 
-## Merged from
+## Where features came from
 
-This repo is the complete YouNeeK Pro Radar weather app. The marketing landing page builds separately. Location alerts, the customizable radar desk, NOAA radio, contacts, and safety texts came from **youneekproradarBABY** and sit on YNK222's existing pages.
+Location alerts, the customizable radar desk, NOAA radio, contacts, and safety texts came from **youneekproradarBABY** and live on this app's pages. The marketing site stays on that other Worker at youneekproradar.com.

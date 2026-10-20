@@ -1,4 +1,4 @@
-import { LANDING_PROJECT, WEATHER_PROJECT, siteRoleFromEnv, workerProjectFromEnv } from "./site.js";
+import { MARKETING_URL, WEATHER_PROJECT, workerProjectFromEnv } from "./site.js";
 import { normalizePrivateKey } from "./weatherkit.js";
 
 function present(value) {
@@ -13,27 +13,26 @@ export function workerProjectName(env = {}) {
 
 export function weatherKitSecretsHint(env = {}) {
   const project = workerProjectName(env);
-  if (siteRoleFromEnv(env) === "landing") {
-    return (
-      `This is the landing page (${LANDING_PROJECT}). WeatherKit secrets belong on the weather website ` +
-      `${WEATHER_PROJECT} → Settings → Variables and Secrets (not Builds). See WEATHERKIT.md`
-    );
-  }
   return (
-    `Set WEATHERKIT_* secrets on the weather website ${project}. ` +
-    `Cloudflare → Workers & Pages → ${WEATHER_PROJECT} → Settings → Variables and Secrets (not Builds). ` +
-    `The landing page ${LANDING_PROJECT} does not need these secrets. See WEATHERKIT.md`
+    `Set WEATHERKIT_TEAM_ID, WEATHERKIT_KEY_ID, WEATHERKIT_SERVICE_ID, and WEATHERKIT_PRIVATE_KEY ` +
+    `as secrets on Cloudflare Worker ${project}. ` +
+    `Run: npx wrangler secret put WEATHERKIT_TEAM_ID (then the other three names). See WEATHERKIT.md. ` +
+    `The marketing site ${MARKETING_URL} does not use these secrets.`
   );
 }
 
 export function privateKeyLooksLikePem(raw) {
-  const key = normalizePrivateKey(raw);
-  return (
-    key.includes("BEGIN") &&
-    key.includes("PRIVATE KEY") &&
-    key.includes("END") &&
-    key.replace(/\s+/g, "").length > 80
-  );
+  try {
+    const key = normalizePrivateKey(raw);
+    return (
+      key.includes("BEGIN") &&
+      key.includes("PRIVATE KEY") &&
+      key.includes("END") &&
+      key.replace(/\s+/g, "").length > 80
+    );
+  } catch {
+    return false;
+  }
 }
 
 export function inspectWeatherKitEnv(env = {}) {

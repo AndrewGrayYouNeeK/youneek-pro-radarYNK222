@@ -7,7 +7,7 @@ import { aqiCategory } from "@/lib/weather/aqi";
 
 export default function AirQuality() {
   const { coords } = useWeatherLocation();
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["environment", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
     staleTime: 300000,
@@ -18,6 +18,8 @@ export default function AirQuality() {
   return (
     <PageScaffold title="Air quality">
       <LocationPicker />
+      {isLoading && <p className="text-sm text-slate-400">Loading air quality…</p>}
+      {isError && <p className="text-sm text-red-300">Air quality is unavailable right now.</p>}
       <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
         <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">US AQI</div>
         <div className="mt-2 flex items-end gap-3">

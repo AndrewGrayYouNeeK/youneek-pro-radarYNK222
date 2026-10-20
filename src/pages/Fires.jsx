@@ -9,7 +9,7 @@ import { fetchFires } from "@/lib/api/outlook";
 import { haversineMi } from "@/lib/geo";
 
 export default function Fires() {
-  useTabPageMemory("Forecast");
+  useTabPageMemory("More");
   const { coords } = useWeatherLocation();
   const { data, isLoading, error } = useQuery({
     queryKey: ["fire-center"],

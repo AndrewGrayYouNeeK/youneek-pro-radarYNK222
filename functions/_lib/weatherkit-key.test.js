@@ -6,7 +6,7 @@ import {
   privateKeyLooksLikePem,
   weatherKitSecretsHint,
 } from "./weatherkit-key.js";
-import { WEATHER_PROJECT, LANDING_PROJECT } from "./site.js";
+import { MARKETING_URL, WEATHER_PROJECT } from "./site.js";
 
 const BODY =
   "MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgAAAAAAAAAAAAAAAAAAAAAAAHBgkqhkiG9w0BAQEFAASBjzCBjAIBAT";
@@ -50,12 +50,11 @@ test("inspect uses WORKER_PROJECT from the live Worker", () => {
   assert.equal(status.project, WEATHER_PROJECT);
 });
 
-test("hints point WeatherKit secrets at the weather website, not the landing page", () => {
-  const weather = weatherKitSecretsHint({ WORKER_PROJECT: WEATHER_PROJECT, SITE_ROLE: "weather" });
+test("hints name the four WeatherKit secrets on the weather Worker", () => {
+  const weather = weatherKitSecretsHint({ WORKER_PROJECT: WEATHER_PROJECT });
   assert.match(weather, new RegExp(WEATHER_PROJECT));
-  assert.match(weather, /landing page/);
-  const landing = weatherKitSecretsHint({ SITE_ROLE: "landing" });
-  assert.match(landing, /landing page/);
-  assert.match(landing, new RegExp(WEATHER_PROJECT));
-  assert.match(landing, new RegExp(LANDING_PROJECT));
+  assert.match(weather, /WEATHERKIT_TEAM_ID/);
+  assert.match(weather, /WEATHERKIT_PRIVATE_KEY/);
+  assert.match(weather, /npx wrangler secret put/);
+  assert.match(weather, new RegExp(MARKETING_URL.replace(/[.]/g, "\\.")));
 });

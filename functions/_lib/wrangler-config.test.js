@@ -27,15 +27,20 @@ test("Workers assets are not given a Pages _redirects file", () => {
   assert.equal(existsSync(join(root, "public/_redirects")), false);
 });
 
-test("weather Worker serves point alerts and the landing build is a separate target", () => {
+test("weather Worker serves point alerts and WeatherKit status, and has no landing build", () => {
   const worker = readFileSync(join(root, "worker/index.js"), "utf8");
   const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
   const vite = readFileSync(join(root, "vite.config.js"), "utf8");
   assert.match(worker, /\/api\/point-alerts/);
+  assert.match(worker, /\/api\/weather-status/);
   assert.match(pkg.scripts.build, /^vite build$/);
-  assert.match(pkg.scripts["build:landing"], /--mode landing/);
-  assert.match(pkg.scripts["deploy:landing"], /deploy-website/);
+  assert.equal(pkg.scripts["build:landing"], undefined);
+  assert.equal(pkg.scripts["deploy:landing"], undefined);
+  assert.equal(pkg.scripts["deploy:website"], undefined);
   assert.equal(pkg.scripts.deploy, "wrangler deploy");
-  assert.match(vite, /dist-landing/);
-  assert.match(vite, /landing-main/);
+  assert.doesNotMatch(vite, /dist-landing/);
+  assert.doesNotMatch(vite, /landing-main/);
+  assert.equal(existsSync(join(root, "src/landing-main.jsx")), false);
+  assert.equal(existsSync(join(root, "src/pages/Landing.jsx")), false);
+  assert.equal(existsSync(join(root, "scripts/deploy-website.mjs")), false);
 });

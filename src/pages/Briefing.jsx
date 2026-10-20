@@ -25,7 +25,7 @@ function adaptNwsAlerts(payload) {
 }
 
 export default function Briefing() {
-  useTabPageMemory("Forecast");
+  useTabPageMemory("More");
   const { coords } = useWeatherLocation();
   const alertsQuery = useQuery({
     queryKey: ["briefing-alerts", coords?.latitude, coords?.longitude],
@@ -45,7 +45,9 @@ export default function Briefing() {
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-4 pb-28">
         <div className="mx-auto flex max-w-md flex-col gap-5">
           <LocationPicker />
-          <WeatherAlertsCard alerts={adaptNwsAlerts(alertsQuery.data)} />
+          {alertsQuery.isLoading && <p className="text-sm text-slate-400">Loading local alerts…</p>}
+          {alertsQuery.isError && <p className="text-sm text-red-300">Local alerts are unavailable right now.</p>}
+          <WeatherAlertsCard alerts={alertsQuery.data?.alerts || adaptNwsAlerts(alertsQuery.data)} />
           <StormRiskCard coords={coords} />
           <section className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">

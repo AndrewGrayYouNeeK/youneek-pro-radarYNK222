@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+import { MARKETING_URL } from "@/lib/sites";
 
 export default function PageNotFound() {
   const location = useLocation();
@@ -20,9 +21,9 @@ export default function PageNotFound() {
           >
             Open Radar
           </Link>
-          <Link to="/" className="text-sm uppercase tracking-[0.2em] text-white/50 hover:text-[#00ff9c]">
-            Back to landing
-          </Link>
+          <a href={MARKETING_URL} className="text-sm uppercase tracking-[0.2em] text-white/50 hover:text-[#00ff9c]">
+            YouNeeK website
+          </a>
         </div>
       </div>
     </div>

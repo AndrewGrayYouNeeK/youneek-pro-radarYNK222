@@ -1,15 +1,13 @@
-# Deploy guide — weather app and landing site
+# Deploy guide — weather app only
 
-This repository builds **two sites**. The weather app is what `npm run build` and `npm run deploy` publish. The marketing landing page is a separate build and a separate Worker. Neither script changes DNS or attaches `youneekproradar.com`.
+This repository publishes one site: the YouNeeK Pro Radar weather app. The marketing page at [https://youneekproradar.com](https://youneekproradar.com) is the youneekproradarBABY Worker. Do not attach that domain here, and do not rename this Worker.
 
 | Site | Build | Cloudflare Worker | Home |
 |---|---|---|---|
 | **Weather app** | `npm run build` → `dist/` | **`youneek-pro-radarynk222`** (`wrangler.toml`) | `/` redirects to `/Radar` |
-| **Landing page** | `npm run build:landing` → `dist-landing/` | **`youneek-pro-radar-landing`** (generated config, not committed) | `/` is the marketing page |
+| **Marketing site** | youneekproradarBABY repo, not this one | **`youneekproradarbaby`** | `https://youneekproradar.com` |
 
-Launch buttons on the landing site go to the weather app (`WEATHER_APP_URL`, default `https://youneek-pro-radarynk222.youneekartifacts.workers.dev`).
-
-WeatherKit secrets stay on the weather Worker. The landing Worker sets `SITE_ROLE=landing` and does not need those secrets.
+WeatherKit secrets belong only on `youneek-pro-radarynk222`.
 
 ## Weather app
 
@@ -21,26 +19,24 @@ WeatherKit secrets stay on the weather Worker. The landing Worker sets `SITE_ROL
 
 `wrangler.toml` keeps `name = "youneek-pro-radarynk222"` and has no custom domain. Do not add a `youneekproradar.com` route here.
 
-CLI: `npm run build && npm run deploy:weather`
+This guide does not deploy anything. When a human is ready: `npm run build && npm run deploy:weather`.
 
-## Landing page
-
-| Setting | Value |
-|---|---|
-| Build command | `npm run build:landing` |
-| Deploy command | `npm run deploy:landing` |
-
-`deploy:landing` writes a temporary Wrangler config (it is not a second `wrangler*.toml` in the repo) and publishes `dist-landing` as `youneek-pro-radar-landing`. If Workers Builds runs that script while connected to `youneek-pro-radarynk222`, it deploys the weather app instead of renaming the Worker.
-
-Create the landing Worker in Cloudflare and point it at this command when you want the marketing site online. Do not move `youneekproradar.com` with these scripts.
-
-## API routes (weather Worker)
+## API routes
 
 | Route | Purpose |
 |---|---|
+| `GET /api/weather?lat=&lon=` | Apple WeatherKit current, hourly, daily, next hour, and alerts |
+| `GET /api/weather-status` | Signs an ES256 JWT and asks Apple whether that token is accepted |
 | `GET /api/point-alerts?lat=&lon=` | Location-specific NWS alerts, including recent emergencies |
-| `GET /api/site` | `landing` vs `weather` role |
-| `GET /api/weather-status` | Which WeatherKit secrets the weather Worker sees |
 | `GET /api/alerts?type=` | Radar NWS polygons |
-| `GET /api/weather?lat=&lon=` | WeatherKit |
-| `POST /api/nws` | Landing conditions proxy (also served by the landing Worker) |
+| `GET /api/outlook?lat=&lon=` | SPC outlook for a point |
+| `GET /api/getActiveStorms` | NHC active cyclones |
+| `GET /api/lightning` | Recent IEM local storm reports used as lightning proximity |
+| `GET /api/fires` | VIIRS detections plus EONET events |
+| `GET /api/wildfires` | NASA EONET wildfire events |
+| `GET /api/news` | NWS alert headlines |
+| `GET /api/tile` | Radar tile proxy |
+| `GET /api/site` | Confirms this Worker is the weather app and returns the marketing URL |
+| `POST /api/nws` | Location search and point metadata |
+
+If WeatherKit secrets are missing, the private key will not sign, or Apple rejects the token, the Forecast page keeps loading from Open-Meteo and NWS. `/api/weather-status` reports `auth` as `missing`, `invalid_key`, `rejected`, or `unreachable` instead of claiming success from secret presence alone.
