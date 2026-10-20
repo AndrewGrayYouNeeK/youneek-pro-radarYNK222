@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import AppLink from './AppLink';
 import { Radar } from 'lucide-react';
 
 export default function LandingFooter() {
@@ -16,8 +16,8 @@ export default function LandingFooter() {
           // MAKING IT RAIN
         </div>
         <div className="flex items-center gap-4 text-[10px] tracking-[0.25em] uppercase text-white/40">
-          <Link to="/Settings" className="hover:text-[#00ff9c]">Settings</Link>
-          <Link to="/Forecast" className="hover:text-[#00ff9c]">Forecast</Link>
+          <AppLink to="/Settings" className="hover:text-[#00ff9c]">Settings</AppLink>
+          <AppLink to="/Forecast" className="hover:text-[#00ff9c]">Forecast</AppLink>
           <span>© 2026 — All systems nominal</span>
         </div>
       </div>

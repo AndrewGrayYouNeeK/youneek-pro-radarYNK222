@@ -38,6 +38,7 @@ export default function BottomTab({ onToolsClick, showTools }) {
                 "/Health",
                 "/News",
                 "/Astronomy",
+                "/Radio",
               ].some((item) => location.pathname.startsWith(item)));
           return (
             <button

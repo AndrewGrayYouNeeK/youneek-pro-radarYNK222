@@ -44,14 +44,22 @@ export async function openSmsDrafts({ phones, body, onProgress }) {
   }
 }
 
-export async function sendContactTexts({ kind, context } = {}) {
+function locationLineFromCoords(coords) {
+  if (coords?.latitude == null || coords?.longitude == null) return "";
+  return `My location: https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
+}
+
+export async function sendContactTexts({ kind, context, coords } = {}) {
   const contacts = loadShelterContacts();
   const phones = uniqueContactPhones(contacts);
   if (!phones.length) {
-    throw new Error("Add at least one shelter contact first.");
+    const error = new Error("Add at least one shelter contact first.");
+    error.code = "NO_CONTACTS";
+    throw error;
   }
 
-  const locationLine = await new Promise((resolve) => {
+  const knownLine = locationLineFromCoords(coords);
+  const locationLine = knownLine || await new Promise((resolve) => {
     if (!navigator.geolocation) {
       resolve("(Location unavailable)");
       return;

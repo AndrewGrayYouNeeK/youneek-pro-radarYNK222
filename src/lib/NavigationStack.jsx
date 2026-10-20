@@ -26,6 +26,7 @@ const MORE_PREFIXES = [
   "/Health",
   "/News",
   "/Astronomy",
+  "/Radio",
 ];
 
 function getTabKey(pathname) {

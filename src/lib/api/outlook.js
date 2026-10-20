@@ -1,3 +1,5 @@
+import { fetchNwsPointAlerts } from "./nwsAlerts";
+
 export async function fetchStormOutlook(lat, lon) {
   const params = new URLSearchParams({
     lat: String(lat),
@@ -9,12 +11,27 @@ export async function fetchStormOutlook(lat, lon) {
 }
 
 export async function fetchPointAlerts(lat, lon) {
-  const params = new URLSearchParams({
-    point: `${lat},${lon}`,
-  });
-  const response = await fetch(`/api/alerts?${params.toString()}`);
-  if (!response.ok) throw new Error("Alerts unavailable");
-  return response.json();
+  const alerts = await fetchNwsPointAlerts(lat, lon);
+  return {
+    alerts,
+    features: alerts.map((alert) => ({
+      id: alert.id,
+      properties: {
+        event: alert.name,
+        headline: alert.description,
+        description: alert.description,
+        severity: alert.severity,
+        urgency: alert.urgency,
+        certainty: alert.certainty,
+        sent: alert.issued,
+        effective: alert.issued,
+        expires: alert.expires,
+        ends: alert.expires,
+        senderName: alert.source || "NWS",
+        web: alert.url,
+      },
+    })),
+  };
 }
 
 export async function fetchFires() {

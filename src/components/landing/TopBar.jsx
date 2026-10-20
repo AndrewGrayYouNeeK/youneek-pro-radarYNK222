@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import NBoltLogo from './NBoltLogo';
+import AppLink from './AppLink';
 
 const NAV = [
   { label: 'Radar', href: '/Radar' },
@@ -51,33 +52,33 @@ export default function TopBar() {
                 <span className="absolute inset-x-3 bottom-1 h-px bg-[#00ff9c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
               </a>
             ) : (
-              <Link
+              <AppLink
                 key={item.label}
                 to={item.href}
                 className="relative px-4 py-2 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] transition group"
               >
                 <span className="relative z-10">{item.label}</span>
                 <span className="absolute inset-x-3 bottom-1 h-px bg-[#00ff9c] scale-x-0 group-hover:scale-x-100 transition-transform origin-left" />
-              </Link>
+              </AppLink>
             )
           )}
-          <Link
+          <AppLink
             to="/Radar"
             className="ml-4 relative px-5 py-2 text-xs uppercase tracking-[0.25em] font-bold text-black bg-[#00ff9c] hover:bg-white transition-colors"
           >
             <span className="absolute inset-0 bg-[#ff00d4] -translate-x-1 -translate-y-1 -z-10" />
             Launch
-          </Link>
+          </AppLink>
         </nav>
 
         {/* Mobile: Launch stays on-screen — the desk CTA sits below the radar HUD */}
         <div className="md:hidden relative z-[260] flex items-center gap-2">
-          <Link
+          <AppLink
             to="/Radar"
             className="px-3 py-2 text-[10px] font-bold uppercase tracking-[0.2em] text-black bg-[#00ff9c]"
           >
             Launch
-          </Link>
+          </AppLink>
           <button
             onClick={() => setOpen(!open)}
             className="text-[#00ff9c] p-2 border border-[#00ff9c]/40 bg-black"
@@ -110,23 +111,23 @@ export default function TopBar() {
                     {item.label}
                   </a>
                 ) : (
-                  <Link
+                  <AppLink
                     key={item.label}
                     to={item.href}
                     onClick={() => setOpen(false)}
                     className="px-4 py-3 text-xs uppercase tracking-[0.25em] text-white/70 hover:text-[#00ff9c] border border-white/5 hover:border-[#00ff9c]/40 transition"
                   >
                     {item.label}
-                  </Link>
+                  </AppLink>
                 )
               )}
-              <Link
+              <AppLink
                 to="/Radar"
                 onClick={() => setOpen(false)}
                 className="px-4 py-3 text-xs uppercase tracking-[0.25em] text-center font-bold text-black bg-[#00ff9c] hover:bg-white transition"
               >
                 Launch Radar
-              </Link>
+              </AppLink>
             </nav>
           </div>
           <style>{`

@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
 import L from "leaflet";
 import { LocateFixed } from "lucide-react";
 import RadarLayersMenu from "./RadarLayersMenu";
+import RadarPlaybackDock from "./RadarPlaybackDock";
 import ShelterAlert from "./ShelterAlert";
 import RadarQuickActions from "./RadarQuickActions";
 import WindSpeedDisplay from "./WindSpeedDisplay";
@@ -18,6 +21,12 @@ import StormToolsPanel from "./StormToolsPanel";
 import TargetList from "./TargetList";
 import { getRadarProduct } from "./radarProducts";
 import usePullToRefresh from "@/hooks/usePullToRefresh";
+import useMapDesk from "@/hooks/useMapDesk";
+import useWeatherEmergency from "@/hooks/useWeatherEmergency";
+import { fetchNwsPointAlerts } from "@/lib/api/nwsAlerts";
+import { getMapFeature } from "@/lib/mapDesk";
+import { loadActiveLocation } from "@/lib/locationStore";
+import { loadShelterContacts, sendContactTexts } from "@/lib/safety/sms";
 import "leaflet/dist/leaflet.css";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -162,6 +171,18 @@ export default function RadarDisplay({
   const [inspector, setInspector] = useState(null);
   const [stormData, setStormData] = useState(null);
   const clickContextRef = useRef({ userLocation: null, windData: null, onMapClick: null });
+  const navigate = useNavigate();
+  const { dockIds, togglePin, move, reset } = useMapDesk();
+  const savedPlace = typeof window === "undefined" ? null : loadActiveLocation();
+  const alertLat = userLocation?.lat ?? savedPlace?.latitude;
+  const alertLon = userLocation?.lon ?? savedPlace?.longitude;
+  const pointAlertsQuery = useQuery({
+    queryKey: ["nws-point-alerts", alertLat, alertLon],
+    enabled: alertLat != null && alertLon != null,
+    staleTime: 120000,
+    queryFn: () => fetchNwsPointAlerts(alertLat, alertLon),
+  });
+  const emergency = useWeatherEmergency(pointAlertsQuery.data);
 
   useEffect(() => {
     clickContextRef.current = { userLocation, windData, onMapClick };
@@ -586,6 +607,75 @@ export default function RadarDisplay({
     setIsLayersMenuOpen((prev) => !prev);
   };
 
+  const alertsActive = showTornado || showThunderstorm || showFlood || showWinter;
+
+  const sendSafety = async (kind) => {
+    if (!loadShelterContacts().length) {
+      navigate("/Contacts");
+      return;
+    }
+    try {
+      await sendContactTexts({
+        kind,
+        coords: userLocation
+          ? { latitude: userLocation.lat, longitude: userLocation.lon }
+          : savedPlace
+            ? { latitude: savedPlace.latitude, longitude: savedPlace.longitude }
+            : undefined,
+      });
+    } catch (error) {
+      if (error.code === "NO_CONTACTS") {
+        navigate("/Contacts");
+        return;
+      }
+      showLocationError(error.message);
+    }
+  };
+
+  const handleChipClick = (id) => {
+    const feature = getMapFeature(id);
+    if (!feature) return;
+
+    if (feature.kind === "layer") {
+      if (id === "radar") handleShowNexradChange(!showNexrad);
+      if (id === "lightning") setShowLightning((value) => !value);
+      if (id === "satellite") setShowSatellite((value) => !value);
+      if (id === "hurricanes") setShowHurricanes((value) => !value);
+      if (id === "fires") setShowFires((value) => !value);
+      if (id === "alerts") {
+        const next = !alertsActive;
+        setShowTornado(next);
+        setShowThunderstorm(next);
+        setShowFlood(next);
+        setShowWinter(next);
+      }
+      if (id === "tornado") setShowTornado((value) => !value);
+      if (id === "severe") setShowThunderstorm((value) => !value);
+      if (id === "flood") setShowFlood((value) => !value);
+      if (id === "winter") setShowWinter((value) => !value);
+      return;
+    }
+
+    if (feature.kind === "route" && feature.path) {
+      navigate(feature.path);
+      return;
+    }
+
+    if (id === "loop") {
+      setLoopEnabled((value) => {
+        const next = !value;
+        setLoopPlaying(next);
+        return next;
+      });
+      return;
+    }
+
+    if (id === "help" || id === "safe") {
+      if (!emergency.visible) return;
+      sendSafety(id === "help" ? "emergency" : "safe");
+    }
+  };
+
   return (
     <div className="relative h-full min-h-[400px] w-full select-none overscroll-none" {...pullToRefreshHandlers}>
       {!isMapReady && (
@@ -628,6 +718,12 @@ export default function RadarDisplay({
         }}
         onShowFiresChange={setShowFires}
         onAlertToggleChange={handleAlertToggleChange}
+        dockIds={dockIds}
+        onTogglePin={togglePin}
+        onMovePin={move}
+        onResetDock={reset}
+        onFeatureAction={handleChipClick}
+        showSafetyActions={emergency.visible}
       />
       <LightningLayer map={leafletMap.current} enabled={showLightning && isMapReady} />
       <HurricaneLayer map={leafletMap.current} enabled={showHurricanes && isMapReady} />
@@ -683,6 +779,27 @@ export default function RadarDisplay({
               />
             </>
           }
+        />
+        <RadarPlaybackDock
+          dockIds={dockIds}
+          layers={{
+            radar: showNexrad,
+            lightning: showLightning,
+            satellite: showSatellite,
+            hurricanes: showHurricanes,
+            fires: showFires,
+            alerts: alertsActive,
+            tornado: showTornado,
+            severe: showThunderstorm,
+            flood: showFlood,
+            winter: showWinter,
+            loop: loopEnabled,
+          }}
+          onChipClick={handleChipClick}
+          onOpenMore={handleLayersMenuToggle}
+          onTogglePin={togglePin}
+          onResetDock={reset}
+          showSafetyActions={emergency.visible}
         />
         <div className="flex w-full max-w-md items-end justify-between gap-2">
           <TimeLapseBar

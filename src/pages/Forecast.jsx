@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import AppHeader from "@/components/mobile/AppHeader";
@@ -21,6 +21,8 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { isMissingWeatherKit } from "@/lib/api/unifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
+import useWeatherEmergency from "@/hooks/useWeatherEmergency";
+import SafetyTextActions from "@/components/safety/SafetyTextActions";
 
 function adaptNwsAlerts(payload) {
   return (payload?.features || []).map((feature) => {
@@ -62,7 +64,7 @@ export default function Forecast() {
   });
 
   const alerts = useMemo(() => {
-    const nws = adaptNwsAlerts(alertsQuery.data);
+    const nws = alertsQuery.data?.alerts?.length ? alertsQuery.data.alerts : adaptNwsAlerts(alertsQuery.data);
     const kit = data?.alerts || [];
     const seen = new Set();
     return [...nws, ...kit].filter((alert) => {
@@ -73,7 +75,17 @@ export default function Forecast() {
     });
   }, [alertsQuery.data, data?.alerts]);
 
+  const emergency = useWeatherEmergency(alerts);
   const showLoading = locationLoading || (Boolean(coords) && isLoading && !data);
+
+  useEffect(() => {
+    const id = window.location.hash.replace("#", "");
+    if (!id || showLoading) return undefined;
+    const node = document.getElementById(id);
+    if (!node) return undefined;
+    node.scrollIntoView({ block: "start" });
+    return undefined;
+  }, [showLoading, data, alerts]);
 
   return (
     <div className="flex h-[100dvh] flex-col bg-slate-950">
@@ -121,6 +133,16 @@ export default function Forecast() {
                   WeatherKit credentials are optional. Full forecast, future radar, and 16-day outlook still load.
                 </p>
               )}
+              {emergency.visible && (
+                <section className="rounded-2xl border border-red-500/30 bg-red-950/40 p-3">
+                  <p className="mb-2 text-xs text-red-100">
+                    {emergency.recent
+                      ? "A recent weather emergency was in this area. One tap opens Messages. You still tap Send."
+                      : "Weather emergency in this area. One tap opens Messages. You still tap Send."}
+                  </p>
+                  <SafetyTextActions compact />
+                </section>
+              )}
               <WeatherAlertsCard alerts={alerts} />
               <CurrentConditionsCard data={data.current} />
               <LightningProximityCard coords={coords} />
@@ -134,8 +156,12 @@ export default function Forecast() {
                 todayHigh={data.daily?.[0]?.high}
                 todayLow={data.daily?.[0]?.low}
               />
-              <HourlyStrip hours={data.hourly} />
-              <DailyList days={data.daily} />
+              <div id="hourly" className="scroll-mt-24">
+                <HourlyStrip hours={data.hourly} />
+              </div>
+              <div id="daily" className="scroll-mt-24">
+                <DailyList days={data.daily} />
+              </div>
               <HubLinks />
             </>
           )}

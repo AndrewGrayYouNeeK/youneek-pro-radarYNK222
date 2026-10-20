@@ -1,9 +1,9 @@
 # YouNeeK Pro Radar
 
-Cinematic landing site **and** live radar product in one app. Slogan: **MAKING IT RAIN**.
+Live radar product. Slogan: **MAKING IT RAIN**. The marketing landing page is a separate site (`npm run build:landing`).
 
-- **`/`** — storm landing (GPS location, neon signs, WeatherBug-class conditions, SOS)
-- **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires
+- **`/`** and **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires, and the customizable pro desk
+- **`/Radio`** — NOAA Weather Radio for the nearest station
 - **`/Forecast`** — current / hourly (168h) / 16-day, AQI, pollen, UV, storm risk, winter, history
 - **`/Globe`** — 3D globe with live and future weather radar, lightning, hurricanes, and wildfires
 - **`/More`** — air quality, pollen, lightning, cameras, wildfires, health, news, sun & moon, safety contacts
@@ -42,10 +42,14 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 | `npm run dev` | Vite + local NWS / alerts / WeatherKit / lightning proxies |
 | `npm run tunnel` | App on port 8000 plus a public Cloudflare Quick Tunnel URL |
 | `npm run dev:tunnel` | Same as `dev`, bound to `http://localhost:8000` (no public URL) |
-| `npm run build` | Production build |
+| `npm run build` | Production build of the weather app (`dist/`) |
+| `npm run build:landing` | Separate marketing site (`dist-landing/`) |
+| `npm run dev:landing` | Preview the landing site locally |
+| `npm run test` | Unit tests (desk, alerts, safety, two-site deploy) |
 | `npm run preview` | Preview production build (includes API proxies) |
 | `npm run preview:tunnel` | Preview on port 8000 for Cloudflare Tunnel |
-| `npm run deploy` | Cloudflare Worker deploy (`wrangler.toml`) |
+| `npm run deploy` / `deploy:weather` | Deploy the weather app Worker (`youneek-pro-radarynk222`). Does not change DNS. |
+| `npm run deploy:landing` | Deploy the landing site to a separate Worker (`youneek-pro-radar-landing`). Does not attach a custom domain. |
 | `npm run lint` | Run ESLint |
 
 ## Data Sources
@@ -59,4 +63,4 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 
 ## Merged from
 
-This repo is the **youneek-pro-radarYNK222** landing plus the **youneekproradarBABY** radar/WeatherKit app.
+This repo is the complete YouNeeK Pro Radar weather app. The marketing landing page builds separately. Location alerts, the customizable radar desk, NOAA radio, contacts, and safety texts came from **youneekproradarBABY** and sit on YNK222's existing pages.
