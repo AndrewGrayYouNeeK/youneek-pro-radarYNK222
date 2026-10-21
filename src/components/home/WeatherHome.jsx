@@ -8,6 +8,7 @@ import DailyList from "@/components/forecast/DailyList";
 import MinutePrecipitation, { rainTimingLabel } from "@/components/forecast/MinutePrecipitation";
 import EnvironmentCards from "@/components/forecast/EnvironmentCards";
 import AlertBanner from "@/components/home/AlertBanner";
+import LegacyBrand from "@/components/home/LegacyBrand";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
@@ -47,6 +48,7 @@ export default function WeatherHome() {
 
   return (
     <>
+      <LegacyBrand />
       <LocationPicker />
       <AlertBanner alerts={alerts} />
       <SafetyTextCard />

@@ -196,6 +196,17 @@
   animation: ynk-lightning 6s ease-in-out infinite;
 }
 
+@keyframes ynk-rain-fall {
+  0% { transform: translateY(-30%) translateX(0); }
+  100% { transform: translateY(110vh) translateX(-28px); }
+}
+
+.ynk-rain-drop {
+  animation-name: ynk-rain-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
 .hero-title-strike {
   opacity: 0;
   mix-blend-mode: normal;
@@ -213,6 +224,10 @@
     animation: none;
     opacity: 1;
     mix-blend-mode: normal;
+  }
+  .ynk-rain-drop {
+    animation: none;
+    opacity: 0;
   }
 }
 
