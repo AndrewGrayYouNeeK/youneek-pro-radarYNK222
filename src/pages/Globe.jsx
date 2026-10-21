@@ -20,7 +20,7 @@ const LAYERS = [
 ];
 
 export default function Globe() {
-  useTabPageMemory("Globe");
+  useTabPageMemory("More");
   const globeRef = useRef(null);
   const { coords } = useWeatherLocation();
   const userLocation = coords

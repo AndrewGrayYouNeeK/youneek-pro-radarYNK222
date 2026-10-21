@@ -68,7 +68,7 @@ export async function fetchOpenMeteo(lat, lon) {
   url.searchParams.set("minutely_15", "precipitation,precipitation_probability");
   url.searchParams.set("forecast_minutely_15", "8");
 
-  const response = await fetch(url.toString());
+  const response = await fetch(url.toString(), { signal: AbortSignal.timeout(12000) });
   const text = await response.text();
   let payload;
   try {

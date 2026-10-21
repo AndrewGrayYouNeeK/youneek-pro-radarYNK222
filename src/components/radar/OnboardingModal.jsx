@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, X } from "lucide-react";
 
 const SLIDES = [
   {
@@ -26,7 +26,7 @@ const SLIDES = [
   {
     icon: "📻",
     title: "NOAA Weather Radio",
-    body: "Open Tools, then Layers, to stream your nearest NOAA Weather Radio station. Auto-tune can be turned off in Settings.",
+    body: "Open More, then NOAA Weather Radio, to stream the station nearest you. Auto-tune can be turned off in Settings.",
   },
   {
     icon: "🏠",
@@ -40,9 +40,22 @@ export default function OnboardingModal({ onDone }) {
   const isLast = index === SLIDES.length - 1;
   const slide = SLIDES[index];
 
+  const finish = () => {
+    localStorage.setItem("onboarded_v1", "true");
+    onDone();
+  };
+
   return (
-    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/95 backdrop-blur-md px-6">
-      <div className="w-full max-w-sm">
+    <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/80 px-6">
+      <div className="relative w-full max-w-sm rounded-3xl border border-white/10 bg-slate-950 p-6">
+        <button
+          type="button"
+          onClick={finish}
+          aria-label="Close intro"
+          className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10"
+        >
+          <X className="h-5 w-5" aria-hidden="true" />
+        </button>
         {/* Progress dots */}
         <div className="mb-8 flex justify-center gap-2">
           {SLIDES.map((_, i) => (
@@ -90,24 +103,18 @@ export default function OnboardingModal({ onDone }) {
                 setIndex((i) => i + 1);
               }
             }}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 shadow-[0_0_24px_rgba(34,211,238,0.3)] transition-colors hover:bg-cyan-400"
+            className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 transition-colors hover:bg-cyan-400"
           >
             {isLast ? "Get started" : "Next"}
             <ChevronRight className="h-4 w-4" aria-hidden="true" />
           </button>
-
-          {!isLast && (
-            <button
-              type="button"
-              onClick={() => {
-                localStorage.setItem("onboarded_v1", "true");
-                onDone();
-              }}
-              className="w-full py-2 text-sm text-slate-500 hover:text-slate-300 transition-colors"
-            >
-              Skip
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={finish}
+            className="w-full py-2 text-sm text-slate-400 hover:text-white"
+          >
+            {isLast ? "Close" : "Skip"}
+          </button>
         </div>
       </div>
     </div>

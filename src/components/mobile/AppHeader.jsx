@@ -23,18 +23,20 @@ const TITLES = {
   "/Contacts": "Contacts",
   "/Settings": "Settings",
   "/Privacy": "Privacy",
+  "/Intercept": "Storm intercept",
+  "/MapLayers": "Map layers",
 };
 
 export default function AppHeader({ title }) {
   const location = useLocation();
   const { goBack } = useNavigationStack();
   const resolvedTitle = title || TITLES[location.pathname] || "YouNeeK Pro Radar";
-  const showBack = location.pathname !== "/Radar";
+  const showBack = !["/", "/Hourly", "/Daily", "/Radar", "/More"].includes(location.pathname);
 
   return (
     <header className="sticky top-0 z-[1700] shrink-0 border-b border-white/10 bg-slate-950/95 backdrop-blur-xl">
       <div
-        className="mx-auto flex h-14 max-w-lg items-center justify-between px-4"
+        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="flex min-w-0 items-center gap-2">

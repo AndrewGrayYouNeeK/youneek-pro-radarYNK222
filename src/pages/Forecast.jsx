@@ -47,7 +47,7 @@ function adaptNwsAlerts(payload) {
 }
 
 export default function Forecast() {
-  useTabPageMemory("Forecast");
+  useTabPageMemory("More");
   const {
     coords,
     locationError,

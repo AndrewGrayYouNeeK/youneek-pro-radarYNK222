@@ -13,6 +13,6 @@ export function describeSite(env = {}) {
     project: configured || WEATHER_PROJECT,
     weatherProject: WEATHER_PROJECT,
     marketingUrl: MARKETING_URL,
-    homePath: "/Radar",
+    homePath: "/",
   };
 }

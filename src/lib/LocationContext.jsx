@@ -204,9 +204,15 @@ export function LocationProvider({ children }) {
       ...opts,
       maximumAge: 15000,
     });
+    const giveUp = window.setTimeout(() => {
+      if (cancelled) return;
+      setLocating(false);
+      setGpsStatus((current) => (current === "locating" ? (locationRef.current ? "ok" : "error") : current));
+    }, 8000);
 
     return () => {
       cancelled = true;
+      window.clearTimeout(giveUp);
       navigator.geolocation.clearWatch(watchId);
     };
   }, [hydrated, applyPosition]);

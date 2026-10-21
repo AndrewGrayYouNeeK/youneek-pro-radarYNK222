@@ -2,7 +2,7 @@ import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { sendContactTexts } from "@/lib/safety/sms";
 
-export default function SafetyTextActions({ compact = false }) {
+export default function SafetyTextActions({ compact = false, coords = null }) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -13,6 +13,7 @@ export default function SafetyTextActions({ compact = false }) {
     try {
       const result = await sendContactTexts({
         kind,
+        coords,
         context: kind === "safe" ? "I'M SAFE — I am OK and accounted for." : undefined,
       });
       setStatus(`Opened ${result.count} message draft${result.count === 1 ? "" : "s"} — tap Send in Messages.`);

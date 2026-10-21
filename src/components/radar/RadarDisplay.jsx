@@ -11,6 +11,8 @@ import WindSpeedDisplay from "./WindSpeedDisplay";
 import TimeLapseBar from "./TimeLapseBar";
 import LightningLayer from "./LightningLayer";
 import HurricaneLayer from "./HurricaneLayer";
+import StormCellLayer from "./StormCellLayer";
+import WindFieldLayer from "./WindFieldLayer";
 import WildfireLayer from "./WildfireLayer";
 import { rainViewerLeafletUrl } from "@/lib/weather/rainviewer";
 import ProLegend from "./ProLegend";
@@ -25,6 +27,7 @@ import useMapDesk from "@/hooks/useMapDesk";
 import useWeatherEmergency from "@/hooks/useWeatherEmergency";
 import { fetchNwsPointAlerts } from "@/lib/api/nwsAlerts";
 import { getMapFeature } from "@/lib/mapDesk";
+import { RADAR_LAYERS_EVENT, loadRadarLayers, saveRadarLayers } from "@/lib/radarLayers";
 import { loadActiveLocation } from "@/lib/locationStore";
 import { loadShelterContacts, sendContactTexts } from "@/lib/safety/sms";
 import "leaflet/dist/leaflet.css";
@@ -123,6 +126,7 @@ export default function RadarDisplay({
   onMapClick,
   onTargetClick,
   onDeleteTarget,
+  variant = "clean",
 }) {
   const mapRef = useRef(null);
   const leafletMap = useRef(null);
@@ -135,23 +139,32 @@ export default function RadarDisplay({
   const windLayerRef = useRef(null);
   const fireWxLayerRef = useRef(null);
   const satelliteLayerRef = useRef(null);
+  const tempLayerRef = useRef(null);
+  const cloudLayerRef = useRef(null);
+  const precipLayerRef = useRef(null);
   const loopFramesRef = useRef([]);
   const refreshTimerRef = useRef(null);
   const userLocationMarkerRef = useRef(null);
 
-  const [showTornado, setShowTornado] = useState(true);
-  const [showThunderstorm, setShowThunderstorm] = useState(true);
-  const [showFlood, setShowFlood] = useState(false);
-  const [showWinter, setShowWinter] = useState(false);
-  const [showHeat, setShowHeat] = useState(false);
-  const [showWind, setShowWind] = useState(false);
-  const [showFireWx, setShowFireWx] = useState(false);
-  const [showLightning, setShowLightning] = useState(true);
-  const [showHurricanes, setShowHurricanes] = useState(true);
-  const [showSatellite, setShowSatellite] = useState(false);
+  const [showTornado, setShowTornado] = useState(() => loadRadarLayers().alertTornado);
+  const [showThunderstorm, setShowThunderstorm] = useState(() => loadRadarLayers().alertSevere);
+  const [showFlood, setShowFlood] = useState(() => loadRadarLayers().alertFlood);
+  const [showWinter, setShowWinter] = useState(() => loadRadarLayers().alertWinter);
+  const [showHeat, setShowHeat] = useState(() => loadRadarLayers().alertHeat);
+  const [showWind, setShowWind] = useState(() => loadRadarLayers().alertWind);
+  const [showFireWx, setShowFireWx] = useState(() => loadRadarLayers().alertFire);
+  const [showLightning, setShowLightning] = useState(() => loadRadarLayers().lightning);
+  const [showHurricanes, setShowHurricanes] = useState(() => loadRadarLayers().storms);
+  const [showCells, setShowCells] = useState(() => loadRadarLayers().cells);
+  const [showSatellite, setShowSatellite] = useState(() => loadRadarLayers().satellite);
   const [showGlobalRadar, setShowGlobalRadar] = useState(false);
   const [showFutureRadar, setShowFutureRadar] = useState(false);
-  const [showFires, setShowFires] = useState(false);
+  const [showFires, setShowFires] = useState(() => loadRadarLayers().fires);
+  const [showTemps, setShowTemps] = useState(() => loadRadarLayers().temps);
+  const [showClouds, setShowClouds] = useState(() => loadRadarLayers().clouds);
+  const [showPrecip, setShowPrecip] = useState(() => loadRadarLayers().precip);
+  const [showWindField, setShowWindField] = useState(() => loadRadarLayers().wind);
+  const [legendOpen, setLegendOpen] = useState(false);
   const [radarCatalog, setRadarCatalog] = useState(null);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopPlaying, setLoopPlaying] = useState(false);
@@ -187,6 +200,41 @@ export default function RadarDisplay({
   useEffect(() => {
     clickContextRef.current = { userLocation, windData, onMapClick };
   }, [userLocation, windData, onMapClick]);
+
+  const settingsRef = useRef(settings);
+  const onSettingsChangeRef = useRef(onSettingsChange);
+  useEffect(() => {
+    settingsRef.current = settings;
+    onSettingsChangeRef.current = onSettingsChange;
+  }, [settings, onSettingsChange]);
+
+  useEffect(() => {
+    const apply = (event) => {
+      const next = event.detail || loadRadarLayers();
+      setShowSatellite(Boolean(next.satellite));
+      setShowTemps(Boolean(next.temps));
+      setShowClouds(Boolean(next.clouds));
+      setShowPrecip(Boolean(next.precip));
+      setShowWindField(Boolean(next.wind));
+      setShowLightning(Boolean(next.lightning));
+      setShowHurricanes(Boolean(next.storms));
+      setShowCells(Boolean(next.cells));
+      setShowFires(Boolean(next.fires));
+      setShowTornado(Boolean(next.alertTornado));
+      setShowThunderstorm(Boolean(next.alertSevere));
+      setShowFlood(Boolean(next.alertFlood));
+      setShowWinter(Boolean(next.alertWinter));
+      setShowHeat(Boolean(next.alertHeat));
+      setShowWind(Boolean(next.alertWind));
+      setShowFireWx(Boolean(next.alertFire));
+      const current = settingsRef.current;
+      if (Boolean(next.radar) !== Boolean(current?.showNexrad)) {
+        onSettingsChangeRef.current?.({ ...current, showNexrad: Boolean(next.radar) });
+      }
+    };
+    window.addEventListener(RADAR_LAYERS_EVENT, apply);
+    return () => window.removeEventListener(RADAR_LAYERS_EVENT, apply);
+  }, []);
 
   const mapCenter = leafletMap.current?.getCenter();
   const activeWarningsCount = [showTornado, showThunderstorm, showFlood, showWinter, showHeat, showWind, showFireWx].filter(Boolean).length;
@@ -348,6 +396,7 @@ export default function RadarDisplay({
       minZoom: 4,
       maxZoom: 12,
       maxNativeZoom: 12,
+      zIndex: 400,
       crossOrigin: "anonymous",
     }).addTo(leafletMap.current);
 
@@ -407,8 +456,8 @@ export default function RadarDisplay({
     }
     if (!showSatellite) return undefined;
     satelliteLayerRef.current = L.tileLayer(
-      "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/goes_east_vis_1km/{z}/{x}/{y}.png",
-      { opacity: 0.55, maxZoom: 10, attribution: "GOES East via Iowa Mesonet" }
+      "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/goes-east-vis-1km/{z}/{x}/{y}.png",
+      { opacity: 0.55, maxZoom: 10, zIndex: 200, attribution: "GOES East visible via Iowa Mesonet" }
     ).addTo(leafletMap.current);
     return () => {
       if (satelliteLayerRef.current && leafletMap.current) {
@@ -418,9 +467,66 @@ export default function RadarDisplay({
     };
   }, [showSatellite, isMapReady]);
 
+  useEffect(() => {
+    if (!leafletMap.current || !isMapReady) return undefined;
+    if (tempLayerRef.current) {
+      leafletMap.current.removeLayer(tempLayerRef.current);
+      tempLayerRef.current = null;
+    }
+    if (!showTemps) return undefined;
+    tempLayerRef.current = L.tileLayer(
+      "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/goes-east-ir-4km/{z}/{x}/{y}.png",
+      { opacity: 0.5, maxZoom: 8, zIndex: 240, attribution: "GOES infrared cloud temperatures via Iowa Mesonet" }
+    ).addTo(leafletMap.current);
+    return () => {
+      if (tempLayerRef.current && leafletMap.current) {
+        leafletMap.current.removeLayer(tempLayerRef.current);
+        tempLayerRef.current = null;
+      }
+    };
+  }, [showTemps, isMapReady]);
+
+  useEffect(() => {
+    if (!leafletMap.current || !isMapReady) return undefined;
+    if (cloudLayerRef.current) {
+      leafletMap.current.removeLayer(cloudLayerRef.current);
+      cloudLayerRef.current = null;
+    }
+    if (!showClouds) return undefined;
+    cloudLayerRef.current = L.tileLayer(
+      "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/goes-east-wv-4km/{z}/{x}/{y}.png",
+      { opacity: 0.45, maxZoom: 8, zIndex: 220, attribution: "GOES water vapor via Iowa Mesonet" }
+    ).addTo(leafletMap.current);
+    return () => {
+      if (cloudLayerRef.current && leafletMap.current) {
+        leafletMap.current.removeLayer(cloudLayerRef.current);
+        cloudLayerRef.current = null;
+      }
+    };
+  }, [showClouds, isMapReady]);
+
+  useEffect(() => {
+    if (!leafletMap.current || !isMapReady) return undefined;
+    if (precipLayerRef.current) {
+      leafletMap.current.removeLayer(precipLayerRef.current);
+      precipLayerRef.current = null;
+    }
+    if (!showPrecip) return undefined;
+    precipLayerRef.current = L.tileLayer(
+      "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/q2-p24h/{z}/{x}/{y}.png",
+      { opacity: 0.65, maxZoom: 8, zIndex: 260, attribution: "MRMS 24-hour precipitation via Iowa Mesonet" }
+    ).addTo(leafletMap.current);
+    return () => {
+      if (precipLayerRef.current && leafletMap.current) {
+        leafletMap.current.removeLayer(precipLayerRef.current);
+        precipLayerRef.current = null;
+      }
+    };
+  }, [showPrecip, isMapReady]);
+
   // Separate effect for alerts (unchanged logic)
   useEffect(() => {
-    if (!leafletMap.current || !showNexrad || !isMapReady) {
+    if (!leafletMap.current || !isMapReady) {
       setActiveTornadoWarning(false);
       setActiveTornadoWatch(false);
       return;
@@ -434,7 +540,7 @@ export default function RadarDisplay({
 
     const refreshAlertLayer = (layerRef, toggleKey, alertType, color) => {
       if (layerRef.current) { leafletMap.current.removeLayer(layerRef.current); layerRef.current = null; }
-      if (!leafletMap.current || !showNexrad) return;
+      if (!leafletMap.current) return;
       fetch(getAlertUrl(alertType))
         .then((r) => r.json())
         .then((data) => {
@@ -495,7 +601,7 @@ export default function RadarDisplay({
         r.current = null;
       });
     };
-  }, [showNexrad, settings.station, showTornado, showThunderstorm, showFlood, showWinter, showHeat, showWind, showFireWx, userLocation, isMapReady]);
+  }, [settings.station, showTornado, showThunderstorm, showFlood, showWinter, showHeat, showWind, showFireWx, userLocation, isMapReady]);
 
   const handleConusView = () => {
     if (!leafletMap.current) return;
@@ -594,6 +700,15 @@ export default function RadarDisplay({
 
   const handleShowNexradChange = (value) => onSettingsChange({ ...settings, showNexrad: value });
   const handleAlertToggleChange = (key, value) => {
+    const stored = {
+      tornado: "alertTornado",
+      severe: "alertSevere",
+      flood: "alertFlood",
+      winter: "alertWinter",
+      heat: "alertHeat",
+      wind: "alertWind",
+      fire: "alertFire",
+    };
     if (key === "tornado") setShowTornado(value);
     if (key === "severe") setShowThunderstorm(value);
     if (key === "flood") setShowFlood(value);
@@ -601,6 +716,7 @@ export default function RadarDisplay({
     if (key === "heat") setShowHeat(value);
     if (key === "wind") setShowWind(value);
     if (key === "fire") setShowFireWx(value);
+    if (stored[key]) saveRadarLayers({ [stored[key]]: value });
   };
 
   const handleLayersMenuToggle = () => {
@@ -691,7 +807,7 @@ export default function RadarDisplay({
           Refreshing radar...
         </div>
       )}
-      <RadarLayersMenu
+      {variant !== "clean" && <RadarLayersMenu
         isOpen={isLayersMenuOpen}
         onToggle={handleLayersMenuToggle}
         showNexrad={showNexrad}
@@ -724,13 +840,130 @@ export default function RadarDisplay({
         onResetDock={reset}
         onFeatureAction={handleChipClick}
         showSafetyActions={emergency.visible}
-      />
+      />}
       <LightningLayer map={leafletMap.current} enabled={showLightning && isMapReady} />
       <HurricaneLayer map={leafletMap.current} enabled={showHurricanes && isMapReady} />
+      <StormCellLayer map={leafletMap.current} enabled={showCells && isMapReady} />
+      <WindFieldLayer map={leafletMap.current} enabled={showWindField && isMapReady} />
       <WildfireLayer map={leafletMap.current} enabled={showFires && isMapReady} />
-      <WindSpeedDisplay windData={windData} />
-      <ProLegend productLabel={ACTIVE_PRODUCT.label} />
-      <RadarStatusBar
+      {variant === "clean" && (
+        <>
+          <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex flex-col gap-2 px-3">
+            <div className="pointer-events-auto">
+              <ShelterAlert activeTornadoWarning={activeTornadoWarning} activeTornadoWatch={activeTornadoWatch} />
+            </div>
+            <div className="flex items-center gap-2 overflow-x-auto pb-1">
+              {[
+                ["Radar", showNexrad, () => {
+                  const next = !showNexrad;
+                  handleShowNexradChange(next);
+                  saveRadarLayers({ radar: next });
+                }],
+                ["Satellite", showSatellite, () => {
+                  const next = !showSatellite;
+                  setShowSatellite(next);
+                  saveRadarLayers({ satellite: next });
+                }],
+                ["Temps", showTemps, () => {
+                  const next = !showTemps;
+                  setShowTemps(next);
+                  saveRadarLayers({ temps: next });
+                }],
+                ["Clouds", showClouds, () => {
+                  const next = !showClouds;
+                  setShowClouds(next);
+                  saveRadarLayers({ clouds: next });
+                }],
+                ["Precip", showPrecip, () => {
+                  const next = !showPrecip;
+                  setShowPrecip(next);
+                  saveRadarLayers({ precip: next });
+                }],
+                ["Wind", showWindField, () => {
+                  const next = !showWindField;
+                  setShowWindField(next);
+                  saveRadarLayers({ wind: next });
+                }],
+                ["Lightning", showLightning, () => {
+                  const next = !showLightning;
+                  setShowLightning(next);
+                  saveRadarLayers({ lightning: next });
+                }],
+                ["Storms", showHurricanes || showCells, () => {
+                  const next = !(showHurricanes || showCells);
+                  setShowHurricanes(next);
+                  setShowCells(next);
+                  saveRadarLayers({ storms: next, cells: next });
+                }],
+              ].map(([label, active, onClick]) => (
+                <button
+                  key={label}
+                  type="button"
+                  onClick={onClick}
+                  aria-pressed={active}
+                  className={`pointer-events-auto shrink-0 rounded-full px-4 py-2 text-sm font-semibold shadow ${
+                    active ? "bg-sky-400 text-slate-950" : "bg-slate-950/90 text-white"
+                  }`}
+                >
+                  {label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={() => setLegendOpen((value) => !value)}
+                aria-expanded={legendOpen}
+                className="pointer-events-auto shrink-0 rounded-full bg-slate-950/90 px-4 py-2 text-sm font-semibold text-white shadow"
+              >
+                {legendOpen ? "Hide key" : "Key"}
+              </button>
+            </div>
+            {legendOpen && (
+              <div className="w-fit rounded-2xl bg-slate-950/90 p-3 shadow-xl">
+                <ProLegend productLabel={ACTIVE_PRODUCT.label} inline />
+              </div>
+            )}
+          </div>
+          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[1100] flex items-end justify-between gap-3 px-3">
+            <TimeLapseBar
+              enabled={loopEnabled}
+              playing={loopPlaying}
+              frameLabel={
+                loopEnabled && loopFrames[loopIndex]?.time
+                  ? `${loopFrames[loopIndex].kind === "future" ? "Future " : ""}${new Date(loopFrames[loopIndex].time * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+                  : "Live"
+              }
+              speed={loopSpeed}
+              onToggleEnabled={() => {
+                setLoopEnabled((value) => {
+                  const next = !value;
+                  setLoopPlaying(next);
+                  return next;
+                });
+              }}
+              onTogglePlaying={() => setLoopPlaying((value) => !value)}
+              onSpeedChange={setLoopSpeed}
+            />
+            <div className="flex flex-col items-end gap-2">
+              {locationError && (
+                <div className="pointer-events-auto max-w-[16rem] rounded-xl bg-slate-950/95 px-3 py-2 text-xs text-white shadow">
+                  {locationError}
+                </div>
+              )}
+              <button
+                type="button"
+                onClick={handleLocateMe}
+                className="pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-slate-950 shadow-md"
+                aria-label="Center radar on my location"
+              >
+                <LocateFixed size={20} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+      {variant !== "clean" && <WindSpeedDisplay windData={windData} />}
+      {variant !== "clean" && <ProLegend productLabel={ACTIVE_PRODUCT.label} />}
+      {variant !== "clean" && <RadarStatusBar
         productLabel={ACTIVE_PRODUCT.label}
         isLooping={loopEnabled && loopPlaying}
         frameLabel={
@@ -741,8 +974,8 @@ export default function RadarDisplay({
               : "Live"
         }
         warnings={activeWarningsCount}
-      />
-      <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[1200] flex flex-col items-center gap-2 px-3">
+      />}
+      {variant !== "clean" && <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[1200] flex flex-col items-center gap-2 px-3">
         <ShelterAlert activeTornadoWarning={activeTornadoWarning} activeTornadoWatch={activeTornadoWatch} />
         {stormData && (
           <StormToolsPanel stormData={stormData} onClose={() => setStormData(null)} />
@@ -837,11 +1070,13 @@ export default function RadarDisplay({
             {locationError}
           </div>
         )}
-      </div>
-      <div ref={mapRef} className="absolute inset-0 h-full min-h-[400px] w-full" role="application" aria-label="Interactive weather radar" />
-      <div className="pointer-events-none absolute bottom-1 left-3 z-[999] text-[11px] font-semibold tracking-wide text-white/30">
-        YouNeeK Pro Radar — by Andrew Gray
-      </div>
+      </div>}
+      <div ref={mapRef} className="radar-stage absolute inset-0 h-full min-h-[400px] w-full" role="application" aria-label="Interactive weather radar" />
+      {variant !== "clean" && (
+        <div className="pointer-events-none absolute bottom-1 left-3 z-[999] text-[11px] font-semibold tracking-wide text-white/30">
+          YouNeeK Pro Radar — by Andrew Gray
+        </div>
+      )}
     </div>
   );
 }

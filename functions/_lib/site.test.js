@@ -9,7 +9,7 @@ test("this Worker is the weather app and points marketing at youneekproradar.com
   assert.equal(site.weatherProject, WEATHER_PROJECT);
   assert.equal(site.marketingUrl, MARKETING_URL);
   assert.equal(site.marketingUrl, "https://youneekproradar.com");
-  assert.equal(site.homePath, "/Radar");
+  assert.equal(site.homePath, "/");
   assert.equal(DEFAULT_WEATHER_APP_URL.includes("youneek-pro-radarynk222"), true);
 });
 
@@ -17,5 +17,5 @@ test("WORKER_PROJECT overrides the reported project name without changing the ro
   const site = describeSite({ WORKER_PROJECT: WEATHER_PROJECT });
   assert.equal(site.role, "weather");
   assert.equal(site.project, WEATHER_PROJECT);
-  assert.equal(site.homePath, "/Radar");
+  assert.equal(site.homePath, "/");
 });

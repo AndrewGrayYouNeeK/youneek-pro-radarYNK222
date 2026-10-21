@@ -15,7 +15,7 @@ export async function fetchWeatherKit(lat, lon, dataSets = WEATHERKIT_DATASETS) 
     dataSets,
   });
 
-  const response = await fetch(`/api/weather?${params.toString()}`);
+  const response = await fetch(`/api/weather?${params.toString()}`, { signal: AbortSignal.timeout(12000) });
 
   const text = await response.text();
   let payload = {};
