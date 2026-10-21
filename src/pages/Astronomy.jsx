@@ -9,7 +9,7 @@ import { getMoonPhase } from "@/lib/weather/moon";
 export default function Astronomy() {
   const { coords } = useWeatherLocation();
   const moon = getMoonPhase();
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["astronomy", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
     staleTime: 300000,
@@ -22,6 +22,8 @@ export default function Astronomy() {
   return (
     <PageScaffold title="Sun & moon">
       <LocationPicker />
+      {isLoading && <p className="text-sm text-slate-400">Loading sunrise and sunset…</p>}
+      {isError && <p className="text-sm text-red-300">Sun times are unavailable right now.</p>}
       <div className="rounded-3xl border border-white/10 bg-white/5 p-5 text-center">
         <div className="text-5xl">{moon.emoji}</div>
         <div className="mt-2 text-xl font-semibold text-white">{moon.name}</div>

@@ -33,6 +33,16 @@ export default function WeatherAlertsCard({ alerts = [] }) {
                 Until {new Date(alert.expires).toLocaleString()}
               </p>
             )}
+            {alert.url && (
+              <a
+                href={alert.url}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-block text-[11px] font-medium text-amber-200 underline"
+              >
+                Official details
+              </a>
+            )}
           </article>
         ))}
       </div>

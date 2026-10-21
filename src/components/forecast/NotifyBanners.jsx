@@ -1,8 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
+import { fetchEnvironment } from "@/lib/api/environment";
 import { getPref } from "@/lib/prefs";
 import { haversineMiles } from "@/lib/globe/math";
 
 export default function NotifyBanners({ coords, environment }) {
+  const environmentQuery = useQuery({
+    queryKey: ["environment", coords?.latitude, coords?.longitude],
+    enabled: Boolean(coords) && !environment,
+    staleTime: 300000,
+    queryFn: () => fetchEnvironment(coords),
+  });
+  const air = environment || environmentQuery.data;
   const { data: lightning } = useQuery({
     queryKey: ["lightning"],
     staleTime: 60000,
@@ -23,10 +31,10 @@ export default function NotifyBanners({ coords, environment }) {
       banners.push(`Lightning reported ${Math.round(nearest)} miles away`);
     }
   }
-  if (getPref("pref_notifyAqi", true) && environment?.aqi >= 100) {
-    banners.push(`Air quality is elevated (AQI ${Math.round(environment.aqi)})`);
+  if (getPref("pref_notifyAqi", true) && air?.aqi >= 100) {
+    banners.push(`Air quality is elevated (AQI ${Math.round(air.aqi)})`);
   }
-  if (getPref("pref_notifyPollen", true) && environment?.pollen >= 20) {
+  if (getPref("pref_notifyPollen", true) && air?.pollen >= 20) {
     banners.push("Pollen is high in your area");
   }
   if (getPref("pref_notifyHurricane", true)) {

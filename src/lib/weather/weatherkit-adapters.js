@@ -58,6 +58,7 @@ export function adaptWeatherKitCurrent(data) {
       wind_direction_10m: current?.windDirection,
       wind_gusts_10m: current?.windGust,
       weather_code: conditionToWmo(current?.conditionCode),
+      condition_code: current?.conditionCode || "",
       condition_label: formatConditionCode(current?.conditionCode),
       pressure_msl: current?.pressure,
       pressure_trend: current?.pressureTrend,

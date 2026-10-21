@@ -10,6 +10,10 @@ import { onRequestGet as getNews } from "./functions/api/news.js";
 import { onRequestGet as getOutlook } from "./functions/api/outlook.js";
 import { onRequestGet as getTile } from "./functions/api/tile.js";
 import { onRequestGet as getAlertsWorker } from "./functions/api/alerts.js";
+import { onRequestGet as getPointAlerts } from "./functions/api/point-alerts.js";
+import { onRequestGet as getSite } from "./functions/api/site.js";
+import { onRequestGet as getWeatherStatus } from "./functions/api/weather-status.js";
+import { WEATHER_PROJECT } from "./functions/_lib/site.js";
 
 function attachJsonRoute(server, route, handler) {
   server.middlewares.use(route, async (req, res) => {
@@ -118,6 +122,39 @@ function attachRadarApi(server, mode) {
     return { status: response.status, body: await response.text(), contentType: "application/json", headers };
   });
 
+  attachJsonRoute(server, "/api/point-alerts", async (req) => {
+    const request = new Request(`http://localhost${req.url}`, { method: req.method });
+    const response = await getPointAlerts({ request });
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/site", async () => {
+    const response = await getSite({
+      env: {
+        ...workerEnv,
+        WORKER_PROJECT: WEATHER_PROJECT,
+      },
+    });
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
+  attachJsonRoute(server, "/api/weather-status", async () => {
+    const response = await getWeatherStatus({ env: workerEnv });
+    const headers = {};
+    response.headers.forEach((value, key) => {
+      headers[key] = value;
+    });
+    return { status: response.status, body: await response.text(), contentType: "application/json", headers };
+  });
+
   server.middlewares.use("/api/tile", async (req, res) => {
     try {
       const request = new Request(`http://localhost${req.url}`, { method: req.method });
@@ -168,8 +205,17 @@ const tunnelHost = {
   hmr: { protocol: "wss", clientPort: 443 },
 };
 
-export default defineConfig(({ mode }) => ({
-  plugins: [react(), nwsLandingApi(), radarApiDevProxy(mode)],
+export default defineConfig(({ mode }) => {
+  return {
+  plugins: [
+    react(),
+    nwsLandingApi(),
+    radarApiDevProxy(mode),
+  ],
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
@@ -191,4 +237,5 @@ export default defineConfig(({ mode }) => ({
     proxy: hurricaneProxy,
     ...(tunnelMode ? { allowedHosts: true } : {}),
   },
-}));
+};
+});

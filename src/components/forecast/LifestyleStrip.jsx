@@ -1,9 +1,18 @@
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import { fetchEnvironment } from "@/lib/api/environment";
 import { coldFluRisk, outdoorScores, scoreLabel } from "@/lib/weather/lifestyle";
 
-export default function LifestyleStrip({ current, environment }) {
-  const sports = outdoorScores(current, environment).slice(0, 3);
-  const flu = coldFluRisk(current, environment);
+export default function LifestyleStrip({ current, environment, coords }) {
+  const environmentQuery = useQuery({
+    queryKey: ["environment", coords?.latitude, coords?.longitude],
+    enabled: Boolean(coords) && !environment,
+    staleTime: 300000,
+    queryFn: () => fetchEnvironment(coords),
+  });
+  const air = environment || environmentQuery.data;
+  const sports = outdoorScores(current, air).slice(0, 3);
+  const flu = coldFluRisk(current, air);
 
   return (
     <section>

@@ -30,19 +30,21 @@ export default function SafetyTextActions({ compact = false }) {
           type="button"
           onClick={() => send("emergency")}
           disabled={busy}
+          aria-label="Help Me text"
           className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-3 text-sm font-bold text-white hover:bg-red-500 disabled:opacity-50"
         >
           <ShieldAlert className="h-4 w-4" aria-hidden="true" />
-          Emergency text
+          Help Me
         </button>
         <button
           type="button"
           onClick={() => send("safe")}
           disabled={busy}
+          aria-label="I'm Safe text"
           className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
         >
           <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-          I'm Safe text
+          I&apos;m Safe
         </button>
       </div>
       {status && <p className="text-xs text-slate-400">{status}</p>}

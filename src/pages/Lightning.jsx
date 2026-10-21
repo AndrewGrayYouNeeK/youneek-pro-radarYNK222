@@ -9,7 +9,7 @@ import { useUnits } from "@/lib/UnitsContext";
 export default function Lightning() {
   const { coords } = useWeatherLocation();
   const { units } = useUnits();
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["lightning"],
     staleTime: 60000,
     queryFn: async () => {
@@ -37,6 +37,8 @@ export default function Lightning() {
         <div className="mt-2 text-3xl font-light text-white">
           {nearest ? formatDistance(nearest.miles, units) : "No nearby strikes"}
         </div>
+        {isLoading && <p className="mt-2 text-xs text-slate-400">Checking recent storm reports…</p>}
+        {isError && <p className="mt-2 text-xs text-red-300">Lightning reports are unavailable right now.</p>}
         <p className="mt-2 text-xs text-slate-400">
           {nearest
             ? `${nearest.source} · ${nearest.ageMinutes ?? "?"} min ago`

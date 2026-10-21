@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ChevronDown, ChevronUp, Pin, PinOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import AccountActions from "./AccountActions";
 import RadioControls from "./RadioControls";
 import { RADAR_PRODUCTS } from "./radarProducts";
+import { MAP_FEATURE_GROUPS, MAP_FEATURES, MAX_DOCK_CHIPS } from "@/lib/mapDesk";
 
 function ToggleRow({ label, checked, onCheckedChange, ariaLabel }) {
   return (
@@ -37,9 +39,22 @@ export default function RadarLayersMenu({
   onAlertToggleChange,
   productId,
   onProductChange,
+  dockIds = [],
+  onTogglePin,
+  onMovePin,
+  onResetDock,
+  onFeatureAction,
+  showSafetyActions = false,
 }) {
+  const navigate = useNavigate();
   const [showAlerts, setShowAlerts] = useState(false);
+  const [showCustomize, setShowCustomize] = useState(false);
   const menuRef = useRef(null);
+
+  const openRoute = (path) => {
+    onToggle();
+    navigate(path);
+  };
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -198,6 +213,109 @@ export default function RadarLayersMenu({
             </div>
 
             <RadioControls showRadio={showRadio} onShowRadioChange={onShowRadioChange} />
+
+            <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3">
+              <button
+                type="button"
+                onClick={() => setShowCustomize((value) => !value)}
+                className="flex w-full items-center justify-between text-left"
+                aria-label={showCustomize ? "Hide map shortcuts" : "Customize map shortcuts"}
+              >
+                <div>
+                  <div className="text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">On this radar</div>
+                  <div className="mt-0.5 text-xs text-slate-500">
+                    {dockIds.length}/{MAX_DOCK_CHIPS} tools showing
+                  </div>
+                </div>
+                {showCustomize ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+              </button>
+              {showCustomize && (
+                <div className="space-y-3">
+                  {MAP_FEATURE_GROUPS.map((group) => (
+                    <div key={group.id}>
+                      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">{group.label}</div>
+                      <div className="space-y-1">
+                        {MAP_FEATURES.filter((feature) => feature.group === group.id).map((feature) => {
+                          const pinned = dockIds.includes(feature.id);
+                          const index = dockIds.indexOf(feature.id);
+                          return (
+                            <div key={feature.id} className="flex items-center gap-2 rounded-xl bg-white/5 px-2 py-1.5">
+                              <button
+                                type="button"
+                                className="min-w-0 flex-1 text-left text-sm text-white"
+                                onClick={() => {
+                                  if (feature.kind === "route" && feature.path) openRoute(feature.path);
+                                  else onFeatureAction?.(feature.id);
+                                }}
+                              >
+                                {feature.label}
+                              </button>
+                              {pinned && onMovePin && (
+                                <div className="flex items-center">
+                                  <button
+                                    type="button"
+                                    aria-label={`Move ${feature.label} up`}
+                                    onClick={() => onMovePin(feature.id, -1)}
+                                    disabled={index <= 0}
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 disabled:opacity-30"
+                                  >
+                                    <ChevronUp className="h-4 w-4" aria-hidden="true" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    aria-label={`Move ${feature.label} down`}
+                                    onClick={() => onMovePin(feature.id, 1)}
+                                    disabled={index < 0 || index >= dockIds.length - 1}
+                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-300 disabled:opacity-30"
+                                  >
+                                    <ChevronDown className="h-4 w-4" aria-hidden="true" />
+                                  </button>
+                                </div>
+                              )}
+                              <button
+                                type="button"
+                                onClick={() => onTogglePin?.(feature.id)}
+                                aria-label={pinned ? `Hide ${feature.label} from radar` : `Show ${feature.label} on radar`}
+                                className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-[11px] font-semibold ${
+                                  pinned ? "bg-cyan-300 text-slate-950" : "bg-white/10 text-slate-300"
+                                }`}
+                              >
+                                {pinned ? <Pin className="h-3.5 w-3.5" aria-hidden="true" /> : <PinOff className="h-3.5 w-3.5" aria-hidden="true" />}
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                  {showSafetyActions && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => onFeatureAction?.("help")}
+                        className="flex min-h-11 items-center justify-center rounded-xl bg-red-600 text-sm font-bold text-white"
+                      >
+                        Help Me
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onFeatureAction?.("safe")}
+                        className="flex min-h-11 items-center justify-center rounded-xl bg-emerald-400 text-sm font-bold text-slate-950"
+                      >
+                        I&apos;m Safe
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    type="button"
+                    onClick={onResetDock}
+                    className="flex min-h-10 w-full items-center justify-center rounded-xl border border-white/10 text-xs font-semibold text-slate-300"
+                  >
+                    Reset to all tools
+                  </button>
+                </div>
+              )}
+            </div>
 
             <AccountActions />
           </div>

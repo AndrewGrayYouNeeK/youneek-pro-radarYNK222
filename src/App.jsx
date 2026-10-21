@@ -5,12 +5,12 @@ import { queryClientInstance } from "@/lib/query-client";
 import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import PageNotFound from "./lib/PageNotFound";
-import Landing from "./pages/Landing";
 import RadarApp from "./pages/RadarApp";
-import { LocationProvider } from "@/components/landing/LocationContext";
+import { LocationProvider } from "@/lib/LocationContext";
 import { AuthProvider } from "@/lib/AuthContext";
 import { UnitsProvider } from "@/lib/UnitsContext";
 import { NavigationStackProvider } from "@/lib/NavigationStack";
+import { RadioProvider } from "@/lib/RadioContext";
 import OnboardingModal from "@/components/radar/OnboardingModal";
 
 const Radar = lazy(() => import("./pages/Radar"));
@@ -31,6 +31,7 @@ const Wildfire = lazy(() => import("./pages/Wildfire"));
 const Health = lazy(() => import("./pages/Health"));
 const News = lazy(() => import("./pages/News"));
 const Astronomy = lazy(() => import("./pages/Astronomy"));
+const RadioPage = lazy(() => import("./pages/Radio"));
 
 const Spinner = () => (
   <div className="flex h-full items-center justify-center bg-slate-950">
@@ -71,10 +72,10 @@ function App() {
       <UnitsProvider>
       <QueryClientProvider client={queryClientInstance}>
         <LocationProvider>
+          <RadioProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Landing />} />
-              <Route path="/landing" element={<Navigate to="/" replace />} />
+              <Route path="/" element={<Navigate to="/Radar" replace />} />
               <Route path="/app" element={<RadarApp />} />
               <Route
                 element={
@@ -98,6 +99,7 @@ function App() {
                 <Route path="/Health" element={<Health />} />
                 <Route path="/News" element={<News />} />
                 <Route path="/Astronomy" element={<Astronomy />} />
+                <Route path="/Radio" element={<RadioPage />} />
                 <Route path="/Contacts" element={<Contacts />} />
                 <Route path="/Settings" element={<Settings />} />
                 <Route path="/Privacy" element={<Privacy />} />
@@ -106,6 +108,7 @@ function App() {
             </Routes>
             <Toaster />
           </Router>
+          </RadioProvider>
         </LocationProvider>
       </QueryClientProvider>
       </UnitsProvider>

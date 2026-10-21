@@ -7,6 +7,9 @@ import { onRequestGet as getWildfires } from "../functions/api/wildfires.js";
 import { onRequestGet as getFires } from "../functions/api/fires.js";
 import { onRequestGet as getOutlook } from "../functions/api/outlook.js";
 import { onRequestGet as getTile } from "../functions/api/tile.js";
+import { onRequestGet as getPointAlerts } from "../functions/api/point-alerts.js";
+import { onRequestGet as getSite } from "../functions/api/site.js";
+import { onRequestGet as getWeatherStatus } from "../functions/api/weather-status.js";
 import { handleNwsRequest } from "../server/nwsApi.js";
 import { finalizeAssetResponse } from "./serveAssets.js";
 
@@ -48,6 +51,29 @@ export default {
 
     if (request.method === "GET" && pathname === "/api/tile") {
       return getTile({ request });
+    }
+
+    if (request.method === "OPTIONS" && pathname.startsWith("/api/")) {
+      return new Response(null, {
+        status: 204,
+        headers: {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+        },
+      });
+    }
+
+    if (request.method === "GET" && pathname === "/api/point-alerts") {
+      return getPointAlerts({ request });
+    }
+
+    if (request.method === "GET" && pathname === "/api/site") {
+      return getSite({ env });
+    }
+
+    if (request.method === "GET" && pathname === "/api/weather-status") {
+      return getWeatherStatus({ env });
     }
 
     if (request.method === "POST" && pathname === "/api/nws") {

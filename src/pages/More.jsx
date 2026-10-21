@@ -6,6 +6,7 @@ import {
   Flame,
   HeartPulse,
   Newspaper,
+  Radio,
   Shield,
   Sparkles,
   SunMedium,
@@ -18,6 +19,7 @@ import BottomTab from "@/components/radar/BottomTab";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 
 const ITEMS = [
+  { to: "/Radio", icon: Radio, title: "NOAA weather radio", desc: "Live audio for the station nearest you" },
   { to: "/AirQuality", icon: Wind, title: "Air quality", desc: "US AQI, PM2.5, ozone, and health guidance" },
   { to: "/Pollen", icon: Sparkles, title: "Pollen & allergy", desc: "Species breakdown and 3-day outlook" },
   { to: "/Lightning", icon: Zap, title: "Lightning map", desc: "Closest strikes and live storm reports" },

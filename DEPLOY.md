@@ -1,50 +1,42 @@
-# Deploy guide — landing + radar
+# Deploy guide — weather app only
 
-This repository is one app:
+This repository publishes one site: the YouNeeK Pro Radar weather app. The marketing page at [https://youneekproradar.com](https://youneekproradar.com) is the youneekproradarBABY Worker. Do not attach that domain here, and do not rename this Worker.
 
-| Path | What it is |
-|------|------------|
-| `/` | Cinematic landing (MAKING IT RAIN) |
-| `/Radar` (`/app`) | Live NEXRAD radar product |
-| `/Forecast` `/Globe` `/Contacts` `/Settings` | WeatherKit, globe, safety, prefs |
+| Site | Build | Cloudflare Worker | Home |
+|---|---|---|---|
+| **Weather app** | `npm run build` → `dist/` | **`youneek-pro-radarynk222`** (`wrangler.toml`) | `/` redirects to `/Radar` |
+| **Marketing site** | youneekproradarBABY repo, not this one | **`youneekproradarbaby`** | `https://youneekproradar.com` |
 
-Cloudflare project: **`youneek-pro-radarynk222`**.
+WeatherKit secrets belong only on `youneek-pro-radarynk222`.
 
-**Production URL:** [https://youneek-pro-radarynk222.youneekartifacts.workers.dev](https://youneek-pro-radarynk222.youneekartifacts.workers.dev)
-
-## Workers Builds
-
-`wrangler.toml` sets `[assets] directory = "./dist"` and `run_worker_first = true` so the Worker can set `no-store` on HTML (the landing shell) and 404 missing hashed assets instead of serving `index.html`.
+## Weather app
 
 | Setting | Value |
-|---------|-------|
+|---|---|
 | Production branch | `main` |
 | Build command | `npm run build` |
 | Deploy command | `npx wrangler deploy` |
 
-## API routes (Worker)
+`wrangler.toml` keeps `name = "youneek-pro-radarynk222"` and has no custom domain. Do not add a `youneekproradar.com` route here.
+
+This guide does not deploy anything. When a human is ready: `npm run build && npm run deploy:weather`.
+
+## API routes
 
 | Route | Purpose |
-|-------|---------|
-| `POST /api/nws` | Landing GPS / conditions / alerts proxy |
+|---|---|
+| `GET /api/weather?lat=&lon=` | Apple WeatherKit current, hourly, daily, next hour, and alerts |
+| `GET /api/weather-status` | Signs an ES256 JWT and asks Apple whether that token is accepted |
+| `GET /api/point-alerts?lat=&lon=` | Location-specific NWS alerts, including recent emergencies |
 | `GET /api/alerts?type=` | Radar NWS polygons |
-| `GET /api/getActiveStorms` | NHC tropical cyclones |
-| `GET /api/weather?lat=&lon=` | WeatherKit (needs secrets) |
-| `GET /api/lightning` | Lightning reports |
+| `GET /api/outlook?lat=&lon=` | SPC outlook for a point |
+| `GET /api/getActiveStorms` | NHC active cyclones |
+| `GET /api/lightning` | Recent IEM local storm reports used as lightning proximity |
+| `GET /api/fires` | VIIRS detections plus EONET events |
+| `GET /api/wildfires` | NASA EONET wildfire events |
+| `GET /api/news` | NWS alert headlines |
+| `GET /api/tile` | Radar tile proxy |
+| `GET /api/site` | Confirms this Worker is the weather app and returns the marketing URL |
+| `POST /api/nws` | Location search and point metadata |
 
-**WeatherKit:** [WEATHERKIT.md](./WEATHERKIT.md). Set `WEATHERKIT_*` secrets in Cloudflare.
-
-## Local
-
-```bash
-npm install
-npm run dev
-```
-
-## Cloudflare Tunnel (local origin)
-
-```bash
-npm run tunnel
-```
-
-Starts the app on `http://localhost:8000` and prints a public Quick Tunnel URL. No UUID, login, or DNS setup. See [TUNNEL.md](./TUNNEL.md).
+If WeatherKit secrets are missing, the private key will not sign, or Apple rejects the token, the Forecast page keeps loading from Open-Meteo and NWS. `/api/weather-status` reports `auth` as `missing`, `invalid_key`, `rejected`, or `unreachable` instead of claiming success from secret presence alone.

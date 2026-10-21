@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { clearLocalData } from "@/lib/clearLocalData";
@@ -6,12 +6,32 @@ import BottomTab from "@/components/radar/BottomTab";
 import AppHeader from "@/components/mobile/AppHeader";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { Switch } from "@/components/ui/switch";
-import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap } from "lucide-react";
+import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap, CloudSun } from "lucide-react";
 import { setPref } from "@/lib/prefs";
 import { UNIT_OPTIONS } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
 
 const APP_VERSION = "1.0.0";
+
+function weatherKitStatusLabel(status) {
+  if (!status) return "Checking whether Apple accepts the WeatherKit token…";
+  switch (status.auth) {
+    case "ok":
+      return "Auth works. Current, hourly, daily, and alerts prefer WeatherKit, with Open-Meteo filling gaps.";
+    case "missing":
+      return status.missing?.length
+        ? `Secrets missing: ${status.missing.join(", ")}. Forecast is using Open-Meteo and NWS.`
+        : "Secrets are missing. Forecast is using Open-Meteo and NWS.";
+    case "invalid_key":
+      return "The .p8 key could not be signed. Forecast is using Open-Meteo and NWS.";
+    case "rejected":
+      return `Apple returned ${status.appleStatus || "an error"}. Forecast is using Open-Meteo and NWS.`;
+    case "unreachable":
+      return "Could not reach Apple. Forecast is using Open-Meteo and NWS.";
+    default:
+      return "WeatherKit status is unknown. Forecast is using Open-Meteo and NWS.";
+  }
+}
 
 function Section({ title, children }) {
   return (
@@ -64,17 +84,34 @@ export default function Settings() {
   const [notifyAqi, setNotifyAqi] = useState(() => localStorage.getItem("pref_notifyAqi") !== "false");
   const [notifyPrecip24, setNotifyPrecip24] = useState(() => localStorage.getItem("pref_notifyPrecip24") !== "false");
   const [autoTune, setAutoTune] = useState(() => localStorage.getItem("pref_autoTune") !== "false");
+  const [notifyHurricane, setNotifyHurricane] = useState(() => localStorage.getItem("pref_notifyHurricane") !== "false");
   const [showAbout, setShowAbout] = useState(false);
+  const [weatherKit, setWeatherKit] = useState(null);
 
   const handleToggle = (key, setter) => (val) => {
     setter(val);
     setPref(key, val);
   };
 
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/weather-status")
+      .then((response) => response.json())
+      .then((body) => {
+        if (!cancelled) setWeatherKit(body);
+      })
+      .catch(() => {
+        if (!cancelled) setWeatherKit({ auth: "unreachable", ok: false });
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const clearDataMutation = useMutation({
     mutationFn: async () => {
       clearLocalData();
-      window.location.href = "/landing";
+      window.location.href = "/Radar";
     },
     onMutate: () => setConfirmingDelete(false),
   });
@@ -146,6 +183,18 @@ export default function Settings() {
               }
             />
             <SettingRow
+              icon={AlertTriangle}
+              label="Tropical cyclone notices"
+              sublabel="Show a banner on Forecast when NHC is tracking a storm"
+              right={
+                <Switch
+                  checked={notifyHurricane}
+                  onCheckedChange={handleToggle("pref_notifyHurricane", setNotifyHurricane)}
+                  aria-label="Toggle tropical cyclone notices"
+                />
+              }
+            />
+            <SettingRow
               icon={Bell}
               label="Air quality notices"
               sublabel="Keep AQI detail visible on Forecast"
@@ -156,6 +205,14 @@ export default function Settings() {
                   aria-label="Toggle air quality notices"
                 />
               }
+            />
+          </Section>
+
+          <Section title="Weather data">
+            <SettingRow
+              icon={CloudSun}
+              label="Apple WeatherKit"
+              sublabel={weatherKitStatusLabel(weatherKit)}
             />
           </Section>
 

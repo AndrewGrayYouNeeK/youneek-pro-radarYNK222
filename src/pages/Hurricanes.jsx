@@ -6,7 +6,7 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { fetchActiveStorms } from "@/lib/api/outlook";
 
 export default function Hurricanes() {
-  useTabPageMemory("Forecast");
+  useTabPageMemory("More");
   const { data, isLoading, error } = useQuery({
     queryKey: ["hurricane-center"],
     queryFn: fetchActiveStorms,

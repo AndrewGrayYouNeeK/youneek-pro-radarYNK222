@@ -9,7 +9,7 @@ import { coldFluRisk, outdoorScores, scoreLabel, uvCategory } from "@/lib/weathe
 
 export default function Health() {
   const { coords } = useWeatherLocation();
-  const { data } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ["health", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
     staleTime: 300000,
@@ -32,8 +32,13 @@ export default function Health() {
       <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
         <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">UV index</div>
         <div className="mt-2 text-4xl font-extralight text-white">
-          {Math.round(data?.current?.uv_index ?? data?.environment?.uv ?? 0)}
+          {isLoading
+            ? "…"
+            : data?.current?.uv_index != null || data?.environment?.uv != null
+              ? Math.round(data.current?.uv_index ?? data.environment?.uv)
+              : "—"}
         </div>
+        {isError && <p className="mt-2 text-xs text-red-300">Health data is unavailable right now.</p>}
         <p className="mt-2 text-sm text-amber-100">{uv.label}</p>
         <p className="mt-1 text-xs text-slate-400">{uv.advice}</p>
       </div>
