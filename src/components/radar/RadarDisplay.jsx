@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
@@ -24,8 +24,9 @@ import TargetList from "./TargetList";
 import { getRadarProduct } from "./radarProducts";
 import usePullToRefresh from "@/hooks/usePullToRefresh";
 import useMapDesk from "@/hooks/useMapDesk";
-import useWeatherEmergency from "@/hooks/useWeatherEmergency";
 import { fetchNwsPointAlerts } from "@/lib/api/nwsAlerts";
+import { readSafetyPreview } from "@/lib/safety/safetyPreview";
+import { activeSafetyAlerts } from "@/lib/safety/weatherEmergency";
 import { getMapFeature } from "@/lib/mapDesk";
 import { RADAR_LAYERS_EVENT, loadRadarLayers, saveRadarLayers } from "@/lib/radarLayers";
 import { loadActiveLocation } from "@/lib/locationStore";
@@ -195,7 +196,13 @@ export default function RadarDisplay({
     staleTime: 120000,
     queryFn: () => fetchNwsPointAlerts(alertLat, alertLon),
   });
-  const emergency = useWeatherEmergency(pointAlertsQuery.data);
+  const [safetyPreview] = useState(() =>
+    typeof window === "undefined" ? null : readSafetyPreview(window.location.search)
+  );
+  const showSafetyTexts = useMemo(() => {
+    const live = Array.isArray(pointAlertsQuery.data) ? pointAlertsQuery.data : [];
+    return activeSafetyAlerts(safetyPreview ? [safetyPreview, ...live] : live).length > 0;
+  }, [pointAlertsQuery.data, safetyPreview]);
 
   useEffect(() => {
     clickContextRef.current = { userLocation, windData, onMapClick };
@@ -787,7 +794,7 @@ export default function RadarDisplay({
     }
 
     if (id === "help" || id === "safe") {
-      if (!emergency.visible) return;
+      if (!showSafetyTexts) return;
       sendSafety(id === "help" ? "emergency" : "safe");
     }
   };
@@ -839,7 +846,7 @@ export default function RadarDisplay({
         onMovePin={move}
         onResetDock={reset}
         onFeatureAction={handleChipClick}
-        showSafetyActions={emergency.visible}
+        showSafetyActions={showSafetyTexts}
       />}
       <LightningLayer map={leafletMap.current} enabled={showLightning && isMapReady} />
       <HurricaneLayer map={leafletMap.current} enabled={showHurricanes && isMapReady} />
@@ -1032,7 +1039,7 @@ export default function RadarDisplay({
           onOpenMore={handleLayersMenuToggle}
           onTogglePin={togglePin}
           onResetDock={reset}
-          showSafetyActions={emergency.visible}
+          showSafetyActions={showSafetyTexts}
         />
         <div className="flex w-full max-w-md items-end justify-between gap-2">
           <TimeLapseBar

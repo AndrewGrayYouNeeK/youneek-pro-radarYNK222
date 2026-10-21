@@ -9,6 +9,7 @@ import MinutePrecipitation, { rainTimingLabel } from "@/components/forecast/Minu
 import EnvironmentCards from "@/components/forecast/EnvironmentCards";
 import AlertBanner from "@/components/home/AlertBanner";
 import LegacyBrand from "@/components/home/LegacyBrand";
+import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
@@ -52,6 +53,7 @@ export default function WeatherHome() {
       <LocationPicker />
       <AlertBanner alerts={alerts} />
       <SafetyTextCard />
+      <SafetyReminderCard />
 
       {showLoading && (
         <div className="flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-6 text-sm text-slate-300">

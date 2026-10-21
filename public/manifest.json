@@ -1,7 +1,7 @@
 {
   "name": "YouNeeK Pro Radar",
   "short_name": "ProRadar",
-  "description": "YouNeeK Pro Radar — MAKING IT RAIN. Live NEXRAD, WeatherKit forecasts, NWS alerts, NOAA radio, and shelter notifications.",
+  "description": "YouNeeK Pro Radar. Live NEXRAD, WeatherKit forecasts, NWS alerts, NOAA radio, and shelter notifications.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

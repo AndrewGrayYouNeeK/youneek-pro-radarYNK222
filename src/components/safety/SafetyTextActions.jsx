@@ -11,11 +11,7 @@ export default function SafetyTextActions({ compact = false, coords = null }) {
     setBusy(true);
     setStatus("");
     try {
-      const result = await sendContactTexts({
-        kind,
-        coords,
-        context: kind === "safe" ? "I'M SAFE — I am OK and accounted for." : undefined,
-      });
+      const result = await sendContactTexts({ kind, coords });
       setStatus(`Opened ${result.count} message draft${result.count === 1 ? "" : "s"} — tap Send in Messages.`);
     } catch (error) {
       setStatus(error.message);

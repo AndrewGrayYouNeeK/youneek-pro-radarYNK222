@@ -17,6 +17,7 @@ import {
   Wind,
   Zap,
 } from "lucide-react";
+import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import AppHeader from "@/components/mobile/AppHeader";
 import BottomTab from "@/components/radar/BottomTab";
@@ -54,6 +55,7 @@ export default function More() {
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-4">
         <div className="mx-auto max-w-3xl space-y-4">
           <SafetyTextCard />
+          <SafetyContactsLink />
           <div className="rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-950/50 to-slate-950 p-4">
             <div className="flex items-center gap-2 text-cyan-200">
               <Shield className="h-4 w-4" aria-hidden="true" />

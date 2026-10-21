@@ -1,6 +1,6 @@
 # YouNeeK Pro Radar
 
-Live weather and radar app. Slogan: **MAKING IT RAIN**. This repository is only the weather app. The marketing site is [https://youneekproradar.com](https://youneekproradar.com), served by the youneekproradarBABY Worker.
+Live weather and radar app. This repository is only the weather app. The marketing site is [https://youneekproradar.com](https://youneekproradar.com), served by the youneekproradarBABY Worker.
 
 - **`/`** opens **`/Radar`** (also `/app`) — NEXRAD, velocity, global + future radar, lightning, tropical cyclones, wildfires, and the customizable pro desk
 - **`/Radio`** — NOAA Weather Radio for the nearest station

@@ -10,7 +10,7 @@
     "tunnel": "node scripts/share-tunnel.mjs",
     "tunnel:config": "bash scripts/write-tunnel-config.sh",
     "build": "vite build",
-    "test": "node --test src/lib/weather/weatherkit-units.test.js src/lib/weather/skyTheme.test.js src/lib/weather/premiumWeather.test.js src/lib/safety/weatherEmergency.test.js src/lib/safety/sms.test.js functions/api/point-alerts.test.js functions/_lib/weatherkit-key.test.js functions/_lib/weatherkit-auth.test.js functions/_lib/site.test.js functions/_lib/wrangler-config.test.js scripts/test-map-desk.mjs",
+    "test": "node --test src/lib/weather/weatherkit-units.test.js src/lib/weather/skyTheme.test.js src/lib/weather/premiumWeather.test.js src/lib/safety/weatherEmergency.test.js src/lib/safety/safetyPreview.test.js src/lib/safety/sms.test.js functions/api/point-alerts.test.js functions/_lib/weatherkit-key.test.js functions/_lib/weatherkit-auth.test.js functions/_lib/site.test.js functions/_lib/wrangler-config.test.js scripts/test-map-desk.mjs",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",

@@ -16,10 +16,6 @@ export default function LegacyBrand() {
         className="h-44 w-full bg-black object-contain"
       />
       <div className="space-y-3 px-4 py-4">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-[#00ff9c] shadow-[0_0_8px_#00ff9c]" />
-          <p className="text-[10px] font-semibold uppercase tracking-[0.32em] text-[#00ff9c]">Making it rain</p>
-        </div>
         <div>
           <h2 className="text-lg font-bold tracking-tight text-white">YouNeeK Pro Radar</h2>
           <p className="mt-1 text-xs text-white/60">

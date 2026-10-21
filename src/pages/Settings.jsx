@@ -5,6 +5,8 @@ import { clearLocalData } from "@/lib/clearLocalData";
 import BottomTab from "@/components/radar/BottomTab";
 import AppHeader from "@/components/mobile/AppHeader";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
+import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
+import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap, CloudSun } from "lucide-react";
@@ -124,6 +126,8 @@ export default function Settings() {
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-5">
         <div className="mx-auto max-w-md space-y-4">
           <SafetyTextCard />
+          <SafetyReminderCard />
+          <SafetyContactsLink />
           <Section title="Notifications">
             <SettingRow
               icon={Bell}

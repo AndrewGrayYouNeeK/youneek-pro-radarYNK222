@@ -4,12 +4,11 @@ import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import { loadShelterContacts } from "@/lib/safety/sms";
 import { getPref } from "@/lib/prefs";
 
-export default function ShelterAlert({ activeTornadoWarning, activeTornadoWatch }) {
+export default function ShelterAlert({ activeTornadoWarning }) {
   const [dismissed, setDismissed] = useState(false);
   const contacts = loadShelterContacts();
   const notifyEnabled = getPref("pref_notifyTornado", true);
-  const isActive = activeTornadoWarning || activeTornadoWatch;
-  if (!notifyEnabled || !contacts.length || !isActive || dismissed) return null;
+  if (!notifyEnabled || !contacts.length || !activeTornadoWarning || dismissed) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -23,7 +22,7 @@ export default function ShelterAlert({ activeTornadoWarning, activeTornadoWatch 
         <div className="mb-2 flex items-center justify-between">
           <div className="inline-flex items-center gap-1.5 rounded-full border border-red-500/30 bg-red-500/10 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.18em] text-red-300">
             <span className="inline-block h-1.5 w-1.5 animate-pulse rounded-full bg-red-400" />
-            {activeTornadoWarning ? "Tornado Warning Active" : "Tornado Watch Active"}
+            Tornado Warning Active
           </div>
           <button type="button" onClick={() => setDismissed(true)} className="text-[11px] text-slate-400">
             Hide

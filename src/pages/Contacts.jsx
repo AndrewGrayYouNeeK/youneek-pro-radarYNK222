@@ -5,27 +5,18 @@ import AppHeader from "@/components/mobile/AppHeader";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { UserPlus, Trash2, Download, Upload, Phone, User, Shield, AlertTriangle } from "lucide-react";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
-
-// ── Storage helpers ────────────────────────────────────────────────────────
-const STORAGE_KEY = "shelterContacts_v2";
+import useSafetyTexts from "@/hooks/useSafetyTexts";
+import { loadShelterContacts, normalizeUsPhone, saveShelterContacts } from "@/lib/safety/sms";
 
 function loadContacts() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
-  catch { return []; }
+  return loadShelterContacts();
 }
 function saveContacts(contacts) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(contacts));
-  // Mirror to legacy key so ShelterAlert still works
-  const phones = contacts.map((c) => c.phone).filter(Boolean);
-  localStorage.setItem("shelterContacts", JSON.stringify(phones));
+  saveShelterContacts(contacts);
 }
 
-// ── Validation ─────────────────────────────────────────────────────────────
 function cleanPhone(raw) {
-  const digits = raw.replace(/\D/g, "");
-  if (digits.length === 10) return `+1${digits}`;
-  if (digits.length === 11 && digits[0] === "1") return `+${digits}`;
-  return null;
+  return normalizeUsPhone(raw);
 }
 function formatDisplay(phone) {
   const d = phone.replace(/\D/g, "").replace(/^1/, "");
@@ -35,6 +26,7 @@ function formatDisplay(phone) {
 
 export default function Contacts() {
   useTabPageMemory("More");
+  const safety = useSafetyTexts();
   const queryClient = useQueryClient();
   const fileInputRef = useRef(null);
   const [name, setName] = useState("");
@@ -228,11 +220,17 @@ export default function Contacts() {
           )}
         </div>
 
-        {contacts.length > 0 && (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-            <div className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">Send a text</div>
-            <SafetyTextActions />
+        {contacts.length > 0 && safety.show && (
+          <div className="rounded-2xl border border-rose-400/30 bg-rose-950/40 p-4">
+            <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-200">Send a text</div>
+            <p className="mb-3 text-sm font-semibold text-white">{safety.primary?.name}</p>
+            <SafetyTextActions coords={safety.coords} />
           </div>
+        )}
+        {contacts.length > 0 && !safety.show && (
+          <p className="text-xs leading-relaxed text-slate-400">
+            Help Me and I&apos;m Safe stay hidden until a warning covers your location.
+          </p>
         )}
         {contacts.length > 0 && (
           <div className="flex gap-2">
