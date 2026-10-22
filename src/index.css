@@ -249,14 +249,18 @@
   }
 
   .radar-stage .leaflet-bottom.leaflet-right {
-    bottom: 5.5rem;
-    right: 0.5rem;
+    bottom: 4.75rem;
+    left: 0.75rem;
+    right: auto;
   }
 
   .radar-stage .leaflet-control-attribution {
-    max-width: 16rem;
+    max-width: min(16rem, calc(100vw - 6rem));
     background: rgba(2, 6, 23, 0.72);
     color: rgba(255, 255, 255, 0.7);
     font-size: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }

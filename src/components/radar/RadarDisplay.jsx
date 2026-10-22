@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import L from "leaflet";
-import { LocateFixed } from "lucide-react";
+import { Layers, LocateFixed } from "lucide-react";
 import RadarLayersMenu from "./RadarLayersMenu";
 import RadarPlaybackDock from "./RadarPlaybackDock";
 import ShelterAlert from "./ShelterAlert";
@@ -165,7 +165,6 @@ export default function RadarDisplay({
   const [showClouds, setShowClouds] = useState(() => loadRadarLayers().clouds);
   const [showPrecip, setShowPrecip] = useState(() => loadRadarLayers().precip);
   const [showWindField, setShowWindField] = useState(() => loadRadarLayers().wind);
-  const [legendOpen, setLegendOpen] = useState(false);
   const [radarCatalog, setRadarCatalog] = useState(null);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopPlaying, setLoopPlaying] = useState(false);
@@ -855,82 +854,96 @@ export default function RadarDisplay({
       <WildfireLayer map={leafletMap.current} enabled={showFires && isMapReady} />
       {variant === "clean" && (
         <>
-          <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex flex-col gap-2 px-3">
-            <div className="pointer-events-auto">
-              <ShelterAlert activeTornadoWarning={activeTornadoWarning} activeTornadoWatch={activeTornadoWatch} />
-            </div>
-            <div className="flex items-center gap-2 overflow-x-auto pb-1">
-              {[
-                ["Radar", showNexrad, () => {
-                  const next = !showNexrad;
-                  handleShowNexradChange(next);
-                  saveRadarLayers({ radar: next });
-                }],
-                ["Satellite", showSatellite, () => {
-                  const next = !showSatellite;
-                  setShowSatellite(next);
-                  saveRadarLayers({ satellite: next });
-                }],
-                ["Temps", showTemps, () => {
-                  const next = !showTemps;
-                  setShowTemps(next);
-                  saveRadarLayers({ temps: next });
-                }],
-                ["Clouds", showClouds, () => {
-                  const next = !showClouds;
-                  setShowClouds(next);
-                  saveRadarLayers({ clouds: next });
-                }],
-                ["Precip", showPrecip, () => {
-                  const next = !showPrecip;
-                  setShowPrecip(next);
-                  saveRadarLayers({ precip: next });
-                }],
-                ["Wind", showWindField, () => {
-                  const next = !showWindField;
-                  setShowWindField(next);
-                  saveRadarLayers({ wind: next });
-                }],
-                ["Lightning", showLightning, () => {
-                  const next = !showLightning;
-                  setShowLightning(next);
-                  saveRadarLayers({ lightning: next });
-                }],
-                ["Storms", showHurricanes || showCells, () => {
-                  const next = !(showHurricanes || showCells);
-                  setShowHurricanes(next);
-                  setShowCells(next);
-                  saveRadarLayers({ storms: next, cells: next });
-                }],
-              ].map(([label, active, onClick]) => (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={onClick}
-                  aria-pressed={active}
-                  className={`pointer-events-auto shrink-0 rounded-full px-4 py-2 text-sm font-semibold shadow ${
-                    active ? "bg-sky-400 text-slate-950" : "bg-slate-950/90 text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-              <button
-                type="button"
-                onClick={() => setLegendOpen((value) => !value)}
-                aria-expanded={legendOpen}
-                className="pointer-events-auto shrink-0 rounded-full bg-slate-950/90 px-4 py-2 text-sm font-semibold text-white shadow"
-              >
-                {legendOpen ? "Hide key" : "Key"}
-              </button>
-            </div>
-            {legendOpen && (
-              <div className="w-fit rounded-2xl bg-slate-950/90 p-3 shadow-xl">
+          <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex items-start justify-end px-3">
+            <button
+              type="button"
+              onClick={() => setIsLayersMenuOpen((value) => !value)}
+              aria-expanded={isLayersMenuOpen}
+              aria-label={isLayersMenuOpen ? "Close layers" : "Open layers"}
+              className="pointer-events-auto flex h-11 items-center gap-2 rounded-full bg-slate-950/90 px-4 text-sm font-semibold text-white shadow"
+            >
+              <Layers className="h-4 w-4" aria-hidden="true" />
+              Layers
+            </button>
+          </div>
+          {isLayersMenuOpen && (
+            <div className="absolute right-3 top-16 z-[1100] max-h-[calc(100%-8.5rem)] w-[min(18rem,calc(100%-1.5rem))] overflow-y-auto rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-2xl">
+              <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-slate-400">Layers</div>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  ["Radar", showNexrad, () => {
+                    const next = !showNexrad;
+                    handleShowNexradChange(next);
+                    saveRadarLayers({ radar: next });
+                  }],
+                  ["Satellite", showSatellite, () => {
+                    const next = !showSatellite;
+                    setShowSatellite(next);
+                    saveRadarLayers({ satellite: next });
+                  }],
+                  ["Temps", showTemps, () => {
+                    const next = !showTemps;
+                    setShowTemps(next);
+                    saveRadarLayers({ temps: next });
+                  }],
+                  ["Clouds", showClouds, () => {
+                    const next = !showClouds;
+                    setShowClouds(next);
+                    saveRadarLayers({ clouds: next });
+                  }],
+                  ["Precip", showPrecip, () => {
+                    const next = !showPrecip;
+                    setShowPrecip(next);
+                    saveRadarLayers({ precip: next });
+                  }],
+                  ["Wind", showWindField, () => {
+                    const next = !showWindField;
+                    setShowWindField(next);
+                    saveRadarLayers({ wind: next });
+                  }],
+                  ["Lightning", showLightning, () => {
+                    const next = !showLightning;
+                    setShowLightning(next);
+                    saveRadarLayers({ lightning: next });
+                  }],
+                  ["Storms", showHurricanes || showCells, () => {
+                    const next = !(showHurricanes || showCells);
+                    setShowHurricanes(next);
+                    setShowCells(next);
+                    saveRadarLayers({ storms: next, cells: next });
+                  }],
+                ].map(([label, active, onClick]) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={onClick}
+                    aria-pressed={active}
+                    className={`rounded-xl px-3 py-2 text-sm font-semibold ${
+                      active ? "bg-sky-400 text-slate-950" : "bg-white/10 text-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <div className="mt-3 rounded-xl bg-white/5 p-3">
                 <ProLegend productLabel={ACTIVE_PRODUCT.label} inline />
               </div>
-            )}
-          </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-4 z-[1100] flex items-end justify-between gap-3 px-3">
+            </div>
+          )}
+          {(activeTornadoWarning || locationError) && (
+            <div className="pointer-events-none absolute inset-x-3 top-16 z-[1090] flex flex-col gap-2">
+              <div className="pointer-events-auto">
+                <ShelterAlert activeTornadoWarning={activeTornadoWarning} activeTornadoWatch={activeTornadoWatch} />
+              </div>
+              {locationError && (
+                <div className="pointer-events-auto max-w-xs rounded-xl bg-slate-950/95 px-3 py-2 text-xs text-white shadow">
+                  {locationError}
+                </div>
+              )}
+            </div>
+          )}
+          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-[1100] flex items-end justify-between gap-2">
             <TimeLapseBar
               enabled={loopEnabled}
               playing={loopPlaying}
@@ -950,21 +963,14 @@ export default function RadarDisplay({
               onTogglePlaying={() => setLoopPlaying((value) => !value)}
               onSpeedChange={setLoopSpeed}
             />
-            <div className="flex flex-col items-end gap-2">
-              {locationError && (
-                <div className="pointer-events-auto max-w-[16rem] rounded-xl bg-slate-950/95 px-3 py-2 text-xs text-white shadow">
-                  {locationError}
-                </div>
-              )}
-              <button
-                type="button"
-                onClick={handleLocateMe}
-                className="pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-slate-950 shadow-md"
-                aria-label="Center radar on my location"
-              >
-                <LocateFixed size={20} aria-hidden="true" />
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={handleLocateMe}
+              className="pointer-events-auto flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-sky-500 text-slate-950 shadow-md"
+              aria-label="Center radar on my location"
+            >
+              <LocateFixed size={20} aria-hidden="true" />
+            </button>
           </div>
         </>
       )}

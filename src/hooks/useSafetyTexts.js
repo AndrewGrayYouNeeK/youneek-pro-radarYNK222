@@ -4,6 +4,7 @@ import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
 import { readSafetyPreview } from "@/lib/safety/safetyPreview";
 import { activeSafetyAlerts } from "@/lib/safety/weatherEmergency";
+import { mergeWeatherAlerts } from "@/lib/weather/alertMerge";
 
 export default function useSafetyTexts() {
   const { coords, data } = useUnifiedWeather();
@@ -21,8 +22,7 @@ export default function useSafetyTexts() {
     () =>
       activeSafetyAlerts([
         ...(preview ? [preview] : []),
-        ...(alertsQuery.data?.alerts || []),
-        ...(data?.alerts || []),
+        ...mergeWeatherAlerts(alertsQuery.data?.alerts || [], data?.alerts || []),
       ]),
     [alertsQuery.data, data?.alerts, preview]
   );

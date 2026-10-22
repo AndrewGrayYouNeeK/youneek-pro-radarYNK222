@@ -17,13 +17,17 @@ export async function onRequestGet(context) {
   const lat = url.searchParams.get("lat");
   const lon = url.searchParams.get("lon");
   const dataSets = url.searchParams.get("dataSets");
+  const country = url.searchParams.get("country");
 
   if (!lat || !lon) {
     return Response.json({ error: "lat and lon are required" }, { status: 400 });
   }
 
   try {
-    const data = await fetchWeatherKit(env, lat, lon, dataSets || undefined);
+    const data = await fetchWeatherKit(env, lat, lon, {
+      dataSets: dataSets || undefined,
+      country: country || undefined,
+    });
     return Response.json(data, {
       headers: {
         "Cache-Control": "public, max-age=300",

@@ -28,6 +28,8 @@ import { fetchPointAlerts } from "@/lib/api/outlook";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import { activeSafetyAlerts } from "@/lib/safety/weatherEmergency";
 import { readSafetyPreview } from "@/lib/safety/safetyPreview";
+import { mergeWeatherAlerts } from "@/lib/weather/alertMerge";
+import WeatherDetails from "@/components/forecast/WeatherDetails";
 
 function adaptNwsAlerts(payload) {
   return (payload?.features || []).map((feature) => {
@@ -70,14 +72,7 @@ export default function Forecast() {
 
   const alerts = useMemo(() => {
     const nws = alertsQuery.data?.alerts?.length ? alertsQuery.data.alerts : adaptNwsAlerts(alertsQuery.data);
-    const kit = data?.alerts || [];
-    const seen = new Set();
-    return [...nws, ...kit].filter((alert) => {
-      const key = alert.name + (alert.issued || "");
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
+    return mergeWeatherAlerts(nws, data?.alerts || []);
   }, [alertsQuery.data, data?.alerts]);
 
   const [safetyPreview] = useState(() =>
@@ -167,6 +162,7 @@ export default function Forecast() {
               <NotifyBanners coords={coords} />
               <WeatherAlertsCard alerts={alerts} />
               <CurrentConditionsCard data={data.current} />
+              <WeatherDetails data={data} />
               <LifestyleStrip current={current} coords={coords} />
               <LightningProximityCard coords={coords} />
               <PrecipOutlookCard extras={data.extras} />
