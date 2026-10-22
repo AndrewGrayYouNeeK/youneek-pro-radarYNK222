@@ -22,6 +22,10 @@ const ALERT_EVENTS = {
   fog: ["Dense Fog Advisory"],
 };
 
+const EVENT_LAYER = Object.fromEntries(
+  Object.entries(ALERT_EVENTS).flatMap(([layer, events]) => events.map((event) => [event, layer]))
+);
+
 async function fetchEvents(events) {
   const results = await Promise.all(
     events.map(async (event) => {
@@ -43,7 +47,14 @@ async function fetchEvents(events) {
       const key = id || JSON.stringify(feature?.geometry?.coordinates?.[0]?.[0]);
       if (seen.has(key)) continue;
       seen.add(key);
-      features.push(feature);
+      const event = feature?.properties?.event;
+      features.push({
+        ...feature,
+        properties: {
+          ...(feature.properties || {}),
+          ynkLayer: EVENT_LAYER[event] || "",
+        },
+      });
     }
   }
 
@@ -82,7 +93,7 @@ export async function onRequestGet(context) {
       });
     }
 
-    const events = ALERT_EVENTS[type];
+    const events = type === "all" ? Object.values(ALERT_EVENTS).flat() : ALERT_EVENTS[type];
     if (!events) {
       return Response.json({ error: `Unknown alert type: ${type}` }, { status: 400 });
     }

@@ -1,3 +1,5 @@
+import { filterUpcomingDays, forecastDayKey, localDayKey } from "@/lib/weather/days";
+
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
 
 function firstFinite(...values) {
@@ -16,7 +18,7 @@ export async function fetchOpenMeteo(lat, lon) {
   url.searchParams.set("wind_speed_unit", "mph");
   url.searchParams.set("precipitation_unit", "inch");
   url.searchParams.set("forecast_days", "16");
-  url.searchParams.set("past_days", "1");
+  url.searchParams.set("past_days", "0");
   url.searchParams.set(
     "current",
     [
@@ -92,11 +94,15 @@ export function adaptOpenMeteoCurrent(payload) {
   const hourly = payload.hourly || {};
   const now = Date.now();
   const hourIndex = (hourly.time || []).findIndex((time) => Date.parse(time) >= now);
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
+  const previousPressure = hourIndex > 0 ? hourly.pressure_msl?.[hourIndex - 1] : null;
+  const pressureDelta =
+    previousPressure != null && current.pressure_msl != null ? current.pressure_msl - previousPressure : null;
+  const pressureTrend =
+    pressureDelta == null ? "" : pressureDelta > 0.5 ? "rising" : pressureDelta < -0.5 ? "falling" : "steady";
+  const todayKey = localDayKey();
   const todayIndex = Math.max(
     0,
-    (daily.time || []).findIndex((date) => Date.parse(date) >= todayStart.getTime())
+    (daily.time || []).findIndex((date) => forecastDayKey(date) >= todayKey)
   );
   const uv =
     hourIndex >= 0 ? hourly.uv_index?.[hourIndex] : daily.uv_index_max?.[todayIndex] ?? daily.uv_index_max?.[0];
@@ -113,7 +119,7 @@ export function adaptOpenMeteoCurrent(payload) {
       weather_code: current.weather_code,
       condition_label: "",
       pressure_msl: current.pressure_msl,
-      pressure_trend: "",
+      pressure_trend: pressureTrend,
       visibility: current.visibility,
       visibility_mi: current.visibility != null ? current.visibility / 1609.344 : null,
       uv_index: firstFinite(uv),
@@ -154,23 +160,20 @@ export function adaptOpenMeteoHourly(payload, limit = 168) {
 
 export function adaptOpenMeteoDaily(payload) {
   const daily = payload.daily || {};
-  const todayStart = new Date();
-  todayStart.setHours(0, 0, 0, 0);
-  return (daily.time || [])
-    .map((date, index) => ({
-      date,
-      high: Math.round(daily.temperature_2m_max?.[index] ?? 0),
-      low: Math.round(daily.temperature_2m_min?.[index] ?? 0),
-      pop: Math.round(daily.precipitation_probability_max?.[index] ?? 0),
-      precip: daily.precipitation_sum?.[index] ?? 0,
-      snowfall: daily.snowfall_sum?.[index] ?? 0,
-      uv: daily.uv_index_max?.[index],
-      sunrise: daily.sunrise?.[index],
-      sunset: daily.sunset?.[index],
-      label: "",
-      weather_code: daily.weather_code?.[index] ?? 0,
-    }))
-    .filter((day) => Date.parse(day.date) >= todayStart.getTime() - 6 * 60 * 60 * 1000);
+  const rows = (daily.time || []).map((date, index) => ({
+    date,
+    high: Math.round(daily.temperature_2m_max?.[index] ?? 0),
+    low: Math.round(daily.temperature_2m_min?.[index] ?? 0),
+    pop: Math.round(daily.precipitation_probability_max?.[index] ?? 0),
+    precip: daily.precipitation_sum?.[index] ?? 0,
+    snowfall: daily.snowfall_sum?.[index] ?? 0,
+    uv: daily.uv_index_max?.[index],
+    sunrise: daily.sunrise?.[index],
+    sunset: daily.sunset?.[index],
+    label: "",
+    weather_code: daily.weather_code?.[index] ?? 0,
+  }));
+  return filterUpcomingDays(rows);
 }
 
 export function adaptOpenMeteoMinutes(payload) {

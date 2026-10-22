@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { fetchStormOutlook } from "@/lib/api/outlook";
+import { stripSpcHeader } from "@/lib/weather/spcText";
 
 function riskTone(category) {
   const value = String(category || "").toLowerCase();
@@ -19,14 +20,14 @@ export default function StormRiskCard({ coords }) {
   });
 
   const category = data?.category || "No categorical risk at this point";
-  const snippet = String(data?.discussion || "")
+  const snippet = stripSpcHeader(data?.discussion || "")
     .split("\n")
-    .filter((line) => line.trim() && !line.startsWith("."))
+    .filter((line) => line.trim())
     .slice(0, 6)
     .join(" ");
 
   return (
-    <section className={`rounded-2xl border px-4 py-3 ${riskTone(data?.category)}`}>
+    <section className={`min-h-28 rounded-2xl border px-4 py-3 ${riskTone(data?.category)}`}>
       <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-current/70">
         Severe storm risk
       </h2>

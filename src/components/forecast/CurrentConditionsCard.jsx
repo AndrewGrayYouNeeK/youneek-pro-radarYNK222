@@ -1,6 +1,19 @@
 import { describeWeatherCode, degToCardinal } from "@/lib/weather/conditions";
-import { formatTemp, formatWind, tempSuffix } from "@/lib/weather/units";
+import { formatPrecip, formatPressure, formatTemp, formatWind, tempSuffix } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
+
+function clock(iso) {
+  if (!iso) return "—";
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function trendLabel(value) {
+  if (!value) return "";
+  const words = String(value).replace(/([A-Z])/g, " $1").trim().toLowerCase();
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
 
 export default function CurrentConditionsCard({ data }) {
   const { units } = useUnits();
@@ -10,8 +23,23 @@ export default function CurrentConditionsCard({ data }) {
   const daily = data.daily || {};
   const code = describeWeatherCode(current.weather_code);
   const Icon = code.icon;
+  const trend = trendLabel(current.pressure_trend);
+  const pressure = current.pressure_msl != null ? formatPressure(current.pressure_msl, units.pressure) : "—";
+  const stats = [
+    ["Gusts", current.wind_gusts_10m != null ? formatWind(current.wind_gusts_10m, units.wind) : "—"],
+    ["Humidity", current.relative_humidity_2m != null ? `${Math.round(current.relative_humidity_2m)}%` : "—"],
+    ["Dew point", current.dew_point != null ? formatTemp(current.dew_point, units.temp) : "—"],
+    ["UV", current.uv_index != null ? String(Math.round(current.uv_index)) : "—"],
+    ["Visibility", current.visibility_mi != null ? `${Math.round(current.visibility_mi)} mi` : "—"],
+    ["Pressure", trend ? `${pressure} · ${trend}` : pressure],
+    ["Clouds", current.cloud_cover != null ? `${Math.round(current.cloud_cover)}%` : "—"],
+    ["Rain rate", current.precipitation_intensity != null ? `${formatPrecip(current.precipitation_intensity, units.precip)}/hr` : "—"],
+    ["Sunrise", clock(daily.sunrise?.[0])],
+    ["Sunset", clock(daily.sunset?.[0])],
+  ];
+
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950 p-6">
+    <div className="relative min-h-80 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-slate-900 to-slate-950 p-6">
       <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-sky-500/10 blur-3xl" />
       <div className="relative flex items-start justify-between gap-4">
         <div>
@@ -40,6 +68,11 @@ export default function CurrentConditionsCard({ data }) {
           label="Wind"
           value={`${formatWind(current.wind_speed_10m, units.wind)} ${degToCardinal(current.wind_direction_10m)}`}
         />
+      </div>
+      <div className="relative mt-3 grid grid-cols-2 gap-2 text-xs">
+        {stats.map(([label, value]) => (
+          <Stat key={label} label={label} value={value} />
+        ))}
       </div>
     </div>
   );

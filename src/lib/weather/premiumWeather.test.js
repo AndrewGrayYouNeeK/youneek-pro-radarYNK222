@@ -40,4 +40,26 @@ test("describes when the next wet minute arrives", () => {
     rainTimingLabel([{ time: "2026-10-21T12:12:00Z", intensity: 0.2, chance: 80 }], now),
     "Rain starts in 12 min"
   );
+  assert.equal(
+    rainTimingLabel(
+      [
+        { time: "2026-10-21T11:50:00Z", intensity: 1, chance: 90 },
+        { time: "2026-10-21T12:20:00Z", intensity: 0.2, chance: 10 },
+      ],
+      now
+    ),
+    "Rain starts in 20 min"
+  );
+  assert.equal(
+    rainTimingLabel([{ time: "2026-10-21T12:15:00Z", intensity: 0, chance: 40 }], now),
+    "No rain in the next hour"
+  );
+  assert.equal(
+    rainTimingLabel([{ time: "2026-10-21T12:15:00Z", intensity: 0.05, chance: 10 }], now),
+    "No rain in the next hour"
+  );
+  assert.equal(
+    rainTimingLabel([{ time: "2026-10-21T12:15:00Z", intensity: 0, chance: 50 }], now),
+    "Rain starts in 15 min"
+  );
 });
