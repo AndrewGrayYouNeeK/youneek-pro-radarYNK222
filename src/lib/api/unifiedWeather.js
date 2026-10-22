@@ -16,6 +16,7 @@ import {
   fetchOpenMeteo,
 } from "@/lib/weather/openmeteo";
 import { describeWeatherCode } from "@/lib/weather/conditions";
+import { refineMinuteSeries } from "@/lib/weather/rainTiming";
 
 function withLabels(rows) {
   return rows.map((row) => {
@@ -39,6 +40,43 @@ function mergeDaily(primary, extra) {
   return withLabels([...primary, ...rest]).slice(0, 16);
 }
 
+export function bundleOpenMeteo(openMeteo) {
+  const current = adaptOpenMeteoCurrent(openMeteo);
+  current.current.condition_label = describeWeatherCode(current.current.weather_code).label;
+  const openMeteoMinutes = adaptOpenMeteoMinutes(openMeteo);
+  return {
+    source: "open-meteo",
+    current,
+    hourly: withLabels(adaptOpenMeteoHourly(openMeteo)),
+    daily: withLabels(adaptOpenMeteoDaily(openMeteo)),
+    minutes: openMeteoMinutes,
+    openMeteoMinutes,
+    weatherKitMinutes: [],
+    alerts: [],
+    extras: adaptOpenMeteoExtras(openMeteo),
+  };
+}
+
+export function enrichWithWeatherKit(base, kitData) {
+  if (!kitData) return base || null;
+  const weatherKitMinutes = adaptWeatherKitNextHour(kitData);
+  const details = adaptWeatherKitDetails(kitData);
+  const openMeteoMinutes = base?.openMeteoMinutes || [];
+  return {
+    source: "weatherkit",
+    current: adaptWeatherKitCurrent(kitData),
+    hourly: mergeHourly(adaptWeatherKitHourly(kitData), base?.hourly || []),
+    daily: mergeDaily(adaptWeatherKitDaily(kitData), base?.daily || []),
+    minutes: refineMinuteSeries(openMeteoMinutes, weatherKitMinutes),
+    openMeteoMinutes,
+    weatherKitMinutes,
+    alerts: adaptWeatherKitAlerts(kitData),
+    details,
+    attributionUrl: details.attributionUrl,
+    extras: base?.extras || null,
+  };
+}
+
 export async function fetchUnifiedWeather(lat, lon) {
   const [kitResult, omResult] = await Promise.all([
     fetchWeatherKit(lat, lon)
@@ -49,44 +87,10 @@ export async function fetchUnifiedWeather(lat, lon) {
       .catch((error) => ({ ok: false, error })),
   ]);
 
-  const openMeteo = omResult.ok ? omResult.data : null;
-  const omHourly = openMeteo ? adaptOpenMeteoHourly(openMeteo) : [];
-  const omDaily = openMeteo ? adaptOpenMeteoDaily(openMeteo) : [];
-  const extras = openMeteo ? adaptOpenMeteoExtras(openMeteo) : null;
-
-  if (kitResult.ok) {
-    const minutes = adaptWeatherKitNextHour(kitResult.data);
-    const details = adaptWeatherKitDetails(kitResult.data);
-    return {
-      source: "weatherkit",
-      current: adaptWeatherKitCurrent(kitResult.data),
-      hourly: mergeHourly(adaptWeatherKitHourly(kitResult.data), omHourly),
-      daily: mergeDaily(adaptWeatherKitDaily(kitResult.data), omDaily),
-      minutes: minutes.length ? minutes : openMeteo ? adaptOpenMeteoMinutes(openMeteo) : [],
-      alerts: adaptWeatherKitAlerts(kitResult.data),
-      details,
-      attributionUrl: details.attributionUrl,
-      extras,
-    };
-  }
-
-  if (!omResult.ok) {
-    throw omResult.error || new Error("Forecast unavailable");
-  }
-
-  const current = adaptOpenMeteoCurrent(openMeteo);
-  current.current.condition_label = describeWeatherCode(current.current.weather_code).label;
-
-  return {
-    source: "open-meteo",
-    weatherkitError: kitResult.error,
-    current,
-    hourly: withLabels(omHourly),
-    daily: withLabels(omDaily),
-    minutes: adaptOpenMeteoMinutes(openMeteo),
-    alerts: [],
-    extras,
-  };
+  const base = omResult.ok ? bundleOpenMeteo(omResult.data) : null;
+  if (kitResult.ok) return enrichWithWeatherKit(base, kitResult.data);
+  if (!base) throw omResult.error || kitResult.error || new Error("Forecast unavailable");
+  return { ...base, weatherkitError: kitResult.error };
 }
 
 export function isMissingWeatherKit(error) {

@@ -19,6 +19,7 @@ import ProLegend from "./ProLegend";
 import RadarDataDock from "./RadarDataDock";
 import RadarInspectorPanel from "./RadarInspectorPanel";
 import RadarStatusBar from "./RadarStatusBar";
+import RainArrivalAlert from "./RainArrivalAlert";
 import StormToolsPanel from "./StormToolsPanel";
 import TargetList from "./TargetList";
 import { getRadarProduct } from "./radarProducts";
@@ -78,7 +79,15 @@ const STATION_COORDS = {
   KMSX: [47.041, -113.986], KTFX: [47.46, -111.385], KCBX: [43.491, -116.236],
 };
 
-const getAlertUrl = (type) => `/api/alerts?type=${type}`;
+const ALERT_LAYER_COLORS = {
+  tornado: "#ef4444",
+  severe: "#f97316",
+  flood: "#3b82f6",
+  winter: "#a855f7",
+  heat: "#f43f5e",
+  wind: "#22d3ee",
+  fire: "#fb7185",
+};
 
 const AERIS_CLIENT_ID = import.meta.env.VITE_AERIS_CLIENT_ID;
 const AERIS_CLIENT_SECRET = import.meta.env.VITE_AERIS_CLIENT_SECRET;
@@ -174,6 +183,8 @@ export default function RadarDisplay({
   const [userLocation, setUserLocation] = useState(null);
   const [activeTornadoWarning, setActiveTornadoWarning] = useState(false);
   const [activeTornadoWatch, setActiveTornadoWatch] = useState(false);
+  const [alertCollection, setAlertCollection] = useState(null);
+  const [warningCount, setWarningCount] = useState(0);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isLayersMenuOpen, setIsLayersMenuOpen] = useState(false);
   const [locationError, setLocationError] = useState(null);
@@ -243,7 +254,7 @@ export default function RadarDisplay({
   }, []);
 
   const mapCenter = leafletMap.current?.getCenter();
-  const activeWarningsCount = [showTornado, showThunderstorm, showFlood, showWinter, showHeat, showWind, showFireWx].filter(Boolean).length;
+  const activeWarningsCount = warningCount;
 
   const alertToggles = {
     tornado: showTornado,
@@ -530,84 +541,84 @@ export default function RadarDisplay({
     };
   }, [showPrecip, isMapReady]);
 
-  // Separate effect for alerts (unchanged logic)
+  useEffect(() => {
+    if (!isMapReady) return undefined;
+    let cancelled = false;
+    const loadAlerts = () => {
+      fetch("/api/alerts?type=all")
+        .then((response) => response.json())
+        .then((data) => {
+          if (!cancelled) setAlertCollection(Array.isArray(data?.features) ? data : { features: [] });
+        })
+        .catch(() => {
+          if (!cancelled) setAlertCollection({ features: [] });
+        });
+    };
+    loadAlerts();
+    refreshTimerRef.current = setInterval(loadAlerts, 5 * 60 * 1000);
+    return () => {
+      cancelled = true;
+      clearInterval(refreshTimerRef.current);
+    };
+  }, [isMapReady]);
+
   useEffect(() => {
     if (!leafletMap.current || !isMapReady) {
       setActiveTornadoWarning(false);
       setActiveTornadoWatch(false);
-      return;
+      return undefined;
     }
 
-    // Clean up existing alert layers
-    [tornadoLayerRef, thunderLayerRef, floodLayerRef, winterLayerRef, heatLayerRef, windLayerRef, fireWxLayerRef].forEach((r) => {
-      if (r.current) { leafletMap.current.removeLayer(r.current); r.current = null; }
+    const features = alertCollection?.features || [];
+    const grouped = new Map();
+    features.forEach((feature) => {
+      const layer = feature?.properties?.ynkLayer;
+      if (!layer) return;
+      const bucket = grouped.get(layer) || [];
+      bucket.push(feature);
+      grouped.set(layer, bucket);
     });
-    if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
 
-    const refreshAlertLayer = (layerRef, toggleKey, alertType, color) => {
-      if (layerRef.current) { leafletMap.current.removeLayer(layerRef.current); layerRef.current = null; }
-      if (!leafletMap.current) return;
-      fetch(getAlertUrl(alertType))
-        .then((r) => r.json())
-        .then((data) => {
-          if (!leafletMap.current) return;
-          if (toggleKey === "tornado") {
-            const features = data?.features || [];
-            // Only consider features with event "Tornado Warning" (not "Tornado Watch")
-            const tornadoWarnings = features.filter((f) => {
-              const event = f?.properties?.event || '';
-              return event === 'Tornado Warning';
-            });
-            setActiveTornadoWarning(
-              Boolean(userLocation) &&
-              tornadoWarnings.some((f) => isFeatureNearLocation(f, userLocation, 150))
-            );
-          }
-          if (!alertTogglesRef.current[toggleKey]) return;
-          layerRef.current = L.geoJSON(data, {
-            style: { color, weight: 2, opacity: 0.95, fillColor: color, fillOpacity: 0.18 }
-          }).addTo(leafletMap.current);
-        });
+    const tornadoWarnings = grouped.get("tornado") || [];
+    const tornadoWatches = grouped.get("tornado_watch") || [];
+    setActiveTornadoWarning(
+      Boolean(userLocation) && tornadoWarnings.some((feature) => isFeatureNearLocation(feature, userLocation, 150))
+    );
+    setActiveTornadoWatch(
+      Boolean(userLocation) && tornadoWatches.some((feature) => isFeatureNearLocation(feature, userLocation, 150))
+    );
+    setWarningCount(features.filter((feature) => /warning/i.test(feature?.properties?.event || "")).length);
+
+    const paint = (layerRef, layerKey, enabled) => {
+      if (layerRef.current) {
+        leafletMap.current.removeLayer(layerRef.current);
+        layerRef.current = null;
+      }
+      if (!enabled || !leafletMap.current) return;
+      const layerFeatures = grouped.get(layerKey) || [];
+      if (!layerFeatures.length) return;
+      const color = ALERT_LAYER_COLORS[layerKey];
+      layerRef.current = L.geoJSON(
+        { type: "FeatureCollection", features: layerFeatures },
+        { style: { color, weight: 2, opacity: 0.95, fillColor: color, fillOpacity: 0.18 } }
+      ).addTo(leafletMap.current);
     };
 
-    const refreshAlertLayers = () => {
-      refreshAlertLayer(tornadoLayerRef, "tornado", "tornado", "#ef4444");
-      fetch(getAlertUrl("tornado_watch"))
-        .then((r) => r.json())
-        .then((data) => {
-          const features = data?.features || [];
-          // Only consider features with event "Tornado Watch"
-          const tornadoWatches = features.filter((f) => {
-            const event = f?.properties?.event || '';
-            return event === 'Tornado Watch';
-          });
-          setActiveTornadoWatch(
-            Boolean(userLocation) &&
-            tornadoWatches.some((f) => isFeatureNearLocation(f, userLocation, 150))
-          );
-        });
-      refreshAlertLayer(thunderLayerRef, "severe", "thunderstorm", "#f97316");
-      refreshAlertLayer(floodLayerRef, "flood", "flood", "#3b82f6");
-      refreshAlertLayer(winterLayerRef, "winter", "winter", "#a855f7");
-      refreshAlertLayer(heatLayerRef, "heat", "heat", "#f43f5e");
-      refreshAlertLayer(windLayerRef, "wind", "wind", "#22d3ee");
-      refreshAlertLayer(fireWxLayerRef, "fire", "fire", "#fb7185");
-    };
-
-    refreshAlertLayers();
-
-    refreshTimerRef.current = setInterval(() => {
-      refreshAlertLayers();
-    }, 5 * 60 * 1000);
+    paint(tornadoLayerRef, "tornado", showTornado);
+    paint(thunderLayerRef, "severe", showThunderstorm);
+    paint(floodLayerRef, "flood", showFlood);
+    paint(winterLayerRef, "winter", showWinter);
+    paint(heatLayerRef, "heat", showHeat);
+    paint(windLayerRef, "wind", showWind);
+    paint(fireWxLayerRef, "fire", showFireWx);
 
     return () => {
-      clearInterval(refreshTimerRef.current);
-      [tornadoLayerRef, thunderLayerRef, floodLayerRef, winterLayerRef, heatLayerRef, windLayerRef, fireWxLayerRef].forEach((r) => {
-        if (r.current && leafletMap.current?.hasLayer(r.current)) leafletMap.current.removeLayer(r.current);
-        r.current = null;
+      [tornadoLayerRef, thunderLayerRef, floodLayerRef, winterLayerRef, heatLayerRef, windLayerRef, fireWxLayerRef].forEach((layerRef) => {
+        if (layerRef.current && leafletMap.current?.hasLayer(layerRef.current)) leafletMap.current.removeLayer(layerRef.current);
+        layerRef.current = null;
       });
     };
-  }, [settings.station, showTornado, showThunderstorm, showFlood, showWinter, showHeat, showWind, showFireWx, userLocation, isMapReady]);
+  }, [alertCollection, showTornado, showThunderstorm, showFlood, showWinter, showHeat, showWind, showFireWx, userLocation, isMapReady]);
 
   const handleConusView = () => {
     if (!leafletMap.current) return;
@@ -798,6 +809,12 @@ export default function RadarDisplay({
     }
   };
 
+  const frameClock =
+    loopEnabled && loopFrames[loopIndex]?.time
+      ? new Date(loopFrames[loopIndex].time * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
+      : "Now";
+  const playbackLabel = loopEnabled && loopPlaying ? "Looping" : "Live";
+
   return (
     <div className="relative h-full min-h-[400px] w-full select-none overscroll-none" {...pullToRefreshHandlers}>
       {!isMapReady && (
@@ -854,6 +871,12 @@ export default function RadarDisplay({
       <WildfireLayer map={leafletMap.current} enabled={showFires && isMapReady} />
       {variant === "clean" && (
         <>
+          <div className="pointer-events-none absolute left-3 top-3 z-[1000] flex max-w-[calc(100%-6.75rem)] flex-col items-start gap-2">
+            <p className="max-w-full truncate rounded-full bg-slate-950/80 px-3 py-1.5 text-[11px] font-medium text-slate-200 shadow backdrop-blur">
+              {frameClock} · {playbackLabel} · {warningCount} {warningCount === 1 ? "warning" : "warnings"}
+            </p>
+            <RainArrivalAlert />
+          </div>
           <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex items-start justify-end px-3">
             <button
               type="button"

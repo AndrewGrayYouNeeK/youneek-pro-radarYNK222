@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { LoaderCircle, Map } from "lucide-react";
+import { Map } from "lucide-react";
 import LocationPicker from "@/components/forecast/LocationPicker";
 import CurrentConditionsCard from "@/components/forecast/CurrentConditionsCard";
 import HourlyStrip from "@/components/forecast/HourlyStrip";
@@ -10,6 +10,10 @@ import EnvironmentCards from "@/components/forecast/EnvironmentCards";
 import AlertBanner from "@/components/home/AlertBanner";
 import WeatherDetails from "@/components/forecast/WeatherDetails";
 import LegacyBrand from "@/components/home/LegacyBrand";
+import WeatherSkeleton from "@/components/home/WeatherSkeleton";
+import LightningProximityCard from "@/components/forecast/LightningProximityCard";
+import StormRiskCard from "@/components/forecast/StormRiskCard";
+import RainArrivalAlert from "@/components/radar/RainArrivalAlert";
 import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
@@ -51,18 +55,14 @@ export default function WeatherHome() {
 
   return (
     <>
+      <RainArrivalAlert presentation="inline" />
       <LegacyBrand />
       <LocationPicker />
       <AlertBanner alerts={alerts} />
       <SafetyTextCard />
       <SafetyReminderCard />
 
-      {showLoading && (
-        <div className="flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-6 text-sm text-slate-300">
-          <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
-          Loading weather…
-        </div>
-      )}
+      {showLoading && <WeatherSkeleton />}
 
       {!showLoading && locationError && !data && (
         <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-200">
@@ -78,6 +78,8 @@ export default function WeatherHome() {
 
       {data && (
         <>
+          <LightningProximityCard coords={coords} />
+          <StormRiskCard coords={coords} />
           <CurrentConditionsCard data={data.current} />
           <WeatherDetails data={data} />
           <section className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">

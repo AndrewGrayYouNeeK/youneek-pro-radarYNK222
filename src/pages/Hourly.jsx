@@ -1,4 +1,5 @@
 import ForecastLayout from "@/components/home/ForecastLayout";
+import WeatherSkeleton from "@/components/home/WeatherSkeleton";
 import HourlyStrip from "@/components/forecast/HourlyStrip";
 import TempChart from "@/components/home/TempChart";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
@@ -16,8 +17,11 @@ export default function Hourly() {
   return (
     <ForecastLayout title="Hourly">
       <h2 className="text-lg font-semibold text-white">Next {Math.min(hours.length, 48)} hours</h2>
-      {isLoading && !hours.length && <p className="text-sm text-slate-400">Loading hourly forecast…</p>}
-      <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
+      {isLoading && !hours.length ? (
+        <WeatherSkeleton />
+      ) : (
+        <>
+      <div className="min-h-36 rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
         <TempChart points={hours.slice(0, 24).map((hour) => ({ value: hour.temperature }))} />
         <div className="mt-1 flex justify-between text-xs text-slate-400">
           <span>{hours[0] ? formatHourTime(hours[0].time) : "Now"}</span>
@@ -25,7 +29,7 @@ export default function Hourly() {
         </div>
       </div>
       <HourlyStrip hours={hours.slice(0, 48)} title="Hour by hour" />
-      <div className="overflow-hidden rounded-2xl border border-white/10">
+      <div className="min-h-40 overflow-hidden rounded-2xl border border-white/10">
         {hours.slice(0, 24).map((hour) => (
           <div key={hour.time} className="flex items-center justify-between border-t border-white/5 px-4 py-3 text-sm first:border-t-0">
             <span className="text-slate-300">{formatHourTime(hour.time)}</span>
@@ -34,6 +38,8 @@ export default function Hourly() {
           </div>
         ))}
       </div>
+        </>
+      )}
     </ForecastLayout>
   );
 }

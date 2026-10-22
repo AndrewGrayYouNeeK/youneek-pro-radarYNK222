@@ -1,4 +1,5 @@
 import { formatConditionCode } from "./conditions.js";
+import { forecastDayKey, filterUpcomingDays, localDayKey } from "./days.js";
 import { convertTemperature, convertWindSpeed, isUsCustomary, weatherKitUnitsFrom } from "./weatherkit-units.js";
 
 const CONDITION_TO_WMO = {
@@ -144,7 +145,9 @@ function adaptDayPart(part, scale) {
 
 export function adaptWeatherKitCurrent(data) {
   const current = data?.currentWeather;
-  const today = data?.forecastDaily?.days?.[0];
+  const days = data?.forecastDaily?.days || [];
+  const todayKey = localDayKey();
+  const today = days.find((day) => forecastDayKey(day.forecastStart) >= todayKey) || days[0];
   const scale = measurement(weatherKitUnitsFrom(data));
   const humidity = current?.humidity;
   const humidityPct = humidity == null ? 0 : humidity <= 1 ? humidity * 100 : humidity;
@@ -172,8 +175,8 @@ export function adaptWeatherKitCurrent(data) {
       as_of: current?.asOf,
     },
     daily: {
-      temperature_2m_max: [today?.temperatureMax],
-      temperature_2m_min: [today?.temperatureMin],
+      temperature_2m_max: [scale.temp(today?.temperatureMax)],
+      temperature_2m_min: [scale.temp(today?.temperatureMin)],
       sunrise: [today?.sunrise],
       sunset: [today?.sunset],
     },
@@ -198,7 +201,7 @@ export function adaptWeatherKitDaily(data) {
   const days = data?.forecastDaily?.days || [];
   const scale = measurement(weatherKitUnitsFrom(data));
 
-  return days.slice(0, 10).map((day) => ({
+  return filterUpcomingDays(days.map((day) => ({
     date: day.forecastStart,
     high: Math.round(scale.temp(day.temperatureMax) ?? 0),
     low: Math.round(scale.temp(day.temperatureMin) ?? 0),
@@ -207,7 +210,7 @@ export function adaptWeatherKitDaily(data) {
     weather_code: conditionToWmo(day.conditionCode),
     precipType: labelFromCode(day.precipitationType, PRECIP_TYPES),
     snowfallIn: scale.inches(day.snowfallAmount),
-  }));
+  }))).slice(0, 10);
 }
 
 export function adaptWeatherKitNextHour(data) {

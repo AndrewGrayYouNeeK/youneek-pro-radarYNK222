@@ -2,7 +2,9 @@ import { Suspense, lazy, useState } from "react";
 import AppHeader from "@/components/mobile/AppHeader";
 import RainBehind from "@/components/home/RainBehind";
 import BottomTab from "@/components/radar/BottomTab";
+import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { loadRadarLayers } from "@/lib/radarLayers";
+import { isRainOrStorm } from "@/lib/weather/rainTiming";
 
 const RadarDisplay = lazy(() => import("@/components/radar/RadarDisplay"));
 
@@ -20,6 +22,7 @@ function MapFallback() {
 }
 
 export default function ForecastLayout({ title, children }) {
+  const { current } = useUnifiedWeather();
   const [settings, setSettings] = useState(() => ({
     ...MAP_DEFAULTS,
     showNexrad: loadRadarLayers().radar,
@@ -30,7 +33,7 @@ export default function ForecastLayout({ title, children }) {
       <AppHeader title={title} />
       <div className="flex min-h-0 flex-1">
         <div className="relative min-h-0 w-full lg:w-[26rem] lg:shrink-0 xl:w-[32rem]">
-          <RainBehind />
+          <RainBehind active={isRainOrStorm(current)} />
           <div className="relative z-10 h-full overflow-y-auto px-4 pb-28 pt-4">
             <div className="mx-auto flex w-full max-w-xl flex-col gap-4 lg:max-w-none">{children}</div>
           </div>

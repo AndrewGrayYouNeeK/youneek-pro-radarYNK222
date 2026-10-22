@@ -1,18 +1,20 @@
 import { describeWeatherCode, formatDayLabel } from "@/lib/weather/conditions";
+import { filterUpcomingDays } from "@/lib/weather/days";
 import { formatTemp } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
 
 export default function DailyList({ days = [] }) {
   const { units } = useUnits();
-  if (!days.length) return null;
+  const upcoming = filterUpcomingDays(days);
+  if (!upcoming.length) return null;
 
   return (
     <section>
       <h2 className="mb-3 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-        {days.length}-Day Outlook
+        {upcoming.length}-Day Outlook
       </h2>
-      <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
-        {days.map((day, index) => {
+      <div className="min-h-40 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+        {upcoming.map((day, index) => {
           const code = describeWeatherCode(day.weather_code);
           const Icon = code.icon;
           return (

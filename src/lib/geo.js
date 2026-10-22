@@ -21,6 +21,37 @@ export function clampLatLon(lat, lon) {
   };
 }
 
+const CARDINALS = ["N", "NNE", "NE", "ENE", "E", "ESE", "SE", "SSE", "S", "SSW", "SW", "WSW", "W", "WNW", "NW", "NNW"];
+
+export function bearingDegrees(lat1, lon1, lat2, lon2) {
+  const lat1Rad = (lat1 * Math.PI) / 180;
+  const lat2Rad = (lat2 * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const y = Math.sin(dLon) * Math.cos(lat2Rad);
+  const x = Math.cos(lat1Rad) * Math.sin(lat2Rad) - Math.sin(lat1Rad) * Math.cos(lat2Rad) * Math.cos(dLon);
+  return (Math.atan2(y, x) * 180) / Math.PI;
+}
+
+export function bearingToCardinal(degrees) {
+  if (!Number.isFinite(degrees)) return "";
+  const normalized = ((degrees % 360) + 360) % 360;
+  return CARDINALS[Math.round(normalized / 22.5) % 16];
+}
+
+export function describeApproach(origin, point, speedMph = 25) {
+  if (!origin || !point) return null;
+  const miles = haversineMi(origin.lat, origin.lon, point.lat, point.lon);
+  const bearing = (bearingDegrees(origin.lat, origin.lon, point.lat, point.lon) + 360) % 360;
+  const speed = Math.max(Number(speedMph) || 25, 8);
+  return {
+    miles,
+    bearing,
+    cardinal: bearingToCardinal(bearing),
+    speedMph: Math.round(speed),
+    etaMinutes: Math.max(1, Math.round((miles / speed) * 60)),
+  };
+}
+
 export function nearestPoint(origin, points, pick = (item) => item) {
   if (!origin || !points?.length) return null;
   let best = null;

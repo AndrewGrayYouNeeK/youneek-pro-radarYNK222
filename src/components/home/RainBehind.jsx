@@ -7,7 +7,9 @@ const DROPS = Array.from({ length: 42 }, (_, id) => ({
   height: 42 + (id % 6) * 14,
 }));
 
-export default function RainBehind() {
+export default function RainBehind({ active = false }) {
+  if (!active) return null;
+
   return (
     <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
       {DROPS.map((drop) => (

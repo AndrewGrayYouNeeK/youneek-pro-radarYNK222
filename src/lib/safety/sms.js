@@ -119,7 +119,8 @@ export function saveSafetyMessages(messages = {}, storage) {
 }
 
 export function buildSmsUrl(phone, body) {
-  const separator = /iPad|iPhone|iPod/.test(navigator.userAgent) ? "&" : "?";
+  const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent || "";
+  const separator = /iPad|iPhone|iPod/.test(userAgent) ? "&" : "?";
   return `sms:${phone}${separator}body=${encodeURIComponent(body)}`;
 }
 
@@ -159,7 +160,7 @@ export async function sendContactTexts({ kind, context, coords, storage } = {}) 
 
   const knownLine = locationLineFromCoords(coords);
   const locationLine = knownLine || await new Promise((resolve) => {
-    if (!navigator.geolocation) {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
       resolve("(Location unavailable)");
       return;
     }
