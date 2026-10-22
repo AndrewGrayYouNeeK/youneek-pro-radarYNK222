@@ -1,8 +1,19 @@
 import { SignJWT, importPKCS8 } from "jose";
+import {
+  datasetsFromAvailability,
+  normalizeCountryCode,
+  parseDatasetList,
+  selectSupportedDatasets,
+  weatherKitAvailabilityUrl,
+  WEATHERKIT_DATASET_ORDER,
+} from "./weatherkit-datasets.js";
 
 const WEATHERKIT_BASE = "https://weatherkit.apple.com/api/v1/weather";
-const DEFAULT_DATASETS =
-  "currentWeather,forecastHourly,forecastDaily,forecastNextHour,weatherAlerts";
+const DEFAULT_DATASETS = WEATHERKIT_DATASET_ORDER.join(",");
+const NWS_HEADERS = {
+  Accept: "application/geo+json",
+  "User-Agent": "YouNeeKProRadar/1.0 (weatherkit)",
+};
 
 export function isWeatherKitConfigured(env) {
   return Boolean(
@@ -85,25 +96,71 @@ export async function createWeatherKitToken(env) {
     .sign(privateKey);
 }
 
-export async function fetchWeatherKit(env, lat, lon, dataSets = DEFAULT_DATASETS) {
-  if (!isWeatherKitConfigured(env)) {
-    throw new Error("WeatherKit is not configured");
-  }
-
+export async function resolveCountryCode(lat, lon, explicit, fetchImpl = fetch) {
+  const given = normalizeCountryCode(explicit);
+  if (given) return given;
   const latitude = Number(lat);
   const longitude = Number(lon);
-  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-    throw new Error("Invalid coordinates");
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return "";
+
+  try {
+    const point = await fetchImpl(
+      `https://api.weather.gov/points/${latitude.toFixed(4)},${longitude.toFixed(4)}`,
+      { headers: NWS_HEADERS, signal: AbortSignal.timeout(4000) }
+    );
+    if (point?.ok) return "US";
+  } catch {
+    /* try a reverse geocode next */
   }
 
-  const token = await createWeatherKitToken(env);
+  try {
+    const url = new URL("https://geocoding-api.open-meteo.com/v1/reverse");
+    url.searchParams.set("latitude", String(latitude));
+    url.searchParams.set("longitude", String(longitude));
+    url.searchParams.set("count", "1");
+    const response = await fetchImpl(url, { signal: AbortSignal.timeout(4000) });
+    if (response?.ok) {
+      const body = await response.json();
+      return normalizeCountryCode(body?.results?.[0]?.country_code);
+    }
+  } catch {
+    /* country stays blank and alerts are skipped */
+  }
+  return "";
+}
+
+async function readAvailability(fetchImpl, token, latitude, longitude, country) {
+  try {
+    const response = await fetchImpl(weatherKitAvailabilityUrl(latitude, longitude, country), {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!response?.ok) return null;
+    return datasetsFromAvailability(await response.json());
+  } catch {
+    return null;
+  }
+}
+
+function datasetsForRequest(available, requested, country) {
+  if (Array.isArray(available)) return selectSupportedDatasets(available, requested);
+  const want = parseDatasetList(requested);
+  const base = selectSupportedDatasets(null, want);
+  if (country && want.includes("weatherAlerts")) return [...base, "weatherAlerts"];
+  return base.length ? base : ["currentWeather"];
+}
+
+async function requestWeather(fetchImpl, token, latitude, longitude, datasets, country) {
   const url = new URL(`${WEATHERKIT_BASE}/en/${latitude}/${longitude}`);
-  url.searchParams.set("dataSets", dataSets);
+  url.searchParams.set("dataSets", datasets.join(","));
   url.searchParams.set("units", "us");
   url.searchParams.set("timezone", "auto");
-  url.searchParams.set("country", "US");
+  if (country) url.searchParams.set("country", country);
 
-  const response = await fetch(url.toString(), {
+  const response = await fetchImpl(url.toString(), {
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",
@@ -116,4 +173,32 @@ export async function fetchWeatherKit(env, lat, lon, dataSets = DEFAULT_DATASETS
   }
 
   return response.json();
+}
+
+export async function fetchWeatherKit(env, lat, lon, dataSets = DEFAULT_DATASETS, extra = {}) {
+  const options = dataSets && typeof dataSets === "object" ? dataSets : { dataSets, ...extra };
+  if (!isWeatherKitConfigured(env)) {
+    throw new Error("WeatherKit is not configured");
+  }
+
+  const latitude = Number(lat);
+  const longitude = Number(lon);
+  if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+    throw new Error("Invalid coordinates");
+  }
+
+  const fetchImpl = options.fetchImpl || fetch;
+  const token = options.token || (await createWeatherKitToken(env));
+  const requested = options.dataSets || DEFAULT_DATASETS;
+  const country = await resolveCountryCode(latitude, longitude, options.country, fetchImpl);
+  const available = await readAvailability(fetchImpl, token, latitude, longitude, country);
+  const datasets = datasetsForRequest(available, requested, country);
+  try {
+    return await requestWeather(fetchImpl, token, latitude, longitude, datasets, country);
+  } catch (error) {
+    if (!datasets.includes("weatherAlerts") || !/\b400\b/.test(String(error?.message || ""))) throw error;
+    const retry = datasets.filter((name) => name !== "weatherAlerts");
+    if (!retry.length) throw error;
+    return requestWeather(fetchImpl, token, latitude, longitude, retry, country);
+  }
 }

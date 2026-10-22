@@ -1,20 +1,14 @@
 import { createWeatherKitToken } from "./weatherkit.js";
 import { inspectWeatherKitEnv, weatherKitSecretsHint } from "./weatherkit-key.js";
+import { datasetsFromAvailability, WEATHERKIT_STATUS_AVAILABILITY_URL } from "./weatherkit-datasets.js";
 
-export const WEATHERKIT_AVAILABILITY_URL =
-  "https://weatherkit.apple.com/api/v1/availability/37.3349/-122.0090";
+export const WEATHERKIT_AVAILABILITY_URL = WEATHERKIT_STATUS_AVAILABILITY_URL;
 
 export function sanitizeWeatherKitError(message) {
   return String(message || "WeatherKit request failed")
     .replace(/Bearer\s+\S+/gi, "Bearer [redacted]")
     .replace(/-----BEGIN[\s\S]*?-----END[^-]*-----/g, "[redacted key]")
     .slice(0, 180);
-}
-
-function datasetsFromAvailability(body) {
-  if (Array.isArray(body)) return body;
-  if (Array.isArray(body?.datasets)) return body.datasets;
-  return null;
 }
 
 export function weatherKitAuthHint(auth, env, error) {

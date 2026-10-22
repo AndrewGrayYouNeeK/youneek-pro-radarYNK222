@@ -8,6 +8,7 @@ import DailyList from "@/components/forecast/DailyList";
 import MinutePrecipitation, { rainTimingLabel } from "@/components/forecast/MinutePrecipitation";
 import EnvironmentCards from "@/components/forecast/EnvironmentCards";
 import AlertBanner from "@/components/home/AlertBanner";
+import WeatherDetails from "@/components/forecast/WeatherDetails";
 import LegacyBrand from "@/components/home/LegacyBrand";
 import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
@@ -15,6 +16,7 @@ import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
 import { useQuery } from "@tanstack/react-query";
 import { getPref } from "@/lib/prefs";
+import { mergeWeatherAlerts } from "@/lib/weather/alertMerge";
 import { getMoonPhase } from "@/lib/weather/moon";
 
 export default function WeatherHome() {
@@ -25,7 +27,7 @@ export default function WeatherHome() {
     staleTime: 120000,
     queryFn: () => fetchPointAlerts(coords.latitude, coords.longitude),
   });
-  const alerts = alertsQuery.data?.alerts || data?.alerts || [];
+  const alerts = mergeWeatherAlerts(alertsQuery.data?.alerts || [], data?.alerts || []);
   const moon = getMoonPhase();
   const showLoading = locationLoading || (Boolean(coords) && isLoading && !data);
 
@@ -77,6 +79,7 @@ export default function WeatherHome() {
       {data && (
         <>
           <CurrentConditionsCard data={data.current} />
+          <WeatherDetails data={data} />
           <section className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
             <h2 className="text-sm font-semibold text-white">{rainTimingLabel(data.minutes)}</h2>
             <div className="mt-3">

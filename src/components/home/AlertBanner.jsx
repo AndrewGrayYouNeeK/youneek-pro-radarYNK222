@@ -17,7 +17,7 @@ export default function AlertBanner({ alerts = [] }) {
       <div className="min-w-0 flex-1">
         <div className="truncate text-sm font-bold">{top.name}</div>
         <div className="truncate text-xs opacity-80">
-          {alerts.length === 1 ? "Tap for details" : `${alerts.length} alerts · tap for details`}
+          {[top.source, alerts.length === 1 ? "Tap for details" : `${alerts.length} alerts`].filter(Boolean).join(" · ")}
         </div>
       </div>
       <ChevronRight className="h-5 w-5 shrink-0" aria-hidden="true" />

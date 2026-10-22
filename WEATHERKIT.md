@@ -108,7 +108,12 @@ GET /api/weather?lat=37.77&lon=-122.42
 |---|---|---|
 | `lat` | Yes | Latitude |
 | `lon` | Yes | Longitude |
-| `dataSets` | No | Comma-separated WeatherKit data sets. Default: `currentWeather,forecastHourly,forecastDaily,forecastNextHour,weatherAlerts`. The Worker always sends `units=us`, `timezone=auto`, and `country=US` so Apple weather alerts can return. |
+| `dataSets` | No | Comma-separated WeatherKit data sets. Default: `currentWeather,forecastHourly,forecastDaily,forecastNextHour,weatherAlerts`. |
+| `country` | No | ISO country code. When omitted, a US National Weather Service point match uses `US`, otherwise the country comes from reverse geocoding. |
+
+The Worker asks Apple's availability endpoint for that latitude, longitude, and country, then requests only the datasets Apple lists. `weatherAlerts` is included only when that list contains it, and the weather call sends `country` so Apple will return alerts. `timezone` is `auto`.
+
+`GET /api/weather-status` checks availability for Cupertino with `country=US`, so the reported dataset list includes `weatherAlerts` when Apple offers it.
 
 ### Auth health check
 

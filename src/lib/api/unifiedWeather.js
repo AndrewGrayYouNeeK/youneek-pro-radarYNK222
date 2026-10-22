@@ -3,6 +3,7 @@ import {
   adaptWeatherKitAlerts,
   adaptWeatherKitCurrent,
   adaptWeatherKitDaily,
+  adaptWeatherKitDetails,
   adaptWeatherKitHourly,
   adaptWeatherKitNextHour,
 } from "@/lib/weather/weatherkit-adapters";
@@ -55,6 +56,7 @@ export async function fetchUnifiedWeather(lat, lon) {
 
   if (kitResult.ok) {
     const minutes = adaptWeatherKitNextHour(kitResult.data);
+    const details = adaptWeatherKitDetails(kitResult.data);
     return {
       source: "weatherkit",
       current: adaptWeatherKitCurrent(kitResult.data),
@@ -62,6 +64,8 @@ export async function fetchUnifiedWeather(lat, lon) {
       daily: mergeDaily(adaptWeatherKitDaily(kitResult.data), omDaily),
       minutes: minutes.length ? minutes : openMeteo ? adaptOpenMeteoMinutes(openMeteo) : [],
       alerts: adaptWeatherKitAlerts(kitResult.data),
+      details,
+      attributionUrl: details.attributionUrl,
       extras,
     };
   }
