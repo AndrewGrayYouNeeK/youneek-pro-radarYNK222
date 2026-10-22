@@ -10,12 +10,12 @@ const REFLECTIVITY_SCALE = [
   { label: "5 dBZ",   color: "#38bdf8", bg: "bg-sky-400" },
 ];
 
-export default function ProLegend({ productLabel }) {
+export default function ProLegend({ productLabel, inline = false }) {
   const isReflectivity = !productLabel || productLabel === "Reflectivity";
   return (
     <div
-      className="pointer-events-none absolute z-[1000] flex flex-col gap-0.5"
-      style={{ top: "5.5rem", left: "0.75rem" }}
+      className={inline ? "flex flex-col gap-1" : "pointer-events-none absolute z-[1000] flex flex-col gap-0.5"}
+      style={inline ? undefined : { top: "5.5rem", left: "0.75rem" }}
       aria-label="Radar color legend"
     >
       <div className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
@@ -25,7 +25,7 @@ export default function ProLegend({ productLabel }) {
       {isReflectivity && REFLECTIVITY_SCALE.map(({ label, bg }) => (
         <div key={label} className="flex items-center gap-2">
           <div className={`h-2.5 w-5 rounded-sm ${bg} opacity-90 shadow`} />
-          <span className="text-[10px] font-medium text-slate-300">{label}</span>
+          <span className="text-xs font-medium text-slate-200">{label}</span>
         </div>
       ))}
     </div>

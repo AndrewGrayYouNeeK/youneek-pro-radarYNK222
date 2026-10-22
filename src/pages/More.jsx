@@ -2,21 +2,34 @@ import { Link } from "react-router-dom";
 import {
   Activity,
   Camera,
+  Crosshair,
   Droplets,
   Flame,
+  Globe2,
   HeartPulse,
+  Layers,
   Newspaper,
   Radio,
+  Settings,
   Shield,
   Sparkles,
   SunMedium,
-  Users,
   Wind,
   Zap,
 } from "lucide-react";
+import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
+import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import AppHeader from "@/components/mobile/AppHeader";
 import BottomTab from "@/components/radar/BottomTab";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
+
+const PRO_ITEMS = [
+  { to: "/MapLayers", icon: Layers, title: "Map layers", desc: "Radar, satellite, clouds, precip, wind, and NWS polygons" },
+  { to: "/Forecast", icon: SunMedium, title: "Forecast desk", desc: "Storm risk, winter, and the longer outlook" },
+  { to: "/Globe", icon: Globe2, title: "3D radar globe", desc: "Spin radar, satellite, and storms" },
+  { to: "/Intercept", icon: Crosshair, title: "Storm intercept", desc: "Save bearings and ranges on this device" },
+  { to: "/Settings", icon: Settings, title: "Settings", desc: "Units, alerts, and WeatherKit status" },
+];
 
 const ITEMS = [
   { to: "/Radio", icon: Radio, title: "NOAA weather radio", desc: "Live audio for the station nearest you" },
@@ -31,7 +44,6 @@ const ITEMS = [
   { to: "/Health", icon: HeartPulse, title: "Health & sports", desc: "UV, cold & flu risk, outdoor scores" },
   { to: "/News", icon: Newspaper, title: "Weather news", desc: "Live NWS headlines and safety notes" },
   { to: "/Astronomy", icon: SunMedium, title: "Sun & moon", desc: "Sunrise, sunset, and moon phase" },
-  { to: "/Contacts", icon: Users, title: "Safety contacts", desc: "Emergency and I'm Safe text drafts" },
 ];
 
 export default function More() {
@@ -41,7 +53,9 @@ export default function More() {
     <div className="flex h-[100dvh] flex-col bg-slate-950">
       <AppHeader title="More" />
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-4">
-        <div className="mx-auto max-w-md space-y-4">
+        <div className="mx-auto max-w-3xl space-y-4">
+          <SafetyTextCard />
+          <SafetyContactsLink />
           <div className="rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-950/50 to-slate-950 p-4">
             <div className="flex items-center gap-2 text-cyan-200">
               <Shield className="h-4 w-4" aria-hidden="true" />
@@ -53,7 +67,28 @@ export default function More() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            {PRO_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className="flex items-start gap-3 rounded-2xl border border-sky-400/20 bg-sky-400/10 px-4 py-3 transition-colors hover:bg-sky-400/15"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10">
+                    <Icon className="h-5 w-5 text-sky-300" aria-hidden="true" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-semibold text-white">{item.title}</div>
+                    <div className="mt-0.5 text-xs text-slate-400">{item.desc}</div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {ITEMS.map((item) => {
               const Icon = item.icon;
               return (

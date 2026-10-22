@@ -1,21 +1,20 @@
-export default function MinutePrecipitation({ minutes = [] }) {
+import { rainTimingLabel } from "@/lib/weather/rainTiming";
+
+export { rainTimingLabel };
+
+export default function MinutePrecipitation({ minutes = [], hideHeader = false }) {
   if (!minutes.length) return null;
 
   const peak = Math.max(...minutes.map((minute) => minute.intensity || minute.chance / 100), 0.05);
-  const nextWet = minutes.find((minute) => minute.intensity > 0.01 || minute.chance >= 20);
 
   return (
     <section>
-      <div className="mb-3 flex items-end justify-between">
-        <h2 className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-          Next Hour
-        </h2>
-        <p className="text-[11px] text-slate-500">
-          {nextWet
-            ? `Precipitation likely around ${new Date(nextWet.time).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
-            : "Dry through the next hour"}
-        </p>
-      </div>
+      {!hideHeader && (
+        <div className="mb-3 flex items-end justify-between">
+          <h2 className="text-sm font-semibold text-white">Next hour</h2>
+          <p className="text-xs text-slate-400">{rainTimingLabel(minutes)}</p>
+        </div>
+      )}
       <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-3">
         <div className="flex h-16 items-end gap-px">
           {minutes.map((minute) => {

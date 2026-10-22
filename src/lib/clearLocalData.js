@@ -19,6 +19,11 @@ const APP_STORAGE_KEYS = [
   "ynk_saved_locations_v1",
   "shelterContacts_v2",
   "shelterContacts",
+  "safetyMessages_v1",
+  "ynk_safety_preview_v1",
+  "radarLayers_v1",
+  "pref_browserAlerts",
+  "radarTargets",
 ];
 
 export function clearLocalData() {

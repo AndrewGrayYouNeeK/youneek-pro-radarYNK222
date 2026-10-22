@@ -32,6 +32,39 @@ export function emergencyAlerts(alerts = []) {
   return (Array.isArray(alerts) ? alerts : []).filter(isWeatherEmergency);
 }
 
+export function isActiveSafetyAlert(alert, now = Date.now()) {
+  if (!alert || alert.recent) return false;
+  const expires = Date.parse(alert.expires || alert.ends || alert.expireTime || "");
+  if (Number.isFinite(expires) && expires <= now) return false;
+  const name = text(alert.name || alert.event);
+  const severity = text(alert.severity);
+  if (
+    name.includes("advisory") ||
+    name.includes("statement") ||
+    name.includes("outlook") ||
+    name.includes("watch")
+  ) {
+    return false;
+  }
+  if (name.includes("warning")) return true;
+  return severity === "extreme" || severity === "severe";
+}
+
+export function activeSafetyAlerts(alerts = [], now = Date.now()) {
+  const seen = new Set();
+  return (Array.isArray(alerts) ? alerts : []).filter((alert) => {
+    if (!isActiveSafetyAlert(alert, now)) return false;
+    const key = text(alert.name || alert.event);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export function shouldShowSafetyTexts(alerts = [], now = Date.now()) {
+  return activeSafetyAlerts(alerts, now).length > 0;
+}
+
 function storageFor(storage) {
   if (storage) return storage;
   try {

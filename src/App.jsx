@@ -32,6 +32,11 @@ const Health = lazy(() => import("./pages/Health"));
 const News = lazy(() => import("./pages/News"));
 const Astronomy = lazy(() => import("./pages/Astronomy"));
 const RadioPage = lazy(() => import("./pages/Radio"));
+const Now = lazy(() => import("./pages/Now"));
+const Hourly = lazy(() => import("./pages/Hourly"));
+const Daily = lazy(() => import("./pages/Daily"));
+const Intercept = lazy(() => import("./pages/Intercept"));
+const MapLayers = lazy(() => import("./pages/MapLayers"));
 
 const Spinner = () => (
   <div className="flex h-full items-center justify-center bg-slate-950">
@@ -46,7 +51,7 @@ function AppShell() {
   );
 
   return (
-    <div className="app-shell mx-auto h-[100dvh] w-full max-w-4xl overflow-hidden bg-slate-950 text-white">
+    <div className="app-shell h-[100dvh] w-full overflow-hidden bg-slate-950 text-white">
       {showOnboarding && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
       <AnimatePresence mode="wait">
         <motion.div
@@ -75,7 +80,6 @@ function App() {
           <RadioProvider>
           <Router>
             <Routes>
-              <Route path="/" element={<Navigate to="/Radar" replace />} />
               <Route path="/app" element={<RadarApp />} />
               <Route
                 element={
@@ -84,7 +88,13 @@ function App() {
                   </NavigationStackProvider>
                 }
               >
+                <Route path="/" element={<Now />} />
+                <Route path="/Now" element={<Navigate to="/" replace />} />
+                <Route path="/Hourly" element={<Hourly />} />
+                <Route path="/Daily" element={<Daily />} />
                 <Route path="/Radar" element={<Radar />} />
+                <Route path="/Intercept" element={<Intercept />} />
+                <Route path="/MapLayers" element={<MapLayers />} />
                 <Route path="/Forecast" element={<Forecast />} />
                 <Route path="/Globe" element={<Globe />} />
                 <Route path="/More" element={<More />} />

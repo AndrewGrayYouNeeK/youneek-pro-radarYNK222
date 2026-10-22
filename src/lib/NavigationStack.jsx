@@ -5,11 +5,11 @@ const NavigationStackContext = createContext(null);
 const TAB_STATE_STORAGE_KEY = "navigation-tab-state";
 
 const DEFAULT_TABS = {
+  Now: { path: "/", search: "", scrollY: 0 },
+  Hourly: { path: "/Hourly", search: "", scrollY: 0 },
+  Daily: { path: "/Daily", search: "", scrollY: 0 },
   Radar: { path: "/Radar", search: "", scrollY: 0 },
-  Forecast: { path: "/Forecast", search: "", scrollY: 0 },
-  Globe: { path: "/Globe", search: "", scrollY: 0 },
   More: { path: "/More", search: "", scrollY: 0 },
-  Settings: { path: "/Settings", search: "", scrollY: 0 },
 };
 
 const MORE_PREFIXES = [
@@ -27,14 +27,21 @@ const MORE_PREFIXES = [
   "/News",
   "/Astronomy",
   "/Radio",
+  "/Forecast",
+  "/Globe",
+  "/Settings",
+  "/Privacy",
+  "/Intercept",
+  "/MapLayers",
 ];
 
 function getTabKey(pathname) {
-  if (pathname.startsWith("/Forecast")) return "Forecast";
-  if (pathname.startsWith("/Globe")) return "Globe";
+  if (pathname === "/" || pathname.startsWith("/Now")) return "Now";
+  if (pathname.startsWith("/Hourly")) return "Hourly";
+  if (pathname.startsWith("/Daily")) return "Daily";
+  if (pathname.startsWith("/Radar")) return "Radar";
   if (MORE_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return "More";
-  if (pathname.startsWith("/Settings") || pathname.startsWith("/Privacy")) return "Settings";
-  return "Radar";
+  return "Now";
 }
 
 export function NavigationStackProvider({ children }) {
@@ -115,7 +122,7 @@ export function NavigationStackProvider({ children }) {
   }, [tabState]);
 
   const value = useMemo(() => ({
-    goBack: (fallbackPath = "/Radar") => {
+    goBack: (fallbackPath = "/") => {
       const stack = routeStackRef.current;
       if (stack.length > 1) {
         stack.pop();
@@ -135,7 +142,7 @@ export function NavigationStackProvider({ children }) {
     saveScrollPosition: (tabKey, scrollY) => {
       setTabState((current) => {
         const currentTab = current[tabKey] || DEFAULT_TABS[tabKey];
-        if (currentTab.scrollY === scrollY) {
+        if (!currentTab || currentTab.scrollY === scrollY) {
           return current;
         }
         return {

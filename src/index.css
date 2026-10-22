@@ -196,6 +196,17 @@
   animation: ynk-lightning 6s ease-in-out infinite;
 }
 
+@keyframes ynk-rain-fall {
+  0% { transform: translateY(-30%) translateX(0); }
+  100% { transform: translateY(110vh) translateX(-28px); }
+}
+
+.ynk-rain-drop {
+  animation-name: ynk-rain-fall;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+}
+
 .hero-title-strike {
   opacity: 0;
   mix-blend-mode: normal;
@@ -214,6 +225,10 @@
     opacity: 1;
     mix-blend-mode: normal;
   }
+  .ynk-rain-drop {
+    animation: none;
+    opacity: 0;
+  }
 }
 
 @layer utilities {
@@ -231,5 +246,17 @@
   .app-shell .select-none-ui {
     user-select: none;
     -webkit-user-select: none;
+  }
+
+  .radar-stage .leaflet-bottom.leaflet-right {
+    bottom: 5.5rem;
+    right: 0.5rem;
+  }
+
+  .radar-stage .leaflet-control-attribution {
+    max-width: 16rem;
+    background: rgba(2, 6, 23, 0.72);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 10px;
   }
 }

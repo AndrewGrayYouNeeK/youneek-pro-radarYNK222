@@ -5,9 +5,12 @@ import { clearLocalData } from "@/lib/clearLocalData";
 import BottomTab from "@/components/radar/BottomTab";
 import AppHeader from "@/components/mobile/AppHeader";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
+import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
+import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
+import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap, CloudSun } from "lucide-react";
-import { setPref } from "@/lib/prefs";
+import { getPref, setPref } from "@/lib/prefs";
 import { UNIT_OPTIONS } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
 
@@ -73,7 +76,7 @@ function SettingRow({ icon: Icon, label, sublabel, right, onClick, danger }) {
 }
 
 export default function Settings() {
-  useTabPageMemory("Settings");
+  useTabPageMemory("More");
   const navigate = useNavigate();
   const [confirmingDelete, setConfirmingDelete] = useState(false);
   const { units, setUnits } = useUnits();
@@ -85,6 +88,7 @@ export default function Settings() {
   const [notifyPrecip24, setNotifyPrecip24] = useState(() => localStorage.getItem("pref_notifyPrecip24") !== "false");
   const [autoTune, setAutoTune] = useState(() => localStorage.getItem("pref_autoTune") !== "false");
   const [notifyHurricane, setNotifyHurricane] = useState(() => localStorage.getItem("pref_notifyHurricane") !== "false");
+  const [browserAlerts, setBrowserAlerts] = useState(() => getPref("pref_browserAlerts", false));
   const [showAbout, setShowAbout] = useState(false);
   const [weatherKit, setWeatherKit] = useState(null);
 
@@ -111,7 +115,7 @@ export default function Settings() {
   const clearDataMutation = useMutation({
     mutationFn: async () => {
       clearLocalData();
-      window.location.href = "/Radar";
+      window.location.href = "/";
     },
     onMutate: () => setConfirmingDelete(false),
   });
@@ -121,6 +125,9 @@ export default function Settings() {
       <AppHeader title="Settings" />
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-5">
         <div className="mx-auto max-w-md space-y-4">
+          <SafetyTextCard />
+          <SafetyReminderCard />
+          <SafetyContactsLink />
           <Section title="Notifications">
             <SettingRow
               icon={Bell}
@@ -131,6 +138,29 @@ export default function Settings() {
                   checked={notifyRain}
                   onCheckedChange={handleToggle("pref_notifyRain", setNotifyRain)}
                   aria-label="Toggle rain arrival alerts"
+                />
+              }
+            />
+            <SettingRow
+              icon={Bell}
+              label="Browser notifications"
+              sublabel="While this tab is open, show a notification for a new NWS alert. Background push is not available."
+              right={
+                <Switch
+                  checked={browserAlerts}
+                  onCheckedChange={async (value) => {
+                    if (value && typeof Notification !== "undefined") {
+                      const permission = await Notification.requestPermission();
+                      if (permission !== "granted") {
+                        setBrowserAlerts(false);
+                        setPref("pref_browserAlerts", false);
+                        return;
+                      }
+                    }
+                    setBrowserAlerts(value);
+                    setPref("pref_browserAlerts", value);
+                  }}
+                  aria-label="Toggle browser notifications"
                 />
               }
             />
@@ -205,6 +235,14 @@ export default function Settings() {
                   aria-label="Toggle air quality notices"
                 />
               }
+            />
+          </Section>
+
+          <Section title="Appearance">
+            <SettingRow
+              icon={CloudSun}
+              label="Dark mode"
+              sublabel="The app stays in the dark theme so radar and nighttime text stay readable."
             />
           </Section>
 

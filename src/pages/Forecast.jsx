@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { LoaderCircle } from "lucide-react";
 import AppHeader from "@/components/mobile/AppHeader";
@@ -25,8 +25,9 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { isMissingWeatherKit } from "@/lib/api/unifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
-import useWeatherEmergency from "@/hooks/useWeatherEmergency";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
+import { activeSafetyAlerts } from "@/lib/safety/weatherEmergency";
+import { readSafetyPreview } from "@/lib/safety/safetyPreview";
 
 function adaptNwsAlerts(payload) {
   return (payload?.features || []).map((feature) => {
@@ -47,7 +48,7 @@ function adaptNwsAlerts(payload) {
 }
 
 export default function Forecast() {
-  useTabPageMemory("Forecast");
+  useTabPageMemory("More");
   const {
     coords,
     locationError,
@@ -79,7 +80,10 @@ export default function Forecast() {
     });
   }, [alertsQuery.data, data?.alerts]);
 
-  const emergency = useWeatherEmergency(alerts);
+  const [safetyPreview] = useState(() =>
+    typeof window === "undefined" ? null : readSafetyPreview(window.location.search)
+  );
+  const safetyAlerts = activeSafetyAlerts(safetyPreview ? [safetyPreview, ...alerts] : alerts);
   const showLoading = locationLoading || (Boolean(coords) && isLoading && !data);
   const current = data?.current?.current;
   const scene = skyTheme({
@@ -144,14 +148,12 @@ export default function Forecast() {
                   WeatherKit credentials are optional. Full forecast, future radar, and 16-day outlook still load.
                 </p>
               )}
-              {emergency.visible && (
+              {safetyAlerts.length > 0 && (
                 <section className="rounded-2xl border border-red-500/30 bg-red-950/40 p-3">
                   <p className="mb-2 text-xs text-red-100">
-                    {emergency.recent
-                      ? "A recent weather emergency was in this area. One tap opens Messages. You still tap Send."
-                      : "Weather emergency in this area. One tap opens Messages. You still tap Send."}
+                    {safetyAlerts[0].name} covers this location. One tap opens Messages. You still tap Send.
                   </p>
-                  <SafetyTextActions compact />
+                  <SafetyTextActions compact coords={coords} />
                 </section>
               )}
               {data && (
