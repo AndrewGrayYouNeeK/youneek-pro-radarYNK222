@@ -2,8 +2,7 @@ import { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "@/lib/query-client";
-import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from "react-router-dom";
 import PageNotFound from "./lib/PageNotFound";
 import RadarApp from "./pages/RadarApp";
 import { LocationProvider } from "@/lib/LocationContext";
@@ -38,14 +37,9 @@ const Daily = lazy(() => import("./pages/Daily"));
 const Intercept = lazy(() => import("./pages/Intercept"));
 const MapLayers = lazy(() => import("./pages/MapLayers"));
 
-const Spinner = () => (
-  <div className="flex h-full items-center justify-center bg-slate-950">
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-slate-700 border-t-sky-400" />
-  </div>
-);
+const DarkFallback = () => <div className="h-full bg-slate-950" />;
 
 function AppShell() {
-  const location = useLocation();
   const [showOnboarding, setShowOnboarding] = useState(
     () => typeof window !== "undefined" && !localStorage.getItem("onboarded_v1")
   );
@@ -53,20 +47,9 @@ function AppShell() {
   return (
     <div className="app-shell h-[100dvh] w-full overflow-hidden bg-slate-950 text-white">
       {showOnboarding && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={location.pathname}
-          initial={{ opacity: 0, x: 12 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -12 }}
-          transition={{ duration: 0.18, ease: "easeOut" }}
-          className="h-full"
-        >
-          <Suspense fallback={<Spinner />}>
-            <Outlet />
-          </Suspense>
-        </motion.div>
-      </AnimatePresence>
+      <Suspense fallback={<DarkFallback />}>
+        <Outlet />
+      </Suspense>
     </div>
   );
 }

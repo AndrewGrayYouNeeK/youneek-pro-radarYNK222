@@ -18,22 +18,29 @@ import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { showWeatherSkeleton, weatherQueryCoords } from "@/lib/locationStability";
 import { getPref } from "@/lib/prefs";
 import { mergeWeatherAlerts } from "@/lib/weather/alertMerge";
 import { getMoonPhase } from "@/lib/weather/moon";
 
 export default function WeatherHome() {
   const { coords, locationError, locationLoading, data, isLoading, error, refetch } = useUnifiedWeather();
+  const [alertLat, alertLon] = weatherQueryCoords(coords?.latitude, coords?.longitude);
   const alertsQuery = useQuery({
-    queryKey: ["point-alerts", coords?.latitude, coords?.longitude],
+    queryKey: ["point-alerts", alertLat, alertLon],
     enabled: Boolean(coords),
+    placeholderData: keepPreviousData,
     staleTime: 120000,
-    queryFn: () => fetchPointAlerts(coords.latitude, coords.longitude),
+    queryFn: () => fetchPointAlerts(alertLat, alertLon),
   });
   const alerts = mergeWeatherAlerts(alertsQuery.data?.alerts || [], data?.alerts || []);
   const moon = getMoonPhase();
-  const showLoading = locationLoading || (Boolean(coords) && isLoading && !data);
+  const showLoading = showWeatherSkeleton({
+    hasData: Boolean(data),
+    isLoading: Boolean(coords) && isLoading,
+    locationLoading,
+  });
 
   useEffect(() => {
     if (!alerts.length) return undefined;

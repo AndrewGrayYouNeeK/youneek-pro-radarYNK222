@@ -133,7 +133,7 @@ export default function RadarLayersMenu({
                 ariaLabel="Toggle satellite layer"
               />
               <ToggleRow
-                label="⚡ Lightning reports"
+                label="⚡ Storm reports"
                 checked={showLightning}
                 onCheckedChange={onShowLightningChange}
                 ariaLabel="Toggle lightning reports"
