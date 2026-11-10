@@ -5,6 +5,6 @@ export async function onRequestGet({ env }) {
   return jsonWithCors(describeSite(env));
 }
 
-export async function onRequestOptions() {
-  return new Response(null, { status: 204, headers: corsHeaders() });
+export async function onRequestOptions({ request }) {
+  return new Response(null, { status: 204, headers: corsHeaders(request) });
 }

@@ -4,9 +4,13 @@ import {
   addShelterContact,
   buildEmergencyBody,
   buildImSafeBody,
+  buildGroupSmsUrl,
   buildSmsUrl,
+  deviceCanComposeSms,
+  formatSafetyLocationLine,
   loadSafetyMessages,
   normalizeUsPhone,
+  safetyMessageExplanation,
   saveSafetyMessages,
   uniqueContactPhones,
 } from "./sms.js";
@@ -46,6 +50,21 @@ test("sms link keeps the phone and encodes the message", () => {
   const url = buildSmsUrl("+15555550100", "EMERGENCY — help");
   assert.match(url, /^sms:\+15555550100[?&]body=/);
   assert.match(decodeURIComponent(url), /EMERGENCY — help/);
+});
+
+test("iOS opens one composer for every saved contact and the draft includes coordinates", () => {
+  const line = formatSafetyLocationLine({ latitude: 37.7, longitude: -122.4194 });
+  assert.match(line, /37\.70000, -122\.41940/);
+  assert.match(line, /maps\.apple\.com/);
+  assert.match(line, /maps\.google\.com\/\?q=37\.70000,-122\.41940/);
+  const url = buildGroupSmsUrl(["+15555550100", "+15555550101"], `Help\n${line}`, "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)");
+  assert.match(url, /^sms:\+15555550100,\+15555550101&body=/);
+  assert.match(decodeURIComponent(url), /37\.70000, -122\.41940/);
+  assert.equal(deviceCanComposeSms({ userAgent: "iPhone", platform: "iPhone", maxTouchPoints: 5 }), true);
+  assert.equal(deviceCanComposeSms({ userAgent: "iPad", platform: "iPad", maxTouchPoints: 5 }), false);
+  assert.equal(deviceCanComposeSms({ userAgent: "Mozilla/5.0 (Macintosh)", platform: "MacIntel", maxTouchPoints: 5 }), false);
+  assert.match(safetyMessageExplanation(), /tap Send/);
+  assert.match(safetyMessageExplanation(), /does not resend/);
 });
 
 test("duplicate shelter numbers are texted once", () => {

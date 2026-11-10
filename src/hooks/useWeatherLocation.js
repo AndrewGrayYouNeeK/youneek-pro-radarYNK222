@@ -15,7 +15,7 @@ export default function useWeatherLocation() {
 
   let error = "";
   if (!locating && !coords) {
-    if (gpsStatus === "denied") error = "Allow location or search for a city to load the forecast.";
+    if (gpsStatus === "denied") error = "Location is off. Search for a city or ZIP, or allow location while using the app in Settings.";
     else if (gpsStatus === "unavailable") error = "Location services are not available on this device.";
     else error = "Set a location to load weather for your area.";
   }

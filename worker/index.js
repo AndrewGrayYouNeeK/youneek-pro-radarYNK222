@@ -12,9 +12,9 @@ import { onRequestGet as getSite } from "../functions/api/site.js";
 import { onRequestGet as getWeatherStatus } from "../functions/api/weather-status.js";
 import { handleNwsRequest } from "../server/nwsApi.js";
 import { finalizeAssetResponse } from "./serveAssets.js";
+import { applyCors } from "../functions/_lib/cors.js";
 
-export default {
-  async fetch(request, env) {
+async function handle(request, env) {
     const { pathname } = new URL(request.url);
 
     if (request.method === "GET" && pathname === "/api/alerts") {
@@ -54,14 +54,7 @@ export default {
     }
 
     if (request.method === "OPTIONS" && pathname.startsWith("/api/")) {
-      return new Response(null, {
-        status: 204,
-        headers: {
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type",
-        },
-      });
+      return applyCors(request, new Response(null, { status: 204 }));
     }
 
     if (request.method === "GET" && pathname === "/api/point-alerts") {
@@ -89,7 +82,22 @@ export default {
       }
     }
 
+    if (request.method === "GET" && (pathname === "/privacy" || pathname === "/privacy/")) {
+      const assetUrl = new URL(request.url);
+      assetUrl.pathname = "/privacy.html";
+      const assetResponse = await env.ASSETS.fetch(new Request(assetUrl, request));
+      return finalizeAssetResponse(request, assetResponse);
+    }
+
     const assetResponse = await env.ASSETS.fetch(request);
     return finalizeAssetResponse(request, assetResponse);
+}
+
+export default {
+  async fetch(request, env) {
+    const response = await handle(request, env);
+    const { pathname } = new URL(request.url);
+    if (pathname.startsWith("/api/")) return applyCors(request, response);
+    return response;
   },
 };

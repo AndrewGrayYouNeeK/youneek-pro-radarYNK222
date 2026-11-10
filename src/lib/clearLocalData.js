@@ -20,6 +20,7 @@ const APP_STORAGE_KEYS = [
   "shelterContacts_v2",
   "shelterContacts",
   "safetyMessages_v1",
+  "safetySmsExplained_v1",
   "ynk_safety_preview_v1",
   "radarLayers_v1",
   "pref_browserAlerts",

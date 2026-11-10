@@ -36,8 +36,12 @@ export default function AppHeader({ title }) {
   return (
     <header className="sticky top-0 z-[1700] shrink-0 border-b border-white/10 bg-slate-950/95 backdrop-blur-xl">
       <div
-        className="mx-auto flex h-14 w-full max-w-6xl items-center justify-between px-4"
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
+        className="mx-auto flex w-full max-w-6xl items-center justify-between px-4"
+        style={{
+          paddingTop: "calc(0.35rem + env(safe-area-inset-top))",
+          paddingBottom: "0.35rem",
+          minHeight: "calc(3.5rem + env(safe-area-inset-top))",
+        }}
       >
         <div className="flex min-w-0 items-center gap-2">
           {showBack ? (

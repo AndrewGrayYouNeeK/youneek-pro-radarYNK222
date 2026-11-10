@@ -1,14 +1,27 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import { loadShelterContacts } from "@/lib/safety/sms";
 import { getPref } from "@/lib/prefs";
+import { useLocation } from "@/lib/LocationContext";
+import { hapticSevereWarning } from "@/lib/native/haptics";
 
 export default function ShelterAlert({ activeTornadoWarning }) {
   const [dismissed, setDismissed] = useState(false);
+  const { location } = useLocation();
   const contacts = loadShelterContacts();
   const notifyEnabled = getPref("pref_notifyTornado", true);
-  if (!notifyEnabled || !contacts.length || !activeTornadoWarning || dismissed) return null;
+  const visible = Boolean(notifyEnabled && contacts.length && activeTornadoWarning && !dismissed);
+  const coords =
+    location?.lat != null && location?.lon != null
+      ? { latitude: location.lat, longitude: location.lon }
+      : null;
+
+  useEffect(() => {
+    if (visible) hapticSevereWarning("tornado-warning-shelter");
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <AnimatePresence mode="wait">
@@ -30,9 +43,9 @@ export default function ShelterAlert({ activeTornadoWarning }) {
         </div>
         <p className="mb-3 text-xs leading-5 text-slate-300">
           Send an emergency text or an I&apos;m Safe text to {contacts.map((contact) => contact.name).join(", ")}.
-          Drafts open in Messages — you still tap Send.
+          One draft opens in Messages with your coordinates and map links. You still tap Send.
         </p>
-        <SafetyTextActions compact />
+        <SafetyTextActions compact coords={coords} />
       </motion.div>
     </AnimatePresence>
   );
