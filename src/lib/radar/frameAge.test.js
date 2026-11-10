@@ -5,9 +5,9 @@ import { formatRadarFrameAge, latestRadarFrameUnix, resetRadarFrameAgeCache } fr
 const NOW = Date.parse("2026-11-10T15:00:00Z");
 
 test("radar frame age stays short enough for the status line", () => {
-  assert.equal(formatRadarFrameAge(NOW / 1000 - 20, NOW), "updated just now");
-  assert.equal(formatRadarFrameAge(NOW / 1000 - 4 * 60, NOW), "updated 4 min ago");
-  assert.equal(formatRadarFrameAge(NOW / 1000 + 10 * 60, NOW), "forecast · in 10 min");
+  assert.equal(formatRadarFrameAge(NOW / 1000 - 20, NOW), "Updated just now");
+  assert.equal(formatRadarFrameAge(NOW / 1000 - 4 * 60, NOW), "Updated 4 min ago");
+  assert.equal(formatRadarFrameAge(NOW / 1000 + 10 * 60, NOW), "Forecast · in 10 min");
   assert.equal(formatRadarFrameAge(null, NOW), "");
 });
 

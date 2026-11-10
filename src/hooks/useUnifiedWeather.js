@@ -5,6 +5,7 @@ import { fetchWeatherKit } from "@/lib/api/weatherkit";
 import { fetchOpenMeteo } from "@/lib/weather/openmeteo";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { weatherQueryCoords } from "@/lib/locationStability";
+import { readCachedJson, writeCachedJson } from "@/lib/offlineCache";
 
 export function unifiedWeatherKey(lat, lon) {
   return ["open-meteo-forecast", ...weatherQueryCoords(lat, lon)];
@@ -33,7 +34,18 @@ export default function useUnifiedWeather() {
     staleTime: 180000,
     refetchInterval: 600000,
     retry: 1,
-    queryFn: async () => bundleOpenMeteo(await fetchOpenMeteo(roundedLat, roundedLon)),
+    queryFn: async () => {
+      const cacheKey = `ynk-forecast-${roundedLat}-${roundedLon}`;
+      try {
+        const data = bundleOpenMeteo(await fetchOpenMeteo(roundedLat, roundedLon));
+        writeCachedJson(cacheKey, data);
+        return data;
+      } catch (error) {
+        const cached = readCachedJson(cacheKey);
+        if (cached) return { ...cached, offlineSnapshot: true };
+        throw error;
+      }
+    },
   });
 
   const weatherKitQuery = useQuery({

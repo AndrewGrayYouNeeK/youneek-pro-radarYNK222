@@ -6,11 +6,12 @@ import { haversineMiles } from "@/lib/globe/math";
 import { formatDistance } from "@/lib/units";
 import { useUnits } from "@/lib/UnitsContext";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
+import LoadError from "@/components/LoadError";
 
 export default function Wildfire() {
   const { coords } = useWeatherLocation();
   const { units } = useUnits();
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["wildfires"],
     staleTime: 300000,
     queryFn: async () => {
@@ -50,7 +51,7 @@ export default function Wildfire() {
           </article>
         ))}
         {isLoading && <p className="px-4 py-6 text-sm text-slate-400">Loading NASA EONET wildfires…</p>}
-        {isError && <p className="px-4 py-6 text-sm text-red-300">Wildfire updates are unavailable right now.</p>}
+        {isError && <div className="px-4 py-4"><LoadError message="Wildfire updates didn't load." onRetry={() => refetch()} /></div>}
         {!isLoading && !fires.length && <p className="px-4 py-6 text-sm text-slate-400">No open wildfire events in the feed.</p>}
       </div>
     </PageScaffold>

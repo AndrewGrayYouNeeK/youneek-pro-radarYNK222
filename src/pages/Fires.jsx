@@ -7,11 +7,12 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { fetchFires } from "@/lib/api/outlook";
 import { haversineMi } from "@/lib/geo";
+import LoadError from "@/components/LoadError";
 
 export default function Fires() {
   useTabPageMemory("More");
   const { coords } = useWeatherLocation();
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["fire-center"],
     queryFn: fetchFires,
     staleTime: 5 * 60 * 1000,
@@ -44,7 +45,7 @@ export default function Fires() {
             </article>
           ))}
           {isLoading && <p className="text-sm text-slate-400">Loading fire detections…</p>}
-          {error && <p className="text-sm text-red-300">{error.message}</p>}
+          {error && <LoadError message={error.message || "Fire detections didn't load."} onRetry={() => refetch()} />}
           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
             {nearby.map((fire, index) => (
               <div key={`${fire.lat}-${fire.lon}-${index}`} className="flex items-center justify-between border-t border-white/5 px-4 py-3 first:border-t-0">

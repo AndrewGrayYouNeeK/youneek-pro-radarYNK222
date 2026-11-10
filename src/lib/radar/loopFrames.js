@@ -1,5 +1,13 @@
-export function buildRadarLoop(past = [], nowcast = [], { includeFuture = false } = {}) {
-  const history = (past || []).filter((frame) => frame?.tileUrl).slice(-8).map((frame) => ({
+export const LOOP_FRAME_COUNTS = [4, 6, 8, 12];
+
+export function clampLoopFrames(value) {
+  const count = Number(value);
+  return LOOP_FRAME_COUNTS.includes(count) ? count : 8;
+}
+
+export function buildRadarLoop(past = [], nowcast = [], { includeFuture = false, maxFrames = 8 } = {}) {
+  const limit = clampLoopFrames(maxFrames);
+  const history = (past || []).filter((frame) => frame?.tileUrl).slice(-limit).map((frame) => ({
     ...frame,
     kind: "past",
     extrapolated: false,

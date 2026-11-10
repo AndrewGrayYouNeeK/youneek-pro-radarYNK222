@@ -11,6 +11,7 @@ import AlertBanner from "@/components/home/AlertBanner";
 import WeatherDetails from "@/components/forecast/WeatherDetails";
 import LegacyBrand from "@/components/home/LegacyBrand";
 import WeatherSkeleton from "@/components/home/WeatherSkeleton";
+import LoadError from "@/components/LoadError";
 import LightningProximityCard from "@/components/forecast/LightningProximityCard";
 import StormRiskCard from "@/components/forecast/StormRiskCard";
 import RainArrivalAlert from "@/components/radar/RainArrivalAlert";
@@ -78,9 +79,13 @@ export default function WeatherHome() {
       )}
 
       {!showLoading && error && !data && (
-        <button type="button" onClick={() => refetch()} className="rounded-2xl bg-white/10 px-4 py-4 text-left text-sm text-white">
-          Weather did not load. Tap to try again.
-        </button>
+        <LoadError message="Weather didn't load." onRetry={() => refetch()} />
+      )}
+
+      {data?.offlineSnapshot && (
+        <p className="rounded-2xl border border-amber-400/30 bg-amber-950/40 px-4 py-3 text-sm text-amber-100">
+          Connection problem. Showing the last forecast saved on this device.
+        </p>
       )}
 
       {data && (

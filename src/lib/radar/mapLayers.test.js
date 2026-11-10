@@ -32,6 +32,7 @@ test("builds a per-station Iowa Mesonet velocity tile URL", () => {
   assert.match(relative, /ridge::KINX-N0S-0/);
   assert.equal(velocity.includes("nexrad-n0u-900913"), false);
   assert.equal(ridgeProductLabel("KINX", "velocity"), "Showing KINX N0U");
+  assert.match(ridgeTileUrl("KHTX", "reflectivity"), /ridge::KHTX-N0Q-0/);
   assert.match(ridgeTileUrl(NATIONAL_MOSAIC_ID, "reflectivity"), /nexrad-n0q-900913/);
   assert.equal(ridgeProductLabel(NATIONAL_MOSAIC_ID, "reflectivity"), "National N0Q mosaic");
   assert.equal(ridgeTileUrl(NATIONAL_MOSAIC_ID, "velocity").includes("MOSAIC"), false);
@@ -62,4 +63,15 @@ test("fills an empty RainViewer nowcast with an estimated future loop", () => {
   assert.equal(loop.frames.at(-1).extrapolated, true);
   assert.equal(loop.frames.at(-1).kind, "future");
   assert.equal(loop.frames.at(-1).tileUrl, "https://tiles.example/2.png");
+});
+
+test("frame count keeps the newest reflectivity frames", () => {
+  const past = Array.from({ length: 10 }, (_, index) => ({
+    time: index,
+    tileUrl: `https://tiles.example/${index}.png`,
+  }));
+  const loop = buildRadarLoop(past, [], { maxFrames: 4 });
+  assert.equal(loop.frames.length, 4);
+  assert.equal(loop.frames[0].tileUrl, "https://tiles.example/6.png");
+  assert.equal(loop.frames.at(-1).tileUrl, "https://tiles.example/9.png");
 });

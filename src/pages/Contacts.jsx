@@ -6,7 +6,7 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { UserPlus, Trash2, Download, Upload, Phone, User, Shield, AlertTriangle } from "lucide-react";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import useSafetyTexts from "@/hooks/useSafetyTexts";
-import { loadShelterContacts, normalizeUsPhone, saveShelterContacts } from "@/lib/safety/sms";
+import { MAX_SHELTER_CONTACTS, loadShelterContacts, normalizeUsPhone, saveShelterContacts } from "@/lib/safety/sms";
 
 function loadContacts() {
   return loadShelterContacts();
@@ -42,6 +42,7 @@ export default function Contacts() {
   const addMutation = useMutation({
     mutationFn: async (contact) => {
       const current = queryClient.getQueryData(["shelterContacts_v2"]) || [];
+      if (current.length >= MAX_SHELTER_CONTACTS) throw new Error("Max 5 shelter contacts.");
       const next = [...current, contact];
       saveContacts(next);
       return next;
@@ -80,7 +81,7 @@ export default function Contacts() {
     if (!trimName) { setError("Enter a name."); return; }
     if (!cleaned) { setError("Enter a valid 10-digit US number."); return; }
     if (contacts.some((c) => c.phone === cleaned)) { setError("That number is already saved."); return; }
-    if (contacts.length >= 5) { setError("Max 5 shelter contacts."); return; }
+    if (contacts.length >= MAX_SHELTER_CONTACTS) { setError("Max 5 shelter contacts."); return; }
     addMutation.mutate({ id: Date.now().toString(), name: trimName, phone: cleaned });
   };
 
@@ -106,7 +107,7 @@ export default function Contacts() {
         // Merge, dedup by phone
         const existing = queryClient.getQueryData(["shelterContacts_v2"]) || [];
         const existingPhones = new Set(existing.map((c) => c.phone));
-        const merged = [...existing, ...valid.filter((c) => !existingPhones.has(c.phone))].slice(0, 5);
+        const merged = [...existing, ...valid.filter((c) => !existingPhones.has(c.phone))].slice(0, MAX_SHELTER_CONTACTS);
         saveContacts(merged);
         queryClient.setQueryData(["shelterContacts_v2"], merged);
       } catch {
@@ -126,6 +127,7 @@ export default function Contacts() {
         {/* Header */}
         <div>
           <h1 className="text-xl font-bold">Shelter Contacts</h1>
+          <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{contacts.length} of {MAX_SHELTER_CONTACTS}</p>
           <p className="mt-1 text-sm text-slate-400">
             These people are stored only on this device. Help Me and I’m Sheltering open one Messages draft. I’m Sheltering says you are sheltering and safe, with your exact coordinates and a Google Maps link. Nothing sends until you tap Send.
           </p>
@@ -179,12 +181,12 @@ export default function Contacts() {
           <button
             type="button"
             onClick={handleAdd}
-            disabled={!name.trim() || !phone.trim() || addMutation.isPending}
+            disabled={!name.trim() || !phone.trim() || addMutation.isPending || contacts.length >= MAX_SHELTER_CONTACTS}
             aria-label="Add shelter contact"
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <UserPlus className="h-4 w-4" aria-hidden="true" />
-            {addMutation.isPending ? "Adding..." : "Add Contact"}
+            {contacts.length >= MAX_SHELTER_CONTACTS ? "5 contacts saved" : addMutation.isPending ? "Adding..." : "Add Contact"}
           </button>
         </div>
 

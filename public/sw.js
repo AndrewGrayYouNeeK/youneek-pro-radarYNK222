@@ -1,5 +1,12 @@
 const SHELL_CACHE = "ynk-shell-v1";
 const DATA_CACHE = "ynk-data-v1";
+const TILE_CACHE = "ynk-tiles-v1";
+const TILE_LIMIT = 180;
+const TILE_HOSTS = new Set([
+  "mesonet.agron.iastate.edu",
+  "tilecache.rainviewer.com",
+  "server.arcgisonline.com",
+]);
 const SHELL = ["/", "/index.html", "/manifest.json", "/icon.svg", "/privacy.html"];
 
 self.addEventListener("install", (event) => {
@@ -19,7 +26,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((key) => key !== SHELL_CACHE && key !== DATA_CACHE)
+            .filter((key) => key !== SHELL_CACHE && key !== DATA_CACHE && key !== TILE_CACHE)
             .map((key) => caches.delete(key))
         )
       )
@@ -40,6 +47,27 @@ async function networkFirst(request, cacheName) {
   }
 }
 
+async function trimCache(cache, limit) {
+  const keys = await cache.keys();
+  if (keys.length <= limit) return;
+  await Promise.all(keys.slice(0, keys.length - limit).map((key) => cache.delete(key)));
+}
+
+async function tileCache(request) {
+  const cache = await caches.open(TILE_CACHE);
+  const cached = await cache.match(request);
+  const network = fetch(request)
+    .then(async (response) => {
+      if (response && response.ok) {
+        await cache.put(request, response.clone());
+        await trimCache(cache, TILE_LIMIT);
+      }
+      return response;
+    })
+    .catch(() => cached);
+  return cached || network;
+}
+
 async function cacheFirst(request) {
   const cache = await caches.open(SHELL_CACHE);
   const cached = await cache.match(request);
@@ -53,6 +81,11 @@ self.addEventListener("fetch", (event) => {
   const request = event.request;
   if (request.method !== "GET") return;
   const url = new URL(request.url);
+
+  if (TILE_HOSTS.has(url.hostname)) {
+    event.respondWith(tileCache(request));
+    return;
+  }
 
   if (url.origin === self.location.origin && url.pathname.startsWith("/assets/")) {
     event.respondWith(cacheFirst(request));

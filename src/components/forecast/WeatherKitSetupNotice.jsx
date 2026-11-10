@@ -40,7 +40,7 @@ export default function WeatherKitSetupNotice({ type = "not-configured", message
               className="mt-3 inline-flex items-center gap-2 rounded-xl bg-white/10 px-3 py-2 text-xs font-medium text-white transition-colors hover:bg-white/15"
             >
               <RefreshCw className="h-3.5 w-3.5" aria-hidden="true" />
-              Try again
+              Retry
             </button>
           )}
         </div>

@@ -5,11 +5,12 @@ import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { haversineMiles } from "@/lib/globe/math";
 import { formatDistance } from "@/lib/units";
 import { useUnits } from "@/lib/UnitsContext";
+import LoadError from "@/components/LoadError";
 
 export default function Lightning() {
   const { coords } = useWeatherLocation();
   const { units } = useUnits();
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["lightning"],
     staleTime: 60000,
     queryFn: async () => {
@@ -38,7 +39,7 @@ export default function Lightning() {
           {nearest ? formatDistance(nearest.miles, units) : "No nearby strikes"}
         </div>
         {isLoading && <p className="mt-2 text-xs text-slate-400">Checking recent storm reports…</p>}
-        {isError && <p className="mt-2 text-xs text-red-300">Lightning reports are unavailable right now.</p>}
+        {isError && <LoadError message="Lightning reports didn't load." onRetry={() => refetch()} />}
         <p className="mt-2 text-xs text-slate-400">
           {nearest
             ? `${nearest.source} · ${nearest.ageMinutes ?? "?"} min ago`

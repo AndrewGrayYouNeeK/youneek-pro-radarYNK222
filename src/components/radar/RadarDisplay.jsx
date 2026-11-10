@@ -36,7 +36,14 @@ import { readSafetyPreview } from "@/lib/safety/safetyPreview";
 import { activeSafetyAlerts } from "@/lib/safety/weatherEmergency";
 import { getMapFeature } from "@/lib/mapDesk";
 import { RADAR_LAYERS_EVENT, loadRadarLayers, saveRadarLayers } from "@/lib/radarLayers";
-import { loadActiveLocation } from "@/lib/locationStore";
+import LocationSearch from "@/components/location/LocationSearch";
+import RadarAlertSheet from "./RadarAlertSheet";
+import SafetyTextActions from "@/components/safety/SafetyTextActions";
+import { alertSummary, warningFeatures } from "@/lib/radar/alertText";
+import { latestProductScanUnix } from "@/lib/radar/productAge";
+import { readCachedJson, writeCachedJson } from "@/lib/offlineCache";
+import { hapticSevereWarning } from "@/lib/native/haptics";
+import { loadActiveLocation, saveActiveLocation } from "@/lib/locationStore";
 import { loadShelterContacts, sendContactTexts } from "@/lib/safety/sms";
 import "leaflet/dist/leaflet.css";
 
@@ -158,6 +165,9 @@ export default function RadarDisplay({
   const loopFramesRef = useRef([]);
   const refreshTimerRef = useRef(null);
   const userLocationMarkerRef = useRef(null);
+  const baseLayerRef = useRef(null);
+  const stationPanRef = useRef(null);
+  const suppressMapClickRef = useRef(false);
 
   const [showTornado, setShowTornado] = useState(() => loadRadarLayers().alertTornado);
   const [showThunderstorm, setShowThunderstorm] = useState(() => loadRadarLayers().alertSevere);
@@ -197,12 +207,27 @@ export default function RadarDisplay({
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopPlaying, setLoopPlaying] = useState(false);
   const [loopSpeed, setLoopSpeed] = useState(400);
+  const [loopFrameCount, setLoopFrameCount] = useState(8);
+  const [loopError, setLoopError] = useState(false);
+  const [loopAttempt, setLoopAttempt] = useState(0);
+  const [productScanUnix, setProductScanUnix] = useState(null);
+  const [baseMapError, setBaseMapError] = useState(false);
+  const [radarTileError, setRadarTileError] = useState(false);
+  const [locationDenied, setLocationDenied] = useState(false);
+  const [alertsError, setAlertsError] = useState(false);
+  const [alertsStale, setAlertsStale] = useState(false);
+  const [alertAttempt, setAlertAttempt] = useState(0);
+  const [alertSheet, setAlertSheet] = useState(null);
+  const [selectedAlert, setSelectedAlert] = useState(null);
   const [loopIndex, setLoopIndex] = useState(0);
   const [loopFrames, setLoopFrames] = useState([]);
-  const [userLocation, setUserLocation] = useState(null);
+  const [userLocation, setUserLocation] = useState(() => {
+    const saved = typeof window === "undefined" ? null : loadActiveLocation();
+    return saved?.latitude != null ? { lat: saved.latitude, lon: saved.longitude } : null;
+  });
   const [activeTornadoWarning, setActiveTornadoWarning] = useState(false);
   const [activeTornadoWatch, setActiveTornadoWatch] = useState(false);
-  const [alertCollection, setAlertCollection] = useState(null);
+  const [alertCollection, setAlertCollection] = useState(() => readCachedJson("ynk-alerts-v1"));
   const [warningCount, setWarningCount] = useState(0);
   const [isMapReady, setIsMapReady] = useState(false);
   const [isLayersMenuOpen, setIsLayersMenuOpen] = useState(false);
@@ -305,32 +330,57 @@ export default function RadarDisplay({
   };
 
   useEffect(() => {
-    if (leafletMap.current || !mapRef.current) return;
-    const coords = STATION_COORDS[settings.station] || [39.5, -98.35]; // US center fallback
-    leafletMap.current = L.map(mapRef.current, {
+    if (leafletMap.current || !mapRef.current) return undefined;
+    const saved = loadActiveLocation();
+    const coords = saved?.latitude != null ? [saved.latitude, saved.longitude] : [39.5, -98.35];
+    const map = L.map(mapRef.current, {
       zoomControl: false,
       attributionControl: true,
       zoomSnap: 0.5,
       zoomDelta: 0.5,
       touchZoom: true,
       bounceAtZoomLimits: false,
+      inertia: true,
       minZoom: 4,
       maxZoom: 12,
-    }).setView(coords, 7);
+    }).setView(coords, saved?.latitude != null ? 8 : 5);
+    leafletMap.current = map;
     const baseLayer = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
       attribution: "Esri, HERE, Garmin, FAO, NOAA, USGS",
       maxZoom: 16,
+      updateWhenIdle: false,
+      updateWhenZooming: true,
+      keepBuffer: 2,
       crossOrigin: "anonymous",
-    }).addTo(leafletMap.current);
-    baseLayer.once("load", () => {
+    }).addTo(map);
+    baseLayerRef.current = baseLayer;
+    let sawTile = false;
+    const markReady = () => {
+      if (!leafletMap.current) return;
       setIsMapReady(true);
       invalidateMapSize(leafletMap.current);
+    };
+    baseLayer.on("tileload", () => {
+      sawTile = true;
+      setBaseMapError(false);
+      markReady();
     });
-    leafletMap.current.on("click", (event) => {
+    const errorTimer = window.setTimeout(() => {
+      if (!sawTile) setBaseMapError(true);
+    }, 8000);
+    const readyTimer = window.setTimeout(markReady, 1200);
+    invalidateMapSize(map);
+    const observer = typeof ResizeObserver === "undefined" ? null : new ResizeObserver(() => invalidateMapSize(map));
+    observer?.observe(map.getContainer());
+    map.on("click", (event) => {
+      if (suppressMapClickRef.current) {
+        suppressMapClickRef.current = false;
+        return;
+      }
       const lat = event.latlng.lat;
       const lon = event.latlng.lng;
       const ctx = clickContextRef.current;
-      const origin = ctx.userLocation || { lat: leafletMap.current.getCenter().lat, lon: leafletMap.current.getCenter().lng };
+      const origin = ctx.userLocation || { lat: map.getCenter().lat, lon: map.getCenter().lng };
       const range = haversineKm(origin.lat, origin.lon, lat, lon) * 0.621371;
       const y = Math.sin((lon - origin.lon) * Math.PI / 180) * Math.cos(lat * Math.PI / 180);
       const x =
@@ -353,6 +403,9 @@ export default function RadarDisplay({
       ctx.onMapClick?.({ bearing, range, lat, lon });
     });
     return () => {
+      window.clearTimeout(readyTimer);
+      window.clearTimeout(errorTimer);
+      observer?.disconnect();
       if (refreshTimerRef.current) clearInterval(refreshTimerRef.current);
       if (locationErrorTimerRef.current) clearTimeout(locationErrorTimerRef.current);
       if (windFetchTimerRef.current) clearTimeout(windFetchTimerRef.current);
@@ -360,6 +413,7 @@ export default function RadarDisplay({
         if (r.current && leafletMap.current?.hasLayer(r.current)) leafletMap.current.removeLayer(r.current);
         r.current = null;
       });
+      baseLayerRef.current = null;
       setIsMapReady(false);
       if (leafletMap.current) {
         const mapInstance = leafletMap.current;
@@ -367,7 +421,7 @@ export default function RadarDisplay({
         mapInstance.remove();
       }
     };
-  }, [settings.station]);
+  }, []);
 
   // Auto-center on user's GPS location when app loads
   useEffect(() => {
@@ -382,24 +436,20 @@ export default function RadarDisplay({
         // Find nearest NEXRAD station
         const nearestStation = findNearestStation(latitude, longitude);
         setNearestSite(nearestStation);
+        setLocationDenied(false);
 
-        if (onSettingsChange && settings.station !== NATIONAL_MOSAIC_ID && nearestStation !== settings.station) {
-          onSettingsChange({ ...settings, station: nearestStation });
-        }
-
-        // Center map on user's location with good zoom level
         if (leafletMap.current && !initialLocationSet) {
           leafletMap.current.setView([latitude, longitude], 8);
           setInitialLocationSet(true);
         }
       },
-      (error) => {
-        console.warn('Could not get initial location:', error);
+      () => {
+        setLocationDenied(true);
         setInitialLocationSet(true);
       },
       { timeout: 10000, enableHighAccuracy: false }
     );
-  }, [initialLocationSet, settings, onSettingsChange]);
+  }, [initialLocationSet]);
 
   useEffect(() => { alertTogglesRef.current = alertToggles; }, [alertToggles]);
 
@@ -418,6 +468,7 @@ export default function RadarDisplay({
     });
     frameLayersRef.current = [];
     radarLayerRef.current = null;
+    let radarErrorTimer = 0;
     if (!showNexrad) return undefined;
 
     if (loopTiles) {
@@ -427,6 +478,9 @@ export default function RadarDisplay({
         minZoom: 4,
         maxZoom: 12,
         maxNativeZoom: 7,
+        updateWhenIdle: false,
+        updateWhenZooming: true,
+        keepBuffer: 2,
         zIndex: 400,
         crossOrigin: "anonymous",
       }).addTo(map));
@@ -441,14 +495,28 @@ export default function RadarDisplay({
         minZoom: 4,
         maxZoom: 12,
         maxNativeZoom: showGlobalRadar || radarSite === NATIONAL_MOSAIC_ID ? 7 : 8,
+        updateWhenIdle: false,
+        updateWhenZooming: true,
+        keepBuffer: 2,
         zIndex: 400,
         crossOrigin: "anonymous",
       }).addTo(map);
+      let sawRadarTile = false;
+      radarErrorTimer = window.setTimeout(() => {
+        if (!sawRadarTile) setRadarTileError(true);
+      }, 8000);
+      layer.on("tileload", () => {
+        sawRadarTile = true;
+        window.clearTimeout(radarErrorTimer);
+        setRadarTileError(false);
+      });
+      layer.on("remove", () => window.clearTimeout(radarErrorTimer));
       frameLayersRef.current = [layer];
       radarLayerRef.current = layer;
     }
 
     return () => {
+      window.clearTimeout(radarErrorTimer);
       frameLayersRef.current.forEach((layer) => {
         if (leafletMap.current?.hasLayer(layer)) leafletMap.current.removeLayer(layer);
       });
@@ -486,17 +554,20 @@ export default function RadarDisplay({
           tileUrl: `${host}${frame.path}/256/{z}/{x}/{y}/2/1_1.png`,
         }));
         setRadarCatalog({ past, nowcast });
-        const built = buildRadarLoop(past, nowcast, { includeFuture: showFutureRadar });
+        const built = buildRadarLoop(past, nowcast, { includeFuture: showFutureRadar, maxFrames: loopFrameCount });
         loopFramesRef.current = built.frames;
         setLoopSource(built.source);
         setLoopFrames(built.frames);
+        setLoopError(false);
         setLoopIndex(showFutureRadar ? Math.max(0, past.length - 1) : Math.max(0, built.frames.length - 1));
       })
-      .catch(() => {});
+      .catch(() => {
+        if (!cancelled) setLoopError(true);
+      });
     return () => {
       cancelled = true;
     };
-  }, [loopEnabled, showGlobalRadar, showFutureRadar]);
+  }, [loopEnabled, showGlobalRadar, showFutureRadar, loopFrameCount, loopAttempt]);
 
   useEffect(() => {
     if (loopEnabled) return undefined;
@@ -536,12 +607,27 @@ export default function RadarDisplay({
     let cancelled = false;
     const loadAlerts = () => {
       fetch("/api/alerts?type=all")
-        .then((response) => response.json())
+        .then((response) => {
+          if (!response.ok) throw new Error("Alerts unavailable");
+          return response.json();
+        })
         .then((data) => {
-          if (!cancelled) setAlertCollection(Array.isArray(data?.features) ? data : { features: [] });
+          if (cancelled) return;
+          if (data?.error && !(data.features || []).length) throw new Error(data.error);
+          const next = Array.isArray(data?.features) ? data : { features: [] };
+          writeCachedJson("ynk-alerts-v1", next);
+          setAlertCollection(next);
+          setAlertsError(false);
+          setAlertsStale(false);
         })
         .catch(() => {
-          if (!cancelled) setAlertCollection({ features: [] });
+          if (cancelled) return;
+          const cached = readCachedJson("ynk-alerts-v1");
+          if (cached?.features) {
+            setAlertCollection(cached);
+            setAlertsStale(true);
+          }
+          setAlertsError(true);
         });
     };
     loadAlerts();
@@ -550,7 +636,7 @@ export default function RadarDisplay({
       cancelled = true;
       clearInterval(refreshTimerRef.current);
     };
-  }, [isMapReady]);
+  }, [isMapReady, alertAttempt]);
 
   useEffect(() => {
     if (!leafletMap.current || !isMapReady) {
@@ -590,7 +676,17 @@ export default function RadarDisplay({
       const color = ALERT_LAYER_COLORS[layerKey];
       layerRef.current = L.geoJSON(
         { type: "FeatureCollection", features: layerFeatures },
-        { style: { color, weight: 2, opacity: 0.95, fillColor: color, fillOpacity: 0.18 } }
+        {
+          style: { color, weight: 2, opacity: 0.95, fillColor: color, fillOpacity: 0.18 },
+          onEachFeature: (feature, layer) => {
+            layer.on("click", (event) => {
+              suppressMapClickRef.current = true;
+              if (event.originalEvent) L.DomEvent.stopPropagation(event.originalEvent);
+              setSelectedAlert(alertSummary(feature));
+              setAlertSheet("detail");
+            });
+          },
+        }
       ).addTo(leafletMap.current);
     };
 
@@ -628,17 +724,38 @@ export default function RadarDisplay({
   };
 
   const handleLocateMe = () => {
-    if (!navigator.geolocation) { showLocationError("Location services not supported."); return; }
+    if (!navigator.geolocation) {
+      setLocationDenied(true);
+      return;
+    }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const { latitude, longitude } = pos.coords;
+        setLocationDenied(false);
         setUserLocation({ lat: latitude, lon: longitude });
-        leafletMap.current.setView([latitude, longitude], 12);
-        if (userLocationMarkerRef.current) leafletMap.current.removeLayer(userLocationMarkerRef.current);
-        userLocationMarkerRef.current = L.marker([latitude, longitude]).addTo(leafletMap.current).bindPopup("You're here!").openPopup();
+        leafletMap.current?.setView([latitude, longitude], 8);
+        if (userLocationMarkerRef.current && leafletMap.current) leafletMap.current.removeLayer(userLocationMarkerRef.current);
+        if (leafletMap.current) {
+          userLocationMarkerRef.current = L.marker([latitude, longitude]).addTo(leafletMap.current);
+        }
       },
-      () => showLocationError("Couldn't get location—check permissions.")
+      () => setLocationDenied(true)
     );
+  };
+
+  const chooseSearchedPlace = (place) => {
+    if (place?.latitude == null || place?.longitude == null) return;
+    saveActiveLocation(place);
+    setUserLocation({ lat: place.latitude, lon: place.longitude });
+    setLocationDenied(false);
+    leafletMap.current?.setView([place.latitude, place.longitude], 8);
+  };
+
+  const retryMapTiles = () => {
+    setBaseMapError(false);
+    setRadarTileError(false);
+    baseLayerRef.current?.redraw();
+    setRadarRefresh((value) => value + 1);
   };
 
   const handleShowNexradChange = (value) => onSettingsChange({ ...settings, showNexrad: value });
@@ -735,7 +852,51 @@ export default function RadarDisplay({
     }
   };
 
+  useEffect(() => {
+    if (!leafletMap.current || !isMapReady) return undefined;
+    if (settings.station === NATIONAL_MOSAIC_ID) return undefined;
+    const coords = STATION_COORDS[settings.station];
+    if (!coords || stationPanRef.current === settings.station) return undefined;
+    stationPanRef.current = settings.station;
+    const zoom = Math.max(leafletMap.current.getZoom(), 7);
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    if (reduceMotion) leafletMap.current.setView(coords, zoom);
+    else leafletMap.current.flyTo(coords, zoom, { duration: 0.45 });
+    return undefined;
+  }, [settings.station, isMapReady]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const loadAge = () => {
+      latestProductScanUnix(settings.station, radarProduct)
+        .then((time) => {
+          if (!cancelled) setProductScanUnix(time);
+        })
+        .catch(() => {
+          if (!cancelled) setProductScanUnix(null);
+        });
+    };
+    loadAge();
+    const timer = window.setInterval(loadAge, 60000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(timer);
+    };
+  }, [settings.station, radarProduct, radarRefresh]);
+
+  useEffect(() => {
+    const live = Array.isArray(pointAlertsQuery.data) ? pointAlertsQuery.data : [];
+    const active = activeSafetyAlerts(safetyPreview ? [safetyPreview, ...live] : live);
+    if (!active.length) return;
+    hapticSevereWarning(active.map((alert) => alert.id || alert.name).join("|"));
+  }, [pointAlertsQuery.data, safetyPreview]);
+
+  const warningList = useMemo(
+    () => warningFeatures(alertCollection).map(alertSummary),
+    [alertCollection]
+  );
   const frameTime = loopEnabled && loopFrames[loopIndex]?.time ? loopFrames[loopIndex].time : null;
+  const shownFrameTime = frameTime || productScanUnix;
   const frameClock = frameTime
     ? `${loopFrames[loopIndex].extrapolated ? "Estimated " : loopFrames[loopIndex].kind === "future" ? "Future " : ""}${new Date(frameTime * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
     : "Now";
@@ -858,10 +1019,60 @@ export default function RadarDisplay({
               productCaption={productCaption}
               frameClock={frameClock}
               playbackLabel={playbackLabel}
-              frameTime={frameTime}
-              warningCount={warningCount}
+              frameTime={shownFrameTime}
+              warningCount={warningList.length || warningCount}
+              onOpenAlerts={() => setAlertSheet("list")}
             />
             <RainArrivalAlert />
+            {showSafetyTexts && (
+              <div className="pointer-events-auto w-full max-w-sm">
+                <SafetyTextActions
+                  compact
+                  coords={
+                    userLocation
+                      ? { latitude: userLocation.lat, longitude: userLocation.lon }
+                      : savedPlace
+                        ? { latitude: savedPlace.latitude, longitude: savedPlace.longitude }
+                        : null
+                  }
+                />
+              </div>
+            )}
+            {locationDenied && (
+              <div className="pointer-events-auto w-full max-w-sm rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-xl">
+                <p className="text-xs leading-relaxed text-slate-200">
+                  Location is off. Search for a city, or allow location while using the app.
+                </p>
+                <div className="mt-2">
+                  <LocationSearch current={savedPlace} onSelect={chooseSearchedPlace} />
+                </div>
+                <button type="button" onClick={handleLocateMe} className="mt-2 text-xs font-semibold text-sky-300">
+                  Try location again
+                </button>
+              </div>
+            )}
+            {(baseMapError || radarTileError) && (
+              <div className="pointer-events-auto rounded-2xl border border-white/10 bg-slate-950/95 px-3 py-2 text-xs text-slate-100 shadow">
+                <p>{baseMapError ? "Map tiles didn't load." : "Radar tiles didn't load."}</p>
+                <button type="button" onClick={retryMapTiles} className="mt-2 rounded-lg bg-sky-500 px-3 py-1.5 text-xs font-semibold text-slate-950">
+                  Retry
+                </button>
+              </div>
+            )}
+            {alertsStale && !alertSheet && (
+              <p className="pointer-events-auto rounded-full bg-amber-950/90 px-3 py-1.5 text-[11px] text-amber-100">
+                Showing the last alerts saved on this device.
+              </p>
+            )}
+            {alertsError && warningList.length === 0 && (
+              <button
+                type="button"
+                onClick={() => setAlertAttempt((value) => value + 1)}
+                className="pointer-events-auto rounded-full bg-slate-950/95 px-3 py-1.5 text-[11px] font-semibold text-white"
+              >
+                Alerts didn&apos;t load. Retry
+              </button>
+            )}
           </div>
           <div
             className="pointer-events-none absolute inset-x-0 z-[1100] flex items-start justify-end px-3"
@@ -935,17 +1146,28 @@ export default function RadarDisplay({
               onToggle={toggleSheet}
             />
           )}
-          {(activeTornadoWarning || locationError) && (
-            <div className="pointer-events-none absolute inset-x-3 top-16 z-[1090] flex flex-col gap-2">
-              <div className="pointer-events-auto">
-                <ShelterAlert activeTornadoWarning={activeTornadoWarning} activeTornadoWatch={activeTornadoWatch} />
+          {locationError && (
+            <div className="pointer-events-none absolute inset-x-3 top-16 z-[1090]">
+              <div className="pointer-events-auto max-w-xs rounded-xl bg-slate-950/95 px-3 py-2 text-xs text-white shadow">
+                {locationError}
               </div>
-              {locationError && (
-                <div className="pointer-events-auto max-w-xs rounded-xl bg-slate-950/95 px-3 py-2 text-xs text-white shadow">
-                  {locationError}
-                </div>
-              )}
             </div>
+          )}
+          {alertSheet && (
+            <RadarAlertSheet
+              mode={alertSheet}
+              warnings={warningList}
+              selected={selectedAlert}
+              stale={alertsStale}
+              error={alertsError && warningList.length === 0}
+              onClose={() => setAlertSheet(null)}
+              onOpenList={() => setAlertSheet("list")}
+              onSelect={(summary) => {
+                setSelectedAlert(summary);
+                setAlertSheet("detail");
+              }}
+              onRetry={() => setAlertAttempt((value) => value + 1)}
+            />
           )}
           <div
             className="pointer-events-none absolute inset-x-3 z-[1100] flex items-end justify-between gap-2"
@@ -960,6 +1182,9 @@ export default function RadarDisplay({
                   : "Live"
               }
               speed={loopSpeed}
+              frameCount={loopFrameCount}
+              onFrameCountChange={setLoopFrameCount}
+              onRetry={loopEnabled && loopError ? () => setLoopAttempt((value) => value + 1) : undefined}
               onToggleEnabled={() => {
                 setLoopEnabled((value) => {
                   const next = !value;
@@ -1066,6 +1291,9 @@ export default function RadarDisplay({
                   : "Live"
             }
             speed={loopSpeed}
+            frameCount={loopFrameCount}
+            onFrameCountChange={setLoopFrameCount}
+            onRetry={loopEnabled && loopError ? () => setLoopAttempt((value) => value + 1) : undefined}
             onToggleEnabled={() => {
               setLoopEnabled((value) => {
                 const next = !value;

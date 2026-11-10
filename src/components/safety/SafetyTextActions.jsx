@@ -1,5 +1,6 @@
 import { ShieldAlert, ShieldCheck } from "lucide-react";
 import { useState } from "react";
+import { hapticImpact } from "@/lib/native/haptics";
 import { SAFETY_EXPLAINED_KEY, safetyMessageExplanation, sendContactTexts } from "@/lib/safety/sms";
 
 function hasSeenExplanation() {
@@ -81,7 +82,10 @@ export default function SafetyTextActions({ compact = false, coords = null }) {
         <div className={`grid gap-2 ${compact ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-2"}`}>
           <button
             type="button"
-            onClick={() => send("emergency")}
+            onClick={() => {
+              hapticImpact();
+              send("emergency");
+            }}
             disabled={busy}
             aria-label="Help Me text"
             className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-red-600 px-3 py-3 text-sm font-bold text-white hover:bg-red-500 disabled:opacity-50"
@@ -91,7 +95,10 @@ export default function SafetyTextActions({ compact = false, coords = null }) {
           </button>
           <button
             type="button"
-            onClick={() => send("safe")}
+            onClick={() => {
+              hapticImpact();
+              send("safe");
+            }}
             disabled={busy}
             aria-label="I’m Sheltering text"
           className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"

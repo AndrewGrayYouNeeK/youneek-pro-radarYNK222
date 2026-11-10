@@ -12,7 +12,7 @@ export default function OfflineNotice({ compact = false }) {
       }
       role="status"
     >
-      You&apos;re offline. Saved places stay on this device. Radar and forecasts load again when the connection is back.
+      You&apos;re offline. Showing the last radar, alerts, and forecast saved on this device.
     </p>
   );
 }

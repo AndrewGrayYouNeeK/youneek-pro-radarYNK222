@@ -6,10 +6,11 @@ import { fetchEnvironment } from "@/lib/api/environment";
 import { fetchOpenMeteo } from "@/lib/api/openMeteo";
 import { adaptOpenMeteoCurrent } from "@/lib/weather/openmeteo-adapters";
 import { coldFluRisk, outdoorScores, scoreLabel, uvCategory } from "@/lib/weather/lifestyle";
+import LoadError from "@/components/LoadError";
 
 export default function Health() {
   const { coords } = useWeatherLocation();
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["health", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
     staleTime: 300000,
@@ -38,7 +39,7 @@ export default function Health() {
               ? Math.round(data.current?.uv_index ?? data.environment?.uv)
               : "—"}
         </div>
-        {isError && <p className="mt-2 text-xs text-red-300">Health data is unavailable right now.</p>}
+        {isError && <LoadError message="Health data didn't load." onRetry={() => refetch()} />}
         <p className="mt-2 text-sm text-amber-100">{uv.label}</p>
         <p className="mt-1 text-xs text-slate-400">{uv.advice}</p>
       </div>

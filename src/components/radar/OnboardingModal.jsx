@@ -8,7 +8,7 @@ import {
   saveSafetyMessages,
 } from "@/lib/safety/sms";
 
-const STEPS = ["welcome", "safety"];
+const STEPS = ["location", "radar", "contacts"];
 
 export default function OnboardingModal({ onDone }) {
   const [index, setIndex] = useState(0);
@@ -33,7 +33,7 @@ export default function OnboardingModal({ onDone }) {
   };
 
   const close = () => {
-    if (step === "safety") persistMessages();
+    if (step === "contacts") persistMessages();
     finish();
   };
 
@@ -54,13 +54,13 @@ export default function OnboardingModal({ onDone }) {
 
   const allowLocation = () => {
     if (!navigator.geolocation) {
-      setLocationNote("Location is not available in this browser.");
+      setLocationNote("Location is not available here. You can search for a city on the map.");
       return;
     }
-    setLocationNote("Asking for location…");
+    setLocationNote("Asking for location while you use the app…");
     navigator.geolocation.getCurrentPosition(
-      () => setLocationNote("Location allowed. The map link can use your position."),
-      () => setLocationNote("Location stayed off. You can allow it later in the browser."),
+      () => setLocationNote("Location allowed. Radar and alerts can center on you."),
+      () => setLocationNote("Location stayed off. Search for a city instead. You can allow it later while using the app."),
       { timeout: 8000 }
     );
   };
@@ -90,24 +90,38 @@ export default function OnboardingModal({ onDone }) {
             ))}
           </div>
 
-          {step === "welcome" && (
+          {step === "location" && (
             <div className="text-center">
-              <div className="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl border border-white/10 bg-slate-900 text-4xl">
-                🌩️
-              </div>
-              <h2 className="text-2xl font-bold text-white">YouNeeK Pro Radar</h2>
+              <h2 className="text-2xl font-bold text-white">Location</h2>
               <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                Live radar, the forecast, and NOAA alerts. Next, add the people who should get a safety text if a warning covers you.
+                YouNeeK Pro Radar asks for location only while you are using the app. It centers the radar, checks whether a warning covers you, and adds your coordinates to a safety text. If you say no, search for a city instead.
+              </p>
+              <button
+                type="button"
+                onClick={allowLocation}
+                className="mt-5 w-full rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-cyan-400"
+              >
+                Allow location
+              </button>
+              {locationNote && <p className="mt-3 text-xs leading-relaxed text-slate-400">{locationNote}</p>}
+            </div>
+          )}
+
+          {step === "radar" && (
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white">Radar</h2>
+              <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                The map opens on the national reflectivity mosaic and shows how old the scan is. Loop, speed, and frame count sit on a small bar. Pick one NEXRAD site, such as KHTX or KLVX, from Layers when you want that radar instead of the mosaic.
               </p>
             </div>
           )}
 
-          {step === "safety" && (
+          {step === "contacts" && (
             <div className="space-y-3 text-left">
               <div>
-                <h2 className="text-xl font-bold text-white">Safety texts</h2>
+                <h2 className="text-xl font-bold text-white">Shelter contacts</h2>
                 <p className="mt-1 text-sm leading-relaxed text-slate-300">
-                  Add one emergency contact and check the messages. Nothing sends until you tap Send in Messages.
+                  Save 1 to 5 people on this device. Help Me and I’m Sheltering appear only when a severe warning covers your location. Nothing sends until you tap Send in Messages.
                 </p>
               </div>
               <label className="block text-xs font-medium text-slate-300">
@@ -160,23 +174,15 @@ export default function OnboardingModal({ onDone }) {
                   className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-white outline-none focus:border-cyan-500/50"
                 />
               </label>
-              <button
-                type="button"
-                onClick={allowLocation}
-                className="w-full rounded-xl border border-white/10 bg-white/5 px-3 py-3 text-sm font-semibold text-white"
-              >
-                Allow location for the map link
-              </button>
-              {locationNote && <p className="text-xs text-slate-400">{locationNote}</p>}
               {error && <p className="text-xs text-red-300">{error}</p>}
             </div>
           )}
 
           <div className="mt-6 space-y-2">
-            {step === "welcome" ? (
+            {step !== "contacts" ? (
               <button
                 type="button"
-                onClick={() => setIndex(1)}
+                onClick={() => setIndex((value) => value + 1)}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-cyan-400"
               >
                 Next

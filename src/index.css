@@ -250,6 +250,12 @@
     -webkit-user-select: none;
   }
 
+  .radar-stage,
+  .radar-stage.leaflet-container,
+  .leaflet-container {
+    background: #020617;
+  }
+
   .radar-stage .leaflet-bottom.leaflet-right {
     bottom: 4.75rem;
     left: 0.75rem;

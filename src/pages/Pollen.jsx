@@ -4,6 +4,7 @@ import LocationPicker from "@/components/forecast/LocationPicker";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { fetchEnvironment } from "@/lib/api/environment";
 import { pollenCategory } from "@/lib/weather/aqi";
+import LoadError from "@/components/LoadError";
 
 const LABELS = {
   alder: "Alder",
@@ -16,7 +17,7 @@ const LABELS = {
 
 export default function Pollen() {
   const { coords } = useWeatherLocation();
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["environment", coords?.latitude, coords?.longitude],
     enabled: Boolean(coords),
     staleTime: 300000,
@@ -34,7 +35,7 @@ export default function Pollen() {
     <PageScaffold title="Pollen & allergy">
       <LocationPicker />
       {isLoading && <p className="text-sm text-slate-400">Loading pollen…</p>}
-      {isError && <p className="text-sm text-red-300">Pollen data is unavailable right now.</p>}
+      {isError && <LoadError message="Pollen data didn't load." onRetry={() => refetch()} />}
       <div className="rounded-3xl border border-white/10 bg-white/5 p-5">
         <div className="text-[11px] uppercase tracking-[0.16em] text-slate-500">Pollen index</div>
         <div className="mt-2 flex items-end gap-3">

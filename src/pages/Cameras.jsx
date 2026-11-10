@@ -8,16 +8,30 @@ import useWeatherLocation from "@/hooks/useWeatherLocation";
 
 function CameraCard({ camera, distance }) {
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  const imageSrc = attempt
+    ? `${camera.image}${camera.image.includes("?") ? "&" : "?"}ynk=${attempt}`
+    : camera.image;
 
   return (
     <article className="overflow-hidden rounded-2xl border border-white/10 bg-white/5">
       {failed ? (
-        <div className="flex h-40 items-center justify-center bg-slate-900 px-4 text-center text-xs text-slate-400">
-          Live image is unavailable right now. The NOAA feed for {camera.name} did not load.
+        <div className="flex h-40 flex-col items-center justify-center gap-3 bg-slate-900 px-4 text-center text-xs text-slate-400">
+          <p>The image for {camera.name} didn&apos;t load.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setFailed(false);
+              setAttempt((value) => value + 1);
+            }}
+            className="rounded-xl bg-sky-500 px-3 py-2 text-sm font-semibold text-slate-950"
+          >
+            Retry
+          </button>
         </div>
       ) : (
         <img
-          src={camera.image}
+          src={imageSrc}
           alt={camera.name}
           className="h-40 w-full object-cover bg-slate-900"
           loading="lazy"
