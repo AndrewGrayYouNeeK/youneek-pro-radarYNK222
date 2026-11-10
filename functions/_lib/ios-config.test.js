@@ -31,7 +31,11 @@ test("Capacitor names the iOS app and the npm scripts stay deploy-safe", () => {
 
 test("Info.plist asks for When In Use location, forces dark UI, and does not track", () => {
   const plist = read("ios/App/App/Info.plist");
-  assert.match(plist, /YouNeeK Pro Radar uses your location to show radar and severe weather alerts for your area and to power the emergency shelter feature\./);
+  assert.ok(
+    plist.includes(
+      "YouNeeK Pro Radar needs your location to show radar and alerts for your area and to include your coordinates in the I’m Sheltering emergency text."
+    )
+  );
   assert.match(plist, /<key>UIUserInterfaceStyle<\/key>\s*<string>Dark<\/string>/);
   assert.match(plist, /UIStatusBarStyleLightContent/);
   assert.match(plist, /<key>ITSAppUsesNonExemptEncryption<\/key>\s*<false\/>/);

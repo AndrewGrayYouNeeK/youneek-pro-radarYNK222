@@ -93,11 +93,11 @@ export default function SafetyTextActions({ compact = false, coords = null }) {
             type="button"
             onClick={() => send("safe")}
             disabled={busy}
-            aria-label="I'm Safe text"
-            className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
-          >
-            <ShieldCheck className="h-4 w-4" aria-hidden="true" />
-            I&apos;m Safe
+            aria-label="I’m Sheltering text"
+          className="flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-500 px-3 py-3 text-sm font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-50"
+        >
+          <ShieldCheck className="h-4 w-4" aria-hidden="true" />
+          I’m Sheltering
           </button>
         </div>
       )}

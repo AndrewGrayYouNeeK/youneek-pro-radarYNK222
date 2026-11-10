@@ -1,0 +1,18 @@
+YouNeeK Pro Radar is a tactical weather radar app built for people who actually watch the sky.
+
+LIVE NEXRAD RADAR
+National base reflectivity mosaics from Iowa Mesonet, refreshed automatically. See storms as they develop.
+
+NWS WARNING POLYGONS
+Tornado, severe thunderstorm, flood, and winter warnings drawn as real shapes on the map — not just text lists.
+
+I’M SHELTERING
+One tap sends your exact location and a map link to your emergency contacts. No typing. No hunting for numbers. Just a clear signal that you’re safe.
+
+NOAA WEATHER RADIO
+Auto-selects stations near you so you can listen when you need the official voice.
+
+CLEAN & FOCUSED
+Dark tactical interface. No ads. No subscriptions. One-time purchase.
+
+Built for storm watchers, weather enthusiasts, and anyone who wants radar and safety in the same place.

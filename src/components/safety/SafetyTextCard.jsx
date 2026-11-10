@@ -34,7 +34,7 @@ export default function SafetyTextCard() {
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-200/70">Simulated alert</p>
           )}
           <p className="mt-1 text-xs leading-relaxed text-slate-300">
-            This warning covers your location. Help Me and I&apos;m Safe open one text draft with your note, coordinates, and map links. You still tap Send in Messages. Nothing is sent automatically.
+            This warning covers your location. Help Me and I’m Sheltering open one text draft. I’m Sheltering says you are sheltering and safe, with your exact coordinates and a Google Maps link. You still tap Send in Messages. Nothing is sent automatically.
             {count
               ? ` ${count} contact${count === 1 ? "" : "s"} saved on this device.`
               : " Add a contact before the first text."}

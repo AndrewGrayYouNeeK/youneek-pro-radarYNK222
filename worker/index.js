@@ -82,6 +82,18 @@ async function handle(request, env) {
       }
     }
 
+    if (request.method === "GET" && pathname === "/sw.js") {
+      const assetResponse = await env.ASSETS.fetch(request);
+      const headers = new Headers(assetResponse.headers);
+      headers.set("Cache-Control", "no-cache");
+      headers.set("Service-Worker-Allowed", "/");
+      return new Response(assetResponse.body, {
+        status: assetResponse.status,
+        statusText: assetResponse.statusText,
+        headers,
+      });
+    }
+
     if (request.method === "GET" && (pathname === "/privacy" || pathname === "/privacy/")) {
       const assetUrl = new URL(request.url);
       assetUrl.pathname = "/privacy.html";

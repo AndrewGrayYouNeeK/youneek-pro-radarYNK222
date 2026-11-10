@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { ChevronDown, ChevronUp, Pin, PinOff } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import AccountActions from "./AccountActions";
-import RadioControls from "./RadioControls";
 import { RADAR_PRODUCTS } from "./radarProducts";
 import { MAP_FEATURE_GROUPS, MAP_FEATURES, MAX_DOCK_CHIPS } from "@/lib/mapDesk";
 
@@ -20,7 +19,6 @@ export default function RadarLayersMenu({
   isOpen,
   onToggle,
   showNexrad,
-  showRadio,
   showLightning,
   showHurricanes,
   showSatellite,
@@ -29,7 +27,6 @@ export default function RadarLayersMenu({
   showFires,
   alertToggles,
   onShowNexradChange,
-  onShowRadioChange,
   onShowLightningChange,
   onShowHurricanesChange,
   onShowSatelliteChange,
@@ -212,8 +209,6 @@ export default function RadarLayersMenu({
               )}
             </div>
 
-            <RadioControls showRadio={showRadio} onShowRadioChange={onShowRadioChange} />
-
             <div className="space-y-2 rounded-xl border border-white/10 bg-white/5 p-3">
               <button
                 type="button"
@@ -302,7 +297,7 @@ export default function RadarLayersMenu({
                         onClick={() => onFeatureAction?.("safe")}
                         className="flex min-h-11 items-center justify-center rounded-xl bg-emerald-400 text-sm font-bold text-slate-950"
                       >
-                        I&apos;m Safe
+                        I’m Sheltering
                       </button>
                     </div>
                   )}

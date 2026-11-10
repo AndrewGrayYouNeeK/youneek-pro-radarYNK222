@@ -27,7 +27,7 @@ import { getRadarProduct, productTileUrl } from "./radarProducts";
 import LayerSheet from "./LayerSheet";
 import ExtraMapLayers from "./ExtraMapLayers";
 import { buildRadarLoop } from "@/lib/radar/loopFrames";
-import { ridgeProductLabel } from "@/lib/radar/ridgeTiles";
+import { NATIONAL_MOSAIC_ID, resolveRadarSite, ridgeProductLabel } from "@/lib/radar/ridgeTiles";
 import { weatherQueryCoords } from "@/lib/locationStability";
 import usePullToRefresh from "@/hooks/usePullToRefresh";
 import useMapDesk from "@/hooks/useMapDesk";
@@ -186,6 +186,7 @@ export default function RadarDisplay({
   const [showSpc3, setShowSpc3] = useState(false);
   const [showMd, setShowMd] = useState(false);
   const [radarRefresh, setRadarRefresh] = useState(0);
+  const [nearestSite, setNearestSite] = useState("KTLX");
   const [loopSource, setLoopSource] = useState("past");
   const [showFires, setShowFires] = useState(() => loadRadarLayers().fires);
   const [showTemps, setShowTemps] = useState(() => loadRadarLayers().temps);
@@ -380,9 +381,9 @@ export default function RadarDisplay({
 
         // Find nearest NEXRAD station
         const nearestStation = findNearestStation(latitude, longitude);
+        setNearestSite(nearestStation);
 
-        // Update settings with nearest station
-        if (onSettingsChange && nearestStation !== settings.station) {
+        if (onSettingsChange && settings.station !== NATIONAL_MOSAIC_ID && nearestStation !== settings.station) {
           onSettingsChange({ ...settings, station: nearestStation });
         }
 
@@ -403,6 +404,7 @@ export default function RadarDisplay({
   useEffect(() => { alertTogglesRef.current = alertToggles; }, [alertToggles]);
 
   const radarProduct = settings.product || "reflectivity";
+  const radarSite = resolveRadarSite(settings.station, radarProduct, nearestSite);
   const loopTiles = loopEnabled && radarProduct === "reflectivity" && !showGlobalRadar && loopFrames.length > 0;
   const frameSignature = loopTiles
     ? loopFrames.map((frame) => frame.tileUrl).join("|")
@@ -432,13 +434,13 @@ export default function RadarDisplay({
       const liveGlobal = radarCatalog?.past?.[radarCatalog.past.length - 1];
       const tileUrl = showGlobalRadar && liveGlobal
         ? rainViewerLeafletUrl(liveGlobal)
-        : productTileUrl(settings.station, radarProduct);
+        : productTileUrl(radarSite, radarProduct);
       const layer = L.tileLayer(tileUrl, {
         attribution: showGlobalRadar ? "Radar via RainViewer" : "NEXRAD via Iowa Environmental Mesonet",
         opacity: 0.82,
         minZoom: 4,
         maxZoom: 12,
-        maxNativeZoom: showGlobalRadar ? 7 : 8,
+        maxNativeZoom: showGlobalRadar || radarSite === NATIONAL_MOSAIC_ID ? 7 : 8,
         zIndex: 400,
         crossOrigin: "anonymous",
       }).addTo(map);
@@ -453,7 +455,7 @@ export default function RadarDisplay({
       frameLayersRef.current = [];
       radarLayerRef.current = null;
     };
-  }, [showNexrad, isMapReady, loopTiles, frameSignature, radarProduct, settings.station, showGlobalRadar, radarCatalog, radarRefresh]);
+  }, [showNexrad, isMapReady, loopTiles, frameSignature, radarProduct, radarSite, showGlobalRadar, radarCatalog, radarRefresh]);
 
   useEffect(() => {
     if (!loopTiles) return undefined;
@@ -495,6 +497,12 @@ export default function RadarDisplay({
       cancelled = true;
     };
   }, [loopEnabled, showGlobalRadar, showFutureRadar]);
+
+  useEffect(() => {
+    if (loopEnabled) return undefined;
+    const timer = window.setInterval(() => setRadarRefresh((value) => value + 1), 5 * 60 * 1000);
+    return () => window.clearInterval(timer);
+  }, [loopEnabled]);
 
   useEffect(() => {
     if (!loopEnabled || !loopPlaying || loopFrames.length === 0) return undefined;
@@ -732,7 +740,9 @@ export default function RadarDisplay({
     ? `${loopFrames[loopIndex].extrapolated ? "Estimated " : loopFrames[loopIndex].kind === "future" ? "Future " : ""}${new Date(frameTime * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
     : "Now";
   const playbackLabel = loopEnabled && loopPlaying ? "Looping" : "Live";
-  const productCaption = ridgeProductLabel(settings.station, radarProduct);
+  const productCaption = settings.station === NATIONAL_MOSAIC_ID && radarProduct === "reflectivity"
+    ? ridgeProductLabel(NATIONAL_MOSAIC_ID, radarProduct)
+    : ridgeProductLabel(radarSite, radarProduct);
   const toggleSheet = (key) => {
     const flip = (current, setter, saved) => {
       const next = !current;
@@ -870,7 +880,7 @@ export default function RadarDisplay({
           </div>
           {isLayersMenuOpen && (
             <LayerSheet
-              stations={Object.keys(STATION_COORDS).sort()}
+              stations={[NATIONAL_MOSAIC_ID, ...Object.keys(STATION_COORDS).sort()]}
               station={settings.station}
               onStationChange={(site) => onSettingsChange?.({ ...settings, station: site })}
               productId={radarProduct}

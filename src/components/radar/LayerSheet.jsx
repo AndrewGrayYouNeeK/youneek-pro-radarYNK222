@@ -108,7 +108,7 @@ export default function LayerSheet({
             className="mt-1 w-full rounded-lg border border-white/10 bg-slate-900 px-2 py-1.5 text-[12px] text-white"
           >
             {stations.map((id) => (
-              <option key={id} value={id}>{id}</option>
+              <option key={id} value={id}>{id === "MOSAIC" ? "National mosaic" : id}</option>
             ))}
           </select>
         </label>

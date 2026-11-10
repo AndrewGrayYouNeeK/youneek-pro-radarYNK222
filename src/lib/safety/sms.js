@@ -6,7 +6,7 @@ export const SAFETY_EXPLAINED_KEY = "safetySmsExplained_v1";
 export const SAFETY_MESSAGES_KEY = "safetyMessages_v1";
 export const MAX_SHELTER_CONTACTS = 5;
 export const DEFAULT_EMERGENCY_LINE = "EMERGENCY — I need help. I am taking shelter now.";
-export const DEFAULT_SAFE_LINE = "I'M SAFE — I am OK and accounted for.";
+export const DEFAULT_SAFE_LINE = "I’M SHELTERING — I am sheltering and I am safe.";
 const APP_SIGNATURE = "Sent from YouNeeK Pro Radar";
 
 function storageFor(storage) {
@@ -156,7 +156,7 @@ export function formatSafetyLocationLine(coords) {
 }
 
 export function safetyMessageExplanation() {
-  return "This opens one message draft to the contacts you saved on this device. The draft includes your note, your latitude and longitude, and Apple Maps and Google Maps links. Nothing is sent until you tap Send. The app does not text anyone by itself and does not resend.";
+  return "This opens one message draft to the contacts you saved on this device. I’m Sheltering says you are sheltering and safe, and the draft includes your exact coordinates and a Google Maps link. Nothing is sent until you tap Send. The app does not text anyone by itself and does not resend.";
 }
 
 export function buildEmergencyBody({ locationLine, message, storage } = {}) {

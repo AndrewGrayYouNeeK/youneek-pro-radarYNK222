@@ -13,3 +13,7 @@
 /manifest.json
   Cache-Control: no-cache, no-store, must-revalidate
   CDN-Cache-Control: no-store
+
+/sw.js
+  Cache-Control: no-cache
+  CDN-Cache-Control: no-store
