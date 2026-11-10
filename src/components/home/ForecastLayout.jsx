@@ -14,7 +14,7 @@ const MAP_DEFAULTS = {
   showTails: true,
   theme: "green",
   showNexrad: true,
-  station: "KJKL",
+  station: "MOSAIC",
   product: "reflectivity",
 };
 

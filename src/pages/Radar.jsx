@@ -15,7 +15,7 @@ const DEFAULT_SETTINGS = {
   showTails: true,
   theme: "green",    // green | amber | blue
   showNexrad: true,  // live NEXRAD overlay
-  station: "KJKL",   // default station (nearest to Columbia, KY)
+  station: "MOSAIC",
   product: "reflectivity",
 };
 

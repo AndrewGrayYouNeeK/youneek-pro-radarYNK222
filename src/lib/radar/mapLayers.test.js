@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { holdGpsLocation, showWeatherSkeleton, weatherQueryCoords } from "../locationStability.js";
 import { buildRadarLoop, opacitiesForIndex, syncFrameLayers } from "./loopFrames.js";
-import { ridgeProductLabel, ridgeTileUrl } from "./ridgeTiles.js";
+import { NATIONAL_MOSAIC_ID, ridgeProductLabel, ridgeTileUrl } from "./ridgeTiles.js";
 
 test("a small GPS move keeps the forecast and hides the skeleton", () => {
   const previous = { lat: 36.154, lon: -95.9928, accuracy: 30, source: "gps", label: "Tulsa, OK" };
@@ -32,6 +32,9 @@ test("builds a per-station Iowa Mesonet velocity tile URL", () => {
   assert.match(relative, /ridge::KINX-N0S-0/);
   assert.equal(velocity.includes("nexrad-n0u-900913"), false);
   assert.equal(ridgeProductLabel("KINX", "velocity"), "Showing KINX N0U");
+  assert.match(ridgeTileUrl(NATIONAL_MOSAIC_ID, "reflectivity"), /nexrad-n0q-900913/);
+  assert.equal(ridgeProductLabel(NATIONAL_MOSAIC_ID, "reflectivity"), "National N0Q mosaic");
+  assert.equal(ridgeTileUrl(NATIONAL_MOSAIC_ID, "velocity").includes("MOSAIC"), false);
 });
 
 test("does not rebuild radar layers when only the frame index changes", () => {

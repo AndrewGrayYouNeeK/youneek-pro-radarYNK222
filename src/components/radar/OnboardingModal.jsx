@@ -150,11 +150,11 @@ export default function OnboardingModal({ onDone }) {
                 />
               </label>
               <label className="block text-xs font-medium text-slate-300">
-                I&apos;m Safe message
+                I’m Sheltering message
                 <textarea
                   value={safeText}
                   onChange={(event) => setSafeText(event.target.value)}
-                  aria-label="I'm Safe message"
+                  aria-label="I’m Sheltering message"
                   rows={2}
                   maxLength={320}
                   className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-white outline-none focus:border-cyan-500/50"

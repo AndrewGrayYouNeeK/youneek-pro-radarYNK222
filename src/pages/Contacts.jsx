@@ -127,7 +127,7 @@ export default function Contacts() {
         <div>
           <h1 className="text-xl font-bold">Shelter Contacts</h1>
           <p className="mt-1 text-sm text-slate-400">
-            These people are stored only on this device. Help Me and I&apos;m Safe open one Messages draft that includes your note, latitude and longitude, and map links. Nothing sends until you tap Send.
+            These people are stored only on this device. Help Me and I’m Sheltering open one Messages draft. I’m Sheltering says you are sheltering and safe, with your exact coordinates and a Google Maps link. Nothing sends until you tap Send.
           </p>
         </div>
 
@@ -229,7 +229,7 @@ export default function Contacts() {
         )}
         {contacts.length > 0 && !safety.show && (
           <p className="text-xs leading-relaxed text-slate-400">
-            Help Me and I&apos;m Safe stay hidden until a warning covers your location.
+            Help Me and I’m Sheltering stay hidden until a warning covers your location.
           </p>
         )}
         {contacts.length > 0 && (
@@ -258,7 +258,7 @@ export default function Contacts() {
         <div className="flex items-start gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-3">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-slate-500">
-            Contacts are stored only on this device. Emergency and I&apos;m Safe texts only go out when you tap a button, then Send in Messages.
+            Contacts are stored only on this device. Emergency and I’m Sheltering texts only go out when you tap a button, then Send in Messages.
           </p>
         </div>
 

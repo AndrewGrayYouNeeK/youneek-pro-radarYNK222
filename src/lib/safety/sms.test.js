@@ -37,12 +37,12 @@ test("Help Me draft says to take shelter and includes the map link", () => {
   assert.match(body, /YouNeeK Pro Radar/);
 });
 
-test("I'm Safe draft keeps the all-clear line and the map link", () => {
+test("I’m Sheltering draft says the user is sheltering and safe and keeps the map link", () => {
   const body = buildImSafeBody({
-    context: "I'M SAFE — I am OK and accounted for.",
-    locationLine: "My location: https://maps.google.com/?q=37.7,-122.4",
+    locationLine: "My location: 37.70000, -122.41940\nhttps://maps.google.com/?q=37.70000,-122.41940",
   });
-  assert.match(body, /I'M SAFE — I am OK/);
+  assert.match(body, /I’M SHELTERING/);
+  assert.match(body, /sheltering and I am safe/);
   assert.match(body, /maps\.google\.com/);
 });
 
@@ -63,6 +63,8 @@ test("iOS opens one composer for every saved contact and the draft includes coor
   assert.equal(deviceCanComposeSms({ userAgent: "iPhone", platform: "iPhone", maxTouchPoints: 5 }), true);
   assert.equal(deviceCanComposeSms({ userAgent: "iPad", platform: "iPad", maxTouchPoints: 5 }), false);
   assert.equal(deviceCanComposeSms({ userAgent: "Mozilla/5.0 (Macintosh)", platform: "MacIntel", maxTouchPoints: 5 }), false);
+  assert.match(safetyMessageExplanation(), /I’m Sheltering/);
+  assert.match(safetyMessageExplanation(), /Google Maps/);
   assert.match(safetyMessageExplanation(), /tap Send/);
   assert.match(safetyMessageExplanation(), /does not resend/);
 });

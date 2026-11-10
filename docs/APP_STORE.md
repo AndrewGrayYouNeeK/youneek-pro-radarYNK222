@@ -1,6 +1,6 @@
 # App Store review notes
 
-This is the answer sheet for App Store Connect. It matches what the code does as of this branch. Confirm it again if the data flow changes.
+The ready-to-paste listing, screenshot shot list, and the “one tap sends” wording note are in `docs/APP_STORE_LISTING.md` and `fastlane/metadata/en-US/`. This file is the privacy and review answer sheet. Confirm it again if the data flow changes.
 
 ## Privacy nutrition labels
 
@@ -49,7 +49,7 @@ Capacitor plugins ship their own manifests inside the Swift packages. Do not add
 
 ## Info.plist
 
-- `NSLocationWhenInUseUsageDescription`: "YouNeeK Pro Radar uses your location to show radar and severe weather alerts for your area and to power the emergency shelter feature."
+- `NSLocationWhenInUseUsageDescription`: "YouNeeK Pro Radar needs your location to show radar and alerts for your area and to include your coordinates in the I’m Sheltering emergency text."
 - No Always / background location, no `UIBackgroundModes` for location.
 - `UIUserInterfaceStyle` is `Dark`.
 - No `NSUserTrackingUsageDescription`.
@@ -57,7 +57,7 @@ Capacitor plugins ship their own manifests inside the Swift packages. Do not add
 
 Notifications are not requested at launch. The website's "Browser notifications" switch is hidden in the native app. Adding push later is a separate change: a usage string, a permission request at a moment the user understands, and a background mode only if you truly need one.
 
-## How a reviewer sees Help Me / I'm Safe
+## How a reviewer sees Help Me / I’m Sheltering
 
 Those buttons appear only when an active severe warning covers the selected location. They are not on the home screen in clear weather.
 
@@ -73,7 +73,9 @@ To turn the simulated warning off:
 
 Suggested review notes:
 
-> Location is When In Use only. To see Help Me and I'm Safe without a live warning, open youneekproradar://safety-preview on the device. The card is labeled Simulated alert. The buttons open a message draft; the reviewer must tap Send. Contacts are typed in Settings → Contacts and stay on the device. No account is required. Privacy policy: https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy
+> Location is When In Use only. To see Help Me and I’m Sheltering without a live warning, open youneekproradar://safety-preview on the device. The card is labeled Simulated alert. The buttons open a message draft; the reviewer must tap Send. Contacts are typed in Settings → Contacts and stay on the device. No account is required. Privacy policy: https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy
+
+Screenshot steps for each store image are in `docs/APP_STORE_LISTING.md`.
 
 If you would rather not ship a review URL in the binary, delete the `youneekproradar` URL type and `installReviewLink` before you archive. Reviewers can still use the website query string, or a real warning. That URL is the smallest switch that reuses the existing preview. It is not a hidden admin login.
 

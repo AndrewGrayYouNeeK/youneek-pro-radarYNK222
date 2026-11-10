@@ -32,7 +32,7 @@ Then in Xcode:
 - Location uses `@capacitor/geolocation` while the app is in use, and falls back to the browser geolocation API on the website.
 - Last location, safety contacts, and the rest of the existing local settings are mirrored into `@capacitor/preferences` on device. The website still uses local storage only.
 - A severe warning triggers a warning haptic once per alert. Simulators often have no haptic engine.
-- Help Me and I'm Safe open one `sms:` draft for the contacts saved on the device. You tap Send. iPad and any device that cannot compose SMS gets the share sheet instead of a crash.
+- Help Me and I’m Sheltering open one `sms:` draft for the contacts saved on the device. You tap Send. iPad and any device that cannot compose SMS gets the share sheet instead of a crash.
 - The status bar uses light text on the dark UI. The splash and icon are the tactical radar mark. Review both before you ship.
 - The app does not ask for notification permission at launch, and it does not include App Tracking Transparency.
 
@@ -55,7 +55,7 @@ Run this on a real iPhone. The simulator is not enough for SMS or haptics.
 - [ ] Deny location (or reset privacy for the app). The home screen offers city/ZIP search and Open Settings. Radar still opens.
 - [ ] Turn on airplane mode. An offline note appears. Turn the network back on and pull to refresh or reopen Now. Data returns.
 - [ ] Radar status line shows a frame time and an "updated … ago" age without covering the map.
-- [ ] Help Me and I'm Safe stay hidden until a warning covers the location, or until you open the review link in `docs/APP_STORE.md`.
+- [ ] Help Me and I’m Sheltering stay hidden until a warning covers the location, or until you open the review link in `docs/APP_STORE.md`.
 - [ ] Before the first text, the app explains that the draft contains coordinates and map links. Cancel sends nothing.
 - [ ] Continue opens one Messages draft. The body has latitude, longitude, an Apple Maps link, and a Google Maps link. You must tap Send. Nothing sends if you cancel.
 - [ ] With no contacts saved, the buttons explain that a contact is required and do not crash.

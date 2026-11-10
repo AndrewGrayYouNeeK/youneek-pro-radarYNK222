@@ -10,6 +10,12 @@ document.documentElement.classList.add("dark");
 document.body.classList.add("dark");
 document.title = "YouNeeK Pro Radar";
 
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 const root = document.getElementById("root");
 
 bootNativeShell().finally(() => {
