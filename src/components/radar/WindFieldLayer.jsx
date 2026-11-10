@@ -2,16 +2,19 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { advectDegrees, meteorologicalVector } from "@/lib/weather/windField";
 
-const PARTICLE_COUNT = 56;
-const STEP_SECONDS = 90;
+const PARTICLE_COUNT = 42;
+const STEP_SECONDS = 70;
+const STREAM_STEPS = 6;
 
 function sampleGrid(bounds) {
   const lats = [];
   const lons = [];
-  for (let row = 0; row < 4; row += 1) {
-    for (let col = 0; col < 4; col += 1) {
-      lats.push(bounds.getSouth() + ((bounds.getNorth() - bounds.getSouth()) * row) / 3);
-      lons.push(bounds.getWest() + ((bounds.getEast() - bounds.getWest()) * col) / 3);
+  const rows = 8;
+  const cols = 8;
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < cols; col += 1) {
+      lats.push(bounds.getSouth() + ((bounds.getNorth() - bounds.getSouth()) * row) / (rows - 1));
+      lons.push(bounds.getWest() + ((bounds.getEast() - bounds.getWest()) * col) / (cols - 1));
     }
   }
   const url = new URL("https://api.open-meteo.com/v1/forecast");
@@ -110,16 +113,22 @@ export default function WindFieldLayer({ map, enabled }) {
       context.strokeStyle = "rgba(125, 211, 252, 0.8)";
       context.lineWidth = 1.4;
       particles.forEach((particle) => {
-        const point = map.latLngToContainerPoint([particle.lat, particle.lon]);
-        const vector = samples.length ? nearestVector(samples, particle.lat, particle.lon) : { east: 1, north: 0 };
-        const next = advectDegrees(particle.lat, particle.lon, vector.east, vector.north, STEP_SECONDS);
-        const nextPoint = map.latLngToContainerPoint([next.lat, next.lon]);
+        let lat = particle.lat;
+        let lon = particle.lon;
         context.beginPath();
-        context.moveTo(point.x, point.y);
-        context.lineTo(nextPoint.x, nextPoint.y);
+        const start = map.latLngToContainerPoint([lat, lon]);
+        context.moveTo(start.x, start.y);
+        for (let step = 0; step < STREAM_STEPS; step += 1) {
+          const vector = samples.length ? nearestVector(samples, lat, lon) : { east: 1, north: 0 };
+          const next = advectDegrees(lat, lon, vector.east, vector.north, STEP_SECONDS);
+          const nextPoint = map.latLngToContainerPoint([next.lat, next.lon]);
+          context.lineTo(nextPoint.x, nextPoint.y);
+          lat = next.lat;
+          lon = next.lon;
+        }
         context.stroke();
-        particle.lat = next.lat;
-        particle.lon = next.lon;
+        particle.lat = lat;
+        particle.lon = lon;
         particle.life -= 1;
         const bounds = map.getBounds();
         if (particle.life <= 0 || !bounds.contains([particle.lat, particle.lon])) {

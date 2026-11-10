@@ -6,6 +6,7 @@ const NWS_HEADERS = {
 const ALERT_EVENTS = {
   tornado: ["Tornado Warning"],
   tornado_watch: ["Tornado Watch"],
+  severe_watch: ["Severe Thunderstorm Watch"],
   thunderstorm: ["Severe Thunderstorm Warning"],
   flood: ["Flood Warning", "Flash Flood Warning", "Flood Watch", "Flash Flood Watch"],
   winter: [
