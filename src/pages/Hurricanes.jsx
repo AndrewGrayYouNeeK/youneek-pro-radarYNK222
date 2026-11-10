@@ -4,10 +4,11 @@ import AppHeader from "@/components/mobile/AppHeader";
 import BottomTab from "@/components/radar/BottomTab";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import { fetchActiveStorms } from "@/lib/api/outlook";
+import LoadError from "@/components/LoadError";
 
 export default function Hurricanes() {
   useTabPageMemory("More");
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, refetch } = useQuery({
     queryKey: ["hurricane-center"],
     queryFn: fetchActiveStorms,
     refetchInterval: 5 * 60 * 1000,
@@ -24,7 +25,7 @@ export default function Hurricanes() {
             Live National Hurricane Center positions, motion, and intensity. Included — no premium gate.
           </p>
           {isLoading && <p className="text-sm text-slate-400">Loading active cyclones…</p>}
-          {error && <p className="text-sm text-red-300">{error.message}</p>}
+          {error && <LoadError message={error.message || "Hurricane data didn't load."} onRetry={() => refetch()} />}
           {!isLoading && storms.length === 0 && (
             <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-6 text-sm text-slate-300">
               No active tropical cyclones in the NHC basin right now.

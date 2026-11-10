@@ -30,7 +30,7 @@ export default class AppErrorBoundary extends React.Component {
             onClick={() => window.location.reload()}
             className="rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950"
           >
-            Reload App
+            Retry
           </button>
         </div>
       </div>

@@ -254,7 +254,14 @@ export default function Globe() {
                 aria-label="Radar time"
               />
               <div className="mt-0.5 flex justify-between text-[10px] uppercase tracking-[0.12em] text-slate-400">
-                <span>{mosaicLoading ? "Painting tiles…" : formatRadarClock(activeFrame?.time)}</span>
+                <span>
+                  {catalogQuery.isError ? "Radar didn't load." : mosaicLoading ? "Painting tiles…" : formatRadarClock(activeFrame?.time)}
+                </span>
+                {catalogQuery.isError && (
+                  <button type="button" onClick={() => catalogQuery.refetch()} className="font-semibold text-amber-200">
+                    Retry
+                  </button>
+                )}
                 <span className={frameKind === "future" ? "text-fuchsia-300" : "text-cyan-300"}>
                   {layer === "off" ? "No overlay" : frameKind === "future" ? "Future radar" : frameKind === "satellite" ? "Satellite IR" : "Live radar"}
                 </span>

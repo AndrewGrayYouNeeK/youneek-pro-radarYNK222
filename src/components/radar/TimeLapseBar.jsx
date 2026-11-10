@@ -1,4 +1,5 @@
 import { Play, Pause } from "lucide-react";
+import { LOOP_FRAME_COUNTS } from "@/lib/radar/loopFrames";
 
 export default function TimeLapseBar({
   enabled,
@@ -8,9 +9,12 @@ export default function TimeLapseBar({
   frameLabel,
   speed,
   onSpeedChange,
+  frameCount = 8,
+  onFrameCountChange,
+  onRetry,
 }) {
   return (
-    <div className="pointer-events-auto flex items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/90 px-3 py-2 shadow-xl backdrop-blur-md">
+    <div className="pointer-events-auto flex max-w-[calc(100%-3.75rem)] flex-wrap items-center gap-2 rounded-2xl border border-white/10 bg-slate-950/90 px-3 py-2 shadow-xl backdrop-blur-md">
       <button
         type="button"
         onClick={onToggleEnabled}
@@ -41,6 +45,24 @@ export default function TimeLapseBar({
         <option value={400}>Med</option>
         <option value={180}>Fast</option>
       </select>
+      <select
+        value={frameCount}
+        onChange={(event) => onFrameCountChange?.(Number(event.target.value))}
+        disabled={!enabled}
+        aria-label="Radar loop frame count"
+        className="rounded-lg border border-white/10 bg-slate-900 px-2 py-1 text-[11px] text-white disabled:opacity-40"
+      >
+        {LOOP_FRAME_COUNTS.map((count) => (
+          <option key={count} value={count}>
+            {count}
+          </option>
+        ))}
+      </select>
+      {onRetry && (
+        <button type="button" onClick={onRetry} className="rounded-lg px-2 py-1 text-[11px] font-semibold text-amber-200">
+          Retry
+        </button>
+      )}
     </div>
   );
 }

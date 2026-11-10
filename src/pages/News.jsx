@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import PageScaffold from "@/components/more/PageScaffold";
 import { fetchNewsFallback, fetchWeatherNews } from "@/lib/api/news";
+import LoadError from "@/components/LoadError";
 
 export default function News() {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["weather-news"],
     staleTime: 120000,
     queryFn: async () => {
@@ -41,7 +42,7 @@ export default function News() {
           </article>
         ))}
         {isLoading && <p className="text-sm text-slate-400">Loading National Weather Service headlines…</p>}
-        {isError && <p className="text-sm text-red-300">Weather news is unavailable right now.</p>}
+        {isError && <LoadError message="Weather news didn't load." onRetry={() => refetch()} />}
         {!isLoading && !stories.length && <p className="text-sm text-slate-400">No national headlines available right now.</p>}
       </div>
     </PageScaffold>

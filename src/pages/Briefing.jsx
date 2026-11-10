@@ -7,6 +7,7 @@ import LocationPicker from "@/components/forecast/LocationPicker";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
 import { fetchPointAlerts, fetchActiveStorms } from "@/lib/api/outlook";
+import LoadError from "@/components/LoadError";
 
 function adaptNwsAlerts(payload) {
   return (payload?.features || []).map((feature) => {
@@ -46,7 +47,9 @@ export default function Briefing() {
         <div className="mx-auto flex max-w-md flex-col gap-5">
           <LocationPicker />
           {alertsQuery.isLoading && <p className="text-sm text-slate-400">Loading local alerts…</p>}
-          {alertsQuery.isError && <p className="text-sm text-red-300">Local alerts are unavailable right now.</p>}
+          {alertsQuery.isError && (
+            <LoadError message="Local alerts didn't load." onRetry={() => alertsQuery.refetch()} />
+          )}
           <WeatherAlertsCard alerts={alertsQuery.data?.alerts || adaptNwsAlerts(alertsQuery.data)} />
           <StormRiskCard coords={coords} />
           <section className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">

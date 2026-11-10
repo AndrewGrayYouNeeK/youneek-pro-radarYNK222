@@ -4,13 +4,13 @@ export function formatRadarFrameAge(unixSeconds, nowMs = Date.now()) {
   const deltaSec = Math.round(nowMs / 1000 - time);
   if (deltaSec < -90) {
     const ahead = Math.max(1, Math.round(-deltaSec / 60));
-    return ahead === 1 ? "forecast · in 1 min" : `forecast · in ${ahead} min`;
+    return ahead === 1 ? "Forecast · in 1 min" : `Forecast · in ${ahead} min`;
   }
-  if (deltaSec < 45) return "updated just now";
+  if (deltaSec < 45) return "Updated just now";
   const mins = Math.max(1, Math.round(deltaSec / 60));
-  if (mins < 60) return `updated ${mins} min ago`;
+  if (mins < 60) return `Updated ${mins} min ago`;
   const hours = Math.round(mins / 60);
-  return hours === 1 ? "updated 1 hr ago" : `updated ${hours} hr ago`;
+  return hours === 1 ? "Updated 1 hr ago" : `Updated ${hours} hr ago`;
 }
 
 let cachedFrame = { at: 0, time: null };

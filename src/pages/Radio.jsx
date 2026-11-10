@@ -13,23 +13,34 @@ export default function RadioPage() {
   const [selectedId, setSelectedId] = useState("");
   const [status, setStatus] = useState("Finding NOAA Weather Radio transmitters…");
   const [fromCache, setFromCache] = useState(false);
+  const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
+    setFailed(false);
     loadNwrTransmitters()
       .then((result) => {
         if (cancelled) return;
         setStations(result.stations);
         setFromCache(result.fromCache);
-        setStatus(result.fromCache ? "Using the transmitter list saved on this device." : "Transmitters from the National Weather Service.");
+        setFailed(false);
+        setStatus(
+          result.fromCache
+            ? "Connection problem. Showing the last transmitter list saved on this device."
+            : "Transmitters from the National Weather Service."
+        );
       })
       .catch(() => {
-        if (!cancelled) setStatus("The National Weather Service transmitter list did not load. A weather radio still uses 162.400 to 162.550 MHz.");
+        if (!cancelled) {
+          setFailed(true);
+          setStatus("The National Weather Service transmitter list did not load. A weather radio still uses 162.400 to 162.550 MHz.");
+        }
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [attempt]);
 
   const lat = Number(location?.lat);
   const lon = Number(location?.lon);
@@ -48,6 +59,15 @@ export default function RadioPage() {
           </p>
         </div>
         <p className="text-xs text-slate-400">{status}</p>
+        {failed && (
+          <button
+            type="button"
+            onClick={() => setAttempt((value) => value + 1)}
+            className="rounded-xl bg-sky-500 px-4 py-2 text-sm font-semibold text-slate-950"
+          >
+            Retry
+          </button>
+        )}
         {selected && (
           <div className="rounded-2xl border border-emerald-400/30 bg-emerald-950/40 p-4">
             <div className="text-sm font-semibold text-white">

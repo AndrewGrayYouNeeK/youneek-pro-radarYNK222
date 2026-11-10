@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   addShelterContact,
   buildEmergencyBody,
+  MAX_SHELTER_CONTACTS,
   buildImSafeBody,
   buildGroupSmsUrl,
   buildSmsUrl,
@@ -106,4 +107,13 @@ test("a new safety contact is stored for this device and the legacy phone list",
   assert.equal(saved[0].phone, "+15555550100");
   assert.deepEqual(JSON.parse(store.getItem("shelterContacts")), ["+15555550100"]);
   assert.throws(() => addShelterContact({ name: "Alex", phone: "12" }, store), /10-digit/);
+});
+
+test("shelter contacts stop at five people", () => {
+  const store = memoryStorage();
+  for (let index = 0; index < MAX_SHELTER_CONTACTS; index += 1) {
+    addShelterContact({ name: `Person ${index}`, phone: `555555010${index}`, id: String(index) }, store);
+  }
+  assert.equal(JSON.parse(store.getItem("shelterContacts")).length, 5);
+  assert.throws(() => addShelterContact({ name: "Extra", phone: "5555550199", id: "extra" }, store), /Max 5/);
 });
