@@ -1,30 +1,30 @@
+import { RIDGE_PRODUCTS, ridgeTileUrl } from "@/lib/radar/ridgeTiles";
+
 export const RADAR_PRODUCTS = [
   {
     id: "reflectivity",
-    label: "Reflectivity",
-    description: "NEXRAD base reflectivity (N0Q)",
-    tileUrl: "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0q-900913/{z}/{x}/{y}.png",
-    opacity: 0.8,
-    maxNativeZoom: 12,
+    label: RIDGE_PRODUCTS.reflectivity.label,
+    code: RIDGE_PRODUCTS.reflectivity.code,
+    description: "NEXRAD base reflectivity for the selected site",
   },
   {
     id: "velocity",
-    label: "Velocity",
-    description: "NEXRAD base velocity (N0U)",
-    tileUrl: "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/nexrad-n0u-900913/{z}/{x}/{y}.png",
-    opacity: 0.75,
-    maxNativeZoom: 12,
+    label: RIDGE_PRODUCTS.velocity.label,
+    code: RIDGE_PRODUCTS.velocity.code,
+    description: "NEXRAD base velocity (N0U) for the selected site",
   },
   {
-    id: "global",
-    label: "Global radar",
-    description: "Worldwide mosaic and future nowcast",
-    tileUrl: "https://tilecache.rainviewer.com/v2/radar/0/256/{z}/{x}/{y}/2/1_1.png",
-    opacity: 0.78,
-    maxNativeZoom: 7,
+    id: "stormRelative",
+    label: RIDGE_PRODUCTS.stormRelative.label,
+    code: RIDGE_PRODUCTS.stormRelative.code,
+    description: "Storm-relative velocity (N0S) for the selected site",
   },
 ];
 
 export function getRadarProduct(productId) {
   return RADAR_PRODUCTS.find((product) => product.id === productId) || RADAR_PRODUCTS[0];
+}
+
+export function productTileUrl(site, productId) {
+  return ridgeTileUrl(site, productId);
 }

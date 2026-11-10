@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { invokeNwsData } from '@/api/nwsData';
 import { saveActiveLocation } from '@/lib/locationStore';
+import { holdGpsLocation } from '@/lib/locationStability';
 
 const LocationCtx = createContext(null);
 
@@ -24,18 +25,6 @@ function isPlaceholderDenver(loc) {
     Math.abs(Number(loc.lat) - PLACEHOLDER_DENVER.lat) < 0.001 &&
     Math.abs(Number(loc.lon) - PLACEHOLDER_DENVER.lon) < 0.001
   );
-}
-
-function milesBetween(a, b) {
-  if (!a || !b) return Infinity;
-  const toRad = (d) => (d * Math.PI) / 180;
-  const R = 3958.8;
-  const dLat = toRad(b.lat - a.lat);
-  const dLon = toRad(b.lon - a.lon);
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(toRad(a.lat)) * Math.cos(toRad(b.lat)) * Math.sin(dLon / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(x));
 }
 
 function loadSettings() {
@@ -167,9 +156,9 @@ export function LocationProvider({ children }) {
       return;
     }
 
-    const prev = locationRef.current;
-    if (prev?.source === 'gps' && milesBetween(prev, { lat, lon }) < 0.3) {
-      updateLocation({ ...prev, lat, lon, accuracy, source: 'gps' });
+    const held = holdGpsLocation(locationRef.current, { lat, lon, accuracy });
+    if (held) {
+      if (held.accuracy !== locationRef.current?.accuracy) updateLocation(held);
       setLocating(false);
       return;
     }

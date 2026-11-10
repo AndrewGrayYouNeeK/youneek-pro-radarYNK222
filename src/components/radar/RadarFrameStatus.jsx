@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { formatRadarFrameAge, latestRadarFrameUnix } from "@/lib/radar/frameAge";
 
-export default function RadarFrameStatus({ frameClock, playbackLabel, frameTime, warningCount }) {
+export default function RadarFrameStatus({ productCaption, frameClock, playbackLabel, frameTime, warningCount }) {
   const [liveTime, setLiveTime] = useState(null);
 
   useEffect(() => {
@@ -32,6 +32,7 @@ export default function RadarFrameStatus({ frameClock, playbackLabel, frameTime,
       className="max-w-full rounded-full bg-slate-950/80 px-3 py-1.5 text-[11px] font-medium leading-snug text-slate-200 shadow backdrop-blur"
       data-radar-age={age || ""}
     >
+      {productCaption ? `${productCaption} · ` : ""}
       {frameClock} · {playbackLabel}
       {age ? ` · ${age}` : ""} · {warnings}
     </p>

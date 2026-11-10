@@ -1,12 +1,13 @@
 import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { bundleOpenMeteo, enrichWithWeatherKit, isMissingWeatherKit } from "@/lib/api/unifiedWeather";
 import { fetchWeatherKit } from "@/lib/api/weatherkit";
 import { fetchOpenMeteo } from "@/lib/weather/openmeteo";
 import useWeatherLocation from "@/hooks/useWeatherLocation";
+import { weatherQueryCoords } from "@/lib/locationStability";
 
 export function unifiedWeatherKey(lat, lon) {
-  return ["open-meteo-forecast", lat, lon];
+  return ["open-meteo-forecast", ...weatherQueryCoords(lat, lon)];
 }
 
 export default function useUnifiedWeather() {
@@ -23,24 +24,28 @@ export default function useUnifiedWeather() {
   const lat = coords?.latitude;
   const lon = coords?.longitude;
 
+  const [roundedLat, roundedLon] = weatherQueryCoords(lat, lon);
+
   const openMeteoQuery = useQuery({
     queryKey: unifiedWeatherKey(lat, lon),
     enabled: Boolean(coords),
+    placeholderData: keepPreviousData,
     staleTime: 180000,
     refetchInterval: 600000,
     retry: 1,
-    queryFn: async () => bundleOpenMeteo(await fetchOpenMeteo(lat, lon)),
+    queryFn: async () => bundleOpenMeteo(await fetchOpenMeteo(roundedLat, roundedLon)),
   });
 
   const weatherKitQuery = useQuery({
-    queryKey: ["weatherkit-forecast", lat, lon],
+    queryKey: ["weatherkit-forecast", roundedLat, roundedLon],
     enabled: Boolean(coords),
+    placeholderData: keepPreviousData,
     staleTime: 180000,
     refetchInterval: 600000,
     retry: false,
     queryFn: async () => {
       try {
-        return await fetchWeatherKit(lat, lon);
+        return await fetchWeatherKit(roundedLat, roundedLon);
       } catch (error) {
         if (isMissingWeatherKit(error)) return null;
         return null;
