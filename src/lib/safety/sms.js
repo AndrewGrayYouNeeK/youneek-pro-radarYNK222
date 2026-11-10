@@ -1,4 +1,8 @@
+import { openExternalUrl, shareSafetyMessage } from "../native/openExternal.js";
+import { isNativePlatform } from "../native/runtime.js";
+
 export const SHELTER_CONTACTS_EVENT = "ynk-shelter-contacts";
+export const SAFETY_EXPLAINED_KEY = "safetySmsExplained_v1";
 export const SAFETY_MESSAGES_KEY = "safetyMessages_v1";
 export const MAX_SHELTER_CONTACTS = 5;
 export const DEFAULT_EMERGENCY_LINE = "EMERGENCY — I need help. I am taking shelter now.";
@@ -118,10 +122,41 @@ export function saveSafetyMessages(messages = {}, storage) {
   return next;
 }
 
-export function buildSmsUrl(phone, body) {
-  const userAgent = typeof navigator === "undefined" ? "" : navigator.userAgent || "";
-  const separator = /iPad|iPhone|iPod/.test(userAgent) ? "&" : "?";
+export function buildSmsUrl(phone, body, userAgent) {
+  const ua = userAgent ?? (typeof navigator === "undefined" ? "" : navigator.userAgent || "");
+  const separator = /iPad|iPhone|iPod/.test(ua) ? "&" : "?";
   return `sms:${phone}${separator}body=${encodeURIComponent(body)}`;
+}
+
+export function buildGroupSmsUrl(phones, body, userAgent) {
+  const list = (phones || []).filter(Boolean).join(",");
+  return buildSmsUrl(list, body, userAgent);
+}
+
+export function deviceCanComposeSms(env = {}) {
+  const ua = env.userAgent ?? (typeof navigator === "undefined" ? "" : navigator.userAgent || "");
+  const platform = env.platform ?? (typeof navigator === "undefined" ? "" : navigator.platform || "");
+  const touch = env.maxTouchPoints ?? (typeof navigator === "undefined" ? 0 : navigator.maxTouchPoints || 0);
+  if (/iPad/.test(ua)) return false;
+  if (platform === "MacIntel" && touch > 1 && !/iPhone/.test(ua)) return false;
+  return true;
+}
+
+export function formatSafetyLocationLine(coords) {
+  const lat = Number(coords?.latitude);
+  const lon = Number(coords?.longitude);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return "";
+  const latText = lat.toFixed(5);
+  const lonText = lon.toFixed(5);
+  return [
+    `My location: ${latText}, ${lonText}`,
+    `https://maps.apple.com/?ll=${latText},${lonText}&q=${latText},${lonText}`,
+    `https://maps.google.com/?q=${latText},${lonText}`,
+  ].join("\n");
+}
+
+export function safetyMessageExplanation() {
+  return "This opens one message draft to the contacts you saved on this device. The draft includes your note, your latitude and longitude, and Apple Maps and Google Maps links. Nothing is sent until you tap Send. The app does not text anyone by itself and does not resend.";
 }
 
 export function buildEmergencyBody({ locationLine, message, storage } = {}) {
@@ -145,8 +180,11 @@ export async function openSmsDrafts({ phones, body, onProgress }) {
 }
 
 function locationLineFromCoords(coords) {
-  if (coords?.latitude == null || coords?.longitude == null) return "";
-  return `My location: https://maps.google.com/?q=${coords.latitude},${coords.longitude}`;
+  return formatSafetyLocationLine(coords);
+}
+
+function cancelledShare(error) {
+  return /cancel/i.test(String(error?.message || error || ""));
 }
 
 export async function sendContactTexts({ kind, context, coords, storage } = {}) {
@@ -166,7 +204,10 @@ export async function sendContactTexts({ kind, context, coords, storage } = {}) 
     }
     navigator.geolocation.getCurrentPosition(
       (position) => {
-        resolve(`My location: https://maps.google.com/?q=${position.coords.latitude},${position.coords.longitude}`);
+        resolve(formatSafetyLocationLine({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        }) || "(Location unavailable)");
       },
       () => resolve("(Location unavailable)"),
       { timeout: 8000 }
@@ -178,6 +219,31 @@ export async function sendContactTexts({ kind, context, coords, storage } = {}) 
       ? buildEmergencyBody({ locationLine, storage })
       : buildImSafeBody({ locationLine, context, storage });
 
+  if (isNativePlatform()) {
+    if (!deviceCanComposeSms()) {
+      try {
+        await shareSafetyMessage(body);
+        return { count: phones.length, mode: "share", body };
+      } catch (error) {
+        if (cancelledShare(error)) {
+          const cancelled = new Error("Nothing was sent.");
+          cancelled.code = "CANCELLED";
+          throw cancelled;
+        }
+        const unavailable = new Error("This device can't open Messages. Nothing was sent.");
+        unavailable.code = "SMS_UNAVAILABLE";
+        throw unavailable;
+      }
+    }
+    const opened = openExternalUrl(buildGroupSmsUrl(phones, body));
+    if (!opened) {
+      const unavailable = new Error("Messages didn't open. Nothing was sent.");
+      unavailable.code = "SMS_UNAVAILABLE";
+      throw unavailable;
+    }
+    return { count: phones.length, mode: "sms", body };
+  }
+
   await openSmsDrafts({ phones, body });
-  return { count: phones.length };
+  return { count: phones.length, mode: "sms", body };
 }

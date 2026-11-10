@@ -8,6 +8,7 @@ import AppHeader from "@/components/mobile/AppHeader";
 import { loadRadarLayers } from "@/lib/radarLayers";
 import { useNavigationStack } from "@/lib/NavigationStack";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
+import OfflineNotice from "@/components/OfflineNotice";
 
 const DEFAULT_SETTINGS = {
   showLabels: true,
@@ -131,6 +132,12 @@ export default function Radar() {
         className="relative min-h-0 flex-1 overflow-hidden"
         style={{ paddingBottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
       >
+        <div
+          className="pointer-events-none absolute inset-x-0 z-[1300] flex justify-center px-3"
+          style={{ bottom: "calc(5.5rem + env(safe-area-inset-bottom))" }}
+        >
+          <OfflineNotice compact />
+        </div>
         <Suspense
           fallback={(
             <div className="flex h-full items-center justify-center bg-slate-950">

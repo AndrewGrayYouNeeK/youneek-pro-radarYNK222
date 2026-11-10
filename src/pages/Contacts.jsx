@@ -127,7 +127,7 @@ export default function Contacts() {
         <div>
           <h1 className="text-xl font-bold">Shelter Contacts</h1>
           <p className="mt-1 text-sm text-slate-400">
-            These people get Emergency and I&apos;m Safe texts with your GPS location. Drafts open in Messages — nothing sends until you tap Send.
+            These people are stored only on this device. Help Me and I&apos;m Safe open one Messages draft that includes your note, latitude and longitude, and map links. Nothing sends until you tap Send.
           </p>
         </div>
 

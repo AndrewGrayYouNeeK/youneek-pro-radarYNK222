@@ -9,6 +9,7 @@ import ShelterAlert from "./ShelterAlert";
 import RadarQuickActions from "./RadarQuickActions";
 import WindSpeedDisplay from "./WindSpeedDisplay";
 import TimeLapseBar from "./TimeLapseBar";
+import RadarFrameStatus from "./RadarFrameStatus";
 import LightningLayer from "./LightningLayer";
 import HurricaneLayer from "./HurricaneLayer";
 import StormCellLayer from "./StormCellLayer";
@@ -809,10 +810,10 @@ export default function RadarDisplay({
     }
   };
 
-  const frameClock =
-    loopEnabled && loopFrames[loopIndex]?.time
-      ? new Date(loopFrames[loopIndex].time * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })
-      : "Now";
+  const frameTime = loopEnabled && loopFrames[loopIndex]?.time ? loopFrames[loopIndex].time : null;
+  const frameClock = frameTime
+    ? `${loopFrames[loopIndex].kind === "future" ? "Future " : ""}${new Date(frameTime * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+    : "Now";
   const playbackLabel = loopEnabled && loopPlaying ? "Looping" : "Live";
 
   return (
@@ -871,13 +872,22 @@ export default function RadarDisplay({
       <WildfireLayer map={leafletMap.current} enabled={showFires && isMapReady} />
       {variant === "clean" && (
         <>
-          <div className="pointer-events-none absolute left-3 top-3 z-[1000] flex max-w-[calc(100%-6.75rem)] flex-col items-start gap-2">
-            <p className="max-w-full truncate rounded-full bg-slate-950/80 px-3 py-1.5 text-[11px] font-medium text-slate-200 shadow backdrop-blur">
-              {frameClock} · {playbackLabel} · {warningCount} {warningCount === 1 ? "warning" : "warnings"}
-            </p>
+          <div
+            className="pointer-events-none absolute left-3 z-[1000] flex max-w-[calc(100%-6.75rem)] flex-col items-start gap-2"
+            style={{ top: "calc(0.75rem + env(safe-area-inset-top))" }}
+          >
+            <RadarFrameStatus
+              frameClock={frameClock}
+              playbackLabel={playbackLabel}
+              frameTime={frameTime}
+              warningCount={warningCount}
+            />
             <RainArrivalAlert />
           </div>
-          <div className="pointer-events-none absolute inset-x-0 top-3 z-[1100] flex items-start justify-end px-3">
+          <div
+            className="pointer-events-none absolute inset-x-0 z-[1100] flex items-start justify-end px-3"
+            style={{ top: "calc(0.75rem + env(safe-area-inset-top))" }}
+          >
             <button
               type="button"
               onClick={() => setIsLayersMenuOpen((value) => !value)}
@@ -966,7 +976,10 @@ export default function RadarDisplay({
               )}
             </div>
           )}
-          <div className="pointer-events-none absolute inset-x-3 bottom-3 z-[1100] flex items-end justify-between gap-2">
+          <div
+            className="pointer-events-none absolute inset-x-3 z-[1100] flex items-end justify-between gap-2"
+            style={{ bottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
+          >
             <TimeLapseBar
               enabled={loopEnabled}
               playing={loopPlaying}

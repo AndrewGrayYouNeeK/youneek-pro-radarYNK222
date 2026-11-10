@@ -10,7 +10,10 @@
     "tunnel": "node scripts/share-tunnel.mjs",
     "tunnel:config": "bash scripts/write-tunnel-config.sh",
     "build": "vite build",
-    "test": "node --test src/lib/weather/weatherkit-units.test.js src/lib/weather/skyTheme.test.js src/lib/weather/premiumWeather.test.js src/lib/weather/forecastFixes.test.js src/lib/weather/alertMerge.test.js src/lib/safety/weatherEmergency.test.js src/lib/safety/safetyPreview.test.js src/lib/safety/sms.test.js functions/api/point-alerts.test.js functions/_lib/weatherkit-key.test.js functions/_lib/weatherkit-auth.test.js functions/_lib/weatherkit-datasets.test.js functions/_lib/weatherkit-fetch.test.js functions/_lib/site.test.js functions/_lib/wrangler-config.test.js scripts/test-map-desk.mjs",
+    "build:ios": "npm run build && npx cap sync ios",
+    "cap:sync": "npx cap sync ios",
+    "cap:open": "npx cap open ios",
+    "test": "node --test src/lib/weather/weatherkit-units.test.js src/lib/weather/skyTheme.test.js src/lib/weather/premiumWeather.test.js src/lib/weather/forecastFixes.test.js src/lib/weather/alertMerge.test.js src/lib/safety/weatherEmergency.test.js src/lib/safety/safetyPreview.test.js src/lib/safety/sms.test.js src/lib/native/apiBase.test.js src/lib/radar/frameAge.test.js functions/api/point-alerts.test.js functions/_lib/weatherkit-key.test.js functions/_lib/weatherkit-auth.test.js functions/_lib/weatherkit-datasets.test.js functions/_lib/weatherkit-fetch.test.js functions/_lib/site.test.js functions/_lib/wrangler-config.test.js functions/_lib/cors.test.js functions/_lib/ios-config.test.js scripts/test-map-desk.mjs",
     "lint": "eslint . --quiet",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc -p ./jsconfig.json",
@@ -20,6 +23,15 @@
     "pages:deploy": "npm run build && npm run deploy"
   },
   "dependencies": {
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/geolocation": "^8.2.4",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.6.0",
+    "@capacitor/preferences": "^8.0.1",
+    "@capacitor/share": "^8.0.3",
+    "@capacitor/splash-screen": "^8.0.2",
+    "@capacitor/status-bar": "^8.0.4",
     "@hello-pangea/dnd": "^17.0.0",
     "@hookform/resolvers": "^4.1.2",
     "@radix-ui/react-accordion": "^1.2.3",
@@ -88,6 +100,7 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "@eslint/js": "^9.19.0",
     "@types/node": "^22.13.5",
     "@types/react": "^18.2.66",

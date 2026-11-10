@@ -11,6 +11,7 @@ import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap, CloudSun } from "lucide-react";
 import { getPref, setPref } from "@/lib/prefs";
+import { isNativePlatform } from "@/lib/native/runtime";
 import { UNIT_OPTIONS } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
 
@@ -141,29 +142,38 @@ export default function Settings() {
                 />
               }
             />
-            <SettingRow
-              icon={Bell}
-              label="Browser notifications"
-              sublabel="While this tab is open, show a notification for a new NWS alert. Background push is not available."
-              right={
-                <Switch
-                  checked={browserAlerts}
-                  onCheckedChange={async (value) => {
-                    if (value && typeof Notification !== "undefined") {
-                      const permission = await Notification.requestPermission();
-                      if (permission !== "granted") {
-                        setBrowserAlerts(false);
-                        setPref("pref_browserAlerts", false);
-                        return;
+            {!isNativePlatform() && (
+              <SettingRow
+                icon={Bell}
+                label="Browser notifications"
+                sublabel="While this tab is open, show a notification for a new NWS alert. Background push is not available."
+                right={
+                  <Switch
+                    checked={browserAlerts}
+                    onCheckedChange={async (value) => {
+                      if (value && typeof Notification !== "undefined") {
+                        const permission = await Notification.requestPermission();
+                        if (permission !== "granted") {
+                          setBrowserAlerts(false);
+                          setPref("pref_browserAlerts", false);
+                          return;
+                        }
                       }
-                    }
-                    setBrowserAlerts(value);
-                    setPref("pref_browserAlerts", value);
-                  }}
-                  aria-label="Toggle browser notifications"
-                />
-              }
-            />
+                      setBrowserAlerts(value);
+                      setPref("pref_browserAlerts", value);
+                    }}
+                    aria-label="Toggle browser notifications"
+                  />
+                }
+              />
+            )}
+            {isNativePlatform() && (
+              <SettingRow
+                icon={Bell}
+                label="Lock screen alerts"
+                sublabel="Not turned on. Severe warnings stay inside the app. Notification permission is a later step, not requested at launch."
+              />
+            )}
             <SettingRow
               icon={AlertTriangle}
               label="Tornado & severe weather"
@@ -320,7 +330,7 @@ export default function Settings() {
             <SettingRow
               icon={Shield}
               label="Privacy"
-              sublabel="Location stays on-device except to fetch weather"
+              sublabel="Policy also lives at /privacy on the weather site"
               onClick={() => navigate("/Privacy")}
             />
             <SettingRow

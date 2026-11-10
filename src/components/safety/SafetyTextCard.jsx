@@ -1,12 +1,19 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShieldAlert } from "lucide-react";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import useSafetyTexts from "@/hooks/useSafetyTexts";
 import useShelterContactCount from "@/hooks/useShelterContacts";
+import { hapticSevereWarning } from "@/lib/native/haptics";
 
 export default function SafetyTextCard() {
   const { alerts, coords, show, primary } = useSafetyTexts();
   const count = useShelterContactCount();
+
+  useEffect(() => {
+    if (show && primary?.name) hapticSevereWarning(primary.name);
+  }, [show, primary?.name]);
+
   if (!show || !primary) return null;
 
   const extra = alerts.length > 1 ? ` and ${alerts.length - 1} more` : "";
@@ -27,9 +34,9 @@ export default function SafetyTextCard() {
             <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-rose-200/70">Simulated alert</p>
           )}
           <p className="mt-1 text-xs leading-relaxed text-slate-300">
-            This warning covers your location. Help Me and I&apos;m Safe open a text draft. You still tap Send in Messages.
+            This warning covers your location. Help Me and I&apos;m Safe open one text draft with your note, coordinates, and map links. You still tap Send in Messages. Nothing is sent automatically.
             {count
-              ? ` ${count} contact${count === 1 ? "" : "s"} on this device.`
+              ? ` ${count} contact${count === 1 ? "" : "s"} saved on this device.`
               : " Add a contact before the first text."}
           </p>
         </div>

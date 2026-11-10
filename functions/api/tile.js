@@ -39,7 +39,6 @@ export async function onRequestGet(context) {
     headers: {
       "Content-Type": upstream.headers.get("content-type") || upstream.headers.get("Content-Type") || "image/png",
       "Cache-Control": "public, max-age=120",
-      "Access-Control-Allow-Origin": "*",
     },
   });
 }

@@ -32,6 +32,17 @@ dist-ssr
 .env
 .vite
 
+# Capacitor iOS build output, CocoaPods, and Xcode user data
+ios/App/Pods/
+ios/App/build/
+ios/App/output/
+ios/App/App/public/
+ios/App/App/capacitor.config.json
+ios/DerivedData/
+ios/**/xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+
 # Cloudflare Tunnel credentials and local overrides
 **/.cloudflared/*.json
 **/.cloudflared/cert.pem
