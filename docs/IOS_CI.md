@@ -28,7 +28,7 @@ GitHub Actions workflow: [`.github/workflows/ios-app-store.yml`](../.github/work
 3. Leave **Upload the signed IPA…** checked to send the build to App Store Connect / TestFlight after the IPA is produced.
 4. Uncheck upload to only produce and attach the IPA artifact.
 
-Local equivalent (on a Mac with Xcode 26):
+Local equivalent (on a Mac with Xcode 26 and Node.js 22+ — Capacitor CLI requires Node ≥22):
 
 ```bash
 npm ci

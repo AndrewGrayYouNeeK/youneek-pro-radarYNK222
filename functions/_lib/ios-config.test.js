@@ -44,6 +44,7 @@ test("iOS CI targets the existing ASC listing with Xcode 26 cloud signing", () =
   assert.match(workflow, /APPLE_TEAM_ID/);
   assert.match(workflow, /compile_unsigned/);
   assert.match(workflow, /build_ipa/);
+  assert.match(workflow, /node-version:\s*"22"/);
   assert.match(fastfile, /authenticationKeyPath/);
   assert.match(fastfile, /signingStyle:\s*"automatic"/);
   assert.match(appfile, /com\.base69facdfe1fbc3700e00a8387\.app/);
