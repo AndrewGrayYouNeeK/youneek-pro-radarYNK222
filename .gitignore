@@ -43,6 +43,20 @@ ios/**/xcuserdata/
 *.xcuserstate
 *.xcscmblueprint
 
+# Fastlane / Apple signing material (never commit)
+fastlane/AuthKey.p8
+fastlane/AuthKey_*.p8
+**/AuthKey_*.p8
+*.p8
+*.p12
+*.cer
+*.mobileprovision
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+vendor/bundle/
+
 # Cloudflare Tunnel credentials and local overrides
 **/.cloudflared/*.json
 **/.cloudflared/cert.pem

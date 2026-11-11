@@ -1,0 +1,4 @@
+# Existing App Store Connect listing — do not invent a new bundle id.
+app_identifier("com.base69facdfe1fbc3700e00a8387.app")
+apple_id(ENV["APPLE_ID"]) if ENV["APPLE_ID"].to_s != ""
+team_id(ENV["APPLE_TEAM_ID"]) if ENV["APPLE_TEAM_ID"].to_s != ""
