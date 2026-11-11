@@ -19,7 +19,7 @@ function pngSize(path) {
 test("Capacitor names the iOS app and the npm scripts stay deploy-safe", () => {
   const config = JSON.parse(read("capacitor.config.json"));
   const pkg = JSON.parse(read("package.json"));
-  assert.equal(config.appId, "com.youneek.proradar");
+  assert.equal(config.appId, "com.base69facdfe1fbc3700e00a8387.app");
   assert.equal(config.appName, "YouNeeK Pro Radar");
   assert.equal(config.webDir, "dist");
   assert.equal(pkg.scripts.build, "vite build");
@@ -27,6 +27,28 @@ test("Capacitor names the iOS app and the npm scripts stay deploy-safe", () => {
   assert.equal(pkg.scripts["cap:sync"], "npx cap sync ios");
   assert.equal(pkg.scripts["cap:open"], "npx cap open ios");
   assert.doesNotMatch(JSON.stringify(config), /NSUserTracking|ATTracking|analytics/i);
+});
+
+test("iOS CI targets the existing ASC listing with Xcode 26 cloud signing", () => {
+  const workflow = read(".github/workflows/ios-app-store.yml");
+  const fastfile = read("fastlane/Fastfile");
+  const appfile = read("fastlane/Appfile");
+  const ciDoc = read("docs/IOS_CI.md");
+  assert.match(workflow, /runs-on:\s*macos-15/);
+  assert.match(workflow, /xcode-version:\s*"26"/);
+  assert.match(workflow, /com\.base69facdfe1fbc3700e00a8387\.app/);
+  assert.match(workflow, /6766993130/);
+  assert.match(workflow, /APP_STORE_CONNECT_API_KEY_ID/);
+  assert.match(workflow, /APP_STORE_CONNECT_ISSUER_ID/);
+  assert.match(workflow, /APP_STORE_CONNECT_API_KEY_P8/);
+  assert.match(workflow, /APPLE_TEAM_ID/);
+  assert.match(workflow, /compile_unsigned/);
+  assert.match(workflow, /build_ipa/);
+  assert.match(fastfile, /authenticationKeyPath/);
+  assert.match(fastfile, /signingStyle:\s*"automatic"/);
+  assert.match(appfile, /com\.base69facdfe1fbc3700e00a8387\.app/);
+  assert.match(ciDoc, /Admin/);
+  assert.doesNotMatch(workflow, /\.p12|BEGIN PRIVATE KEY|PLACEHOLDER/);
 });
 
 test("Info.plist asks for When In Use location, forces dark UI, and does not track", () => {
@@ -44,7 +66,7 @@ test("Info.plist asks for When In Use location, forces dark UI, and does not tra
   assert.doesNotMatch(plist, /NSUserTrackingUsageDescription/);
   assert.doesNotMatch(plist, /UIBackgroundModes/);
   const project = read("ios/App/App.xcodeproj/project.pbxproj");
-  assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = com\.youneek\.proradar;/);
+  assert.match(project, /PRODUCT_BUNDLE_IDENTIFIER = com\.base69facdfe1fbc3700e00a8387\.app;/);
   assert.match(project, /PrivacyInfo\.xcprivacy/);
 });
 

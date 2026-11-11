@@ -1,0 +1,171 @@
+name: iOS App Store
+
+# Builds YouNeeK Pro Radar for the existing App Store Connect listing
+# (Apple ID 6766993130, bundle id com.base69facdfe1fbc3700e00a8387.app).
+# New uploads require the iOS 26 SDK (Xcode 26). macos-15 defaults to an
+# older Xcode, so this workflow always selects Xcode 26 explicitly.
+
+on:
+  workflow_dispatch:
+    inputs:
+      upload:
+        description: "Upload the signed IPA to App Store Connect / TestFlight"
+        type: boolean
+        default: true
+  pull_request:
+    paths:
+      - "ios/**"
+      - "capacitor.config.json"
+      - "fastlane/**"
+      - "Gemfile*"
+      - ".github/workflows/ios-app-store.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "src/**"
+      - "public/**"
+      - "vite.config.js"
+      - "index.html"
+  push:
+    branches: [main]
+    paths:
+      - "ios/**"
+      - "capacitor.config.json"
+      - "fastlane/**"
+      - "Gemfile*"
+      - ".github/workflows/ios-app-store.yml"
+      - "package.json"
+      - "package-lock.json"
+      - "src/**"
+      - "public/**"
+      - "vite.config.js"
+      - "index.html"
+
+concurrency:
+  group: ios-app-store-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  BUNDLE_ID: com.base69facdfe1fbc3700e00a8387.app
+  ASC_APPLE_ID: "6766993130"
+
+jobs:
+  compile-unsigned:
+    name: Unsigned compile (iOS Simulator)
+    runs-on: macos-15
+    timeout-minutes: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26 (iOS 26 SDK)
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build web assets and sync Capacitor iOS
+        run: npm run build:ios
+
+      - name: Setup Ruby + Bundler cache
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Unsigned Release compile
+        run: bundle exec fastlane ios compile_unsigned
+
+  build-signed:
+    name: Signed App Store IPA
+    runs-on: macos-15
+    timeout-minutes: 75
+    needs: compile-unsigned
+    # Manual only so main stays green before ASC secrets are added.
+    # Dispatch this workflow after APP_STORE_CONNECT_* and APPLE_TEAM_ID exist.
+    if: github.event_name == 'workflow_dispatch'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Select Xcode 26 (iOS 26 SDK)
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: "26"
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Require App Store Connect secrets
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          missing=0
+          for name in APP_STORE_CONNECT_API_KEY_ID APP_STORE_CONNECT_ISSUER_ID APP_STORE_CONNECT_API_KEY_P8 APPLE_TEAM_ID; do
+            if [ -z "${!name}" ]; then
+              echo "::error::Missing repository secret: $name"
+              missing=1
+            fi
+          done
+          if [ "$missing" -ne 0 ]; then
+            echo "Add the secrets listed in docs/IOS_CI.md, then re-run this workflow."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build web assets and sync Capacitor iOS
+        run: npm run build:ios
+
+      - name: Setup Ruby + Bundler cache
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+          bundler-cache: true
+
+      - name: Build signed IPA (automatic + cloud signing)
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: bundle exec fastlane ios build_ipa
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: YouNeeKProRadar-ipa
+          path: ios/App/output/YouNeeKProRadar.ipa
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload to App Store Connect / TestFlight
+        if: >
+          github.event_name == 'workflow_dispatch' &&
+          github.event.inputs.upload == 'true'
+        env:
+          APP_STORE_CONNECT_API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_API_KEY_ID }}
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_API_KEY_P8: ${{ secrets.APP_STORE_CONNECT_API_KEY_P8 }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: bundle exec fastlane ios upload_ipa

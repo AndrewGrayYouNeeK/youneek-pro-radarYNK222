@@ -2,10 +2,10 @@
 
 The iOS app is the same Vite site, wrapped with Capacitor 8. The Xcode project is `ios/`. It uses Swift Package Manager, so CocoaPods is not required.
 
-Bundle id: `com.youneek.proradar`  
+Bundle id: `com.base69facdfe1fbc3700e00a8387.app` (existing App Store Connect listing, Apple ID `6766993130`)  
 Display name: `YouNeeK Pro Radar`
 
-Change either of those in `capacitor.config.js` and in Xcode (Signing & Capabilities, and the target display name) before you upload a build. The id is a placeholder until you register it on your Apple Developer team.
+Do not change the bundle id. It must stay aligned with the existing App Store Connect app. The Capacitor `appId` in `capacitor.config.json` and `PRODUCT_BUNDLE_IDENTIFIER` in Xcode already use this value.
 
 ## Open it on a Mac
 
@@ -22,7 +22,7 @@ npm run cap:open
 Then in Xcode:
 
 1. Select the App target.
-2. Signing & Capabilities: choose your Team. Let Xcode create the provisioning profile for `com.youneek.proradar`, or change the bundle id first if that id is already taken.
+2. Signing & Capabilities: choose your Team. Let Xcode create the provisioning profile for `com.base69facdfe1fbc3700e00a8387.app`.
 3. Pick your iPhone and press Run.
 
 `ios/App/App/public`, `ios/App/Pods`, `ios/App/build`, and Xcode user data are gitignored. Do not commit them.
@@ -45,6 +45,10 @@ The native WebView origin is `capacitor://localhost`. API calls from the app go 
 | `npm run build:ios` | Production web build, then `cap sync ios` |
 | `npm run cap:sync` | `npx cap sync ios` |
 | `npm run cap:open` | `npx cap open ios` |
+
+## CI / App Store upload
+
+GitHub Actions builds a signed IPA for App Store Connect / TestFlight on `macos-15` with **Xcode 26** (iOS 26 SDK). See [IOS_CI.md](./IOS_CI.md) for secrets, how to run the workflow, and the automatic + cloud signing setup.
 
 ## Device test checklist
 
