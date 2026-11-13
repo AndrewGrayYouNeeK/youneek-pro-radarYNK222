@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">YouNeeK Pro Radar</string>
+    <string name="title_activity_main">YouNeeK Pro Radar</string>
+    <string name="package_name">com.youneek.proradar</string>
+    <string name="custom_url_scheme">youneekproradar</string>
+</resources>

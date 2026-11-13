@@ -88,3 +88,25 @@ Screenshots have to be captured on a Mac from the simulator or a device. Connect
 The price is a one-time price in Pricing and Availability, including free if you set it to $0. There is no StoreKit code and no subscription.
 
 Support URL to enter, after you confirm the page shows a way to reach you: `https://youneekproradar.com`
+
+## Play data safety
+
+The Android shell collects the same data as the iOS app. Do not declare tracking, ads, or an advertising id. Package name: `com.youneek.proradar`. Privacy policy URL is the same page as App Store Connect:
+
+`https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy`
+
+The published policy text still says the website and the iOS app. Android follows those same rules. Location is while the app is in use. Contacts and the Help Me / I’m Sheltering wording stay on the device. Backup of app data is off. A text leaves the phone only after the user taps Send in the SMS app.
+
+| Play question | Answer |
+| --- | --- |
+| Data collected | Precise location, and coarse location as a side effect of map tiles. City or ZIP text is sent to geocoders. |
+| Data shared | No data is sold or shared for advertising. Location is sent to the processors listed in the nutrition labels above, for app functionality. |
+| Data linked to the user | No. There is no account and no user id. |
+| Tracking | No. |
+| Advertising ID | Not used. Do not add the advertising-id permission. |
+| Contacts | Not collected. Names and numbers stay in on-device Preferences. |
+| Encryption in transit | Yes. The WebView and the Worker use HTTPS. |
+| Deletion | There is no server account. Deleting the app, or Clear all app data, removes the on-device copy. |
+| Safety texts | The app opens a draft. The user taps Send. The app cannot send the message by itself. |
+
+Reviewers can open `youneekproradar://safety-preview` on the device. The card is labeled Simulated alert. Steps and the `adb` command are in `docs/ANDROID.md`.

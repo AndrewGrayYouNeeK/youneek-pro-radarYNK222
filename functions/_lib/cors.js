@@ -1,4 +1,7 @@
-export const NATIVE_APP_ORIGINS = ["capacitor://localhost", "ionic://localhost"];
+// iOS WebView: capacitor://localhost (iosScheme). Older Ionic shells: ionic://localhost.
+// Android WebView: https://localhost because server.androidScheme is https and the host stays localhost.
+// Exact strings only. Do not add other hosts, ports, or "*".
+export const NATIVE_APP_ORIGINS = ["capacitor://localhost", "ionic://localhost", "https://localhost"];
 
 export function allowedCorsOrigin(request) {
   const origin = request?.headers?.get?.("origin") || request?.headers?.get?.("Origin") || "";
