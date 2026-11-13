@@ -70,6 +70,25 @@ test("iOS opens one composer for every saved contact and the draft includes coor
   assert.match(safetyMessageExplanation(), /does not resend/);
 });
 
+test("Android keeps one sms draft with a question-mark body", () => {
+  const url = buildGroupSmsUrl(
+    ["+15555550100", "+15555550101"],
+    "I’M SHELTERING — I am sheltering and I am safe.",
+    "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
+  );
+  assert.match(url, /^sms:\+15555550100,\+15555550101\?body=/);
+  assert.equal(url.includes("&body="), false);
+  assert.match(decodeURIComponent(url), /sheltering and I am safe/);
+  assert.equal(
+    deviceCanComposeSms({
+      userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 8)",
+      platform: "Linux armv8l",
+      maxTouchPoints: 5,
+    }),
+    true
+  );
+});
+
 test("duplicate shelter numbers are texted once", () => {
   assert.deepEqual(
     uniqueContactPhones([{ phone: "+15555550100" }, { phone: "+15555550100" }, { phone: "" }, {}]),

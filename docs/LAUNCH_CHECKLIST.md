@@ -56,3 +56,16 @@ Age rating: 4+ after the questionnaire. Do not add ads or a web browser to chang
 Screenshots: follow the six-shot list in `docs/APP_STORE_LISTING.md`, including how to show a warning polygon and the I’m Sheltering confirmation. Use the sizes App Store Connect lists. This repo does not include image files.
 
 Submit: select the uploaded build, answer export compliance (the app only uses HTTPS; `ITSAppUsesNonExemptEncryption` is false), and submit for review. Paste the review notes from `docs/APP_STORE.md`.
+
+## Play Store
+
+Checked items below are the Android shell in this branch. Unchecked items need Android Studio, a device, or Play Console. The iOS steps above are unchanged. Details are in `docs/ANDROID.md`.
+
+- [x] Capacitor Android project uses `com.youneek.proradar` and the display name YouNeeK Pro Radar.
+- [x] Location is while-in-use only (`ACCESS_COARSE_LOCATION` and `ACCESS_FINE_LOCATION`). No background location, and GPS is not required to install the app.
+- [x] Help Me and I’m Sheltering stay user-tap-Send drafts. Android opens one `sms:` draft. The manifest does not grant the app the ability to send texts on its own. Contacts stay on device, and Android backup of those preferences is off.
+- [x] The iOS review link also opens on Android: `youneekproradar://safety-preview`.
+- [ ] `npm run build:android`, then a signed release AAB from Android Studio. Not verified here. Android Studio is not available in this environment.
+- [ ] Location allow, location deny, airplane mode, Help Me, and I’m Sheltering on a real phone. See the device checklist in `docs/ANDROID.md`.
+- [ ] Play Console app with package name `com.youneek.proradar`, Play App Signing, internal testing, then production.
+- [ ] Data safety form matches `docs/APP_STORE.md`. No ads and no advertising id. Privacy policy URL is the same `/privacy` page as iOS. Add Android to that page's wording before review if you want the public text to name both apps.

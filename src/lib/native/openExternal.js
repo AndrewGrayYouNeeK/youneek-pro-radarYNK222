@@ -1,3 +1,4 @@
+import { Capacitor } from "@capacitor/core";
 import { Share } from "@capacitor/share";
 import { isNativePlatform } from "./runtime.js";
 
@@ -21,6 +22,13 @@ export async function openLocationSettings() {
     };
   }
   openExternalUrl("app-settings:");
+  if (Capacitor.getPlatform() === "android") {
+    return {
+      opened: true,
+      message:
+        "If Settings did not open, go to Settings → Apps → YouNeeK Pro Radar → Permissions → Location and allow it only while using the app.",
+    };
+  }
   return {
     opened: true,
     message: "If Settings did not open, go to Settings → YouNeeK Pro Radar → Location → While Using the App.",
