@@ -262,6 +262,35 @@
     right: auto;
   }
 
+  .leaflet-container .leaflet-div-icon.ynk-wx-sample {
+    background: transparent;
+    border: none;
+  }
+
+  .ynk-wx-sample-label {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    min-width: 36px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 4px;
+    background: color-mix(in srgb, var(--ynk-sample) 82%, #020617);
+    font: 700 10px/1 ui-sans-serif, system-ui, sans-serif;
+    white-space: nowrap;
+    box-shadow: 0 0 0 1px rgba(2, 6, 23, 0.8);
+  }
+
+  .ynk-wx-sample-label::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    flex: none;
+    border-radius: 1px;
+    background: var(--ynk-sample);
+  }
+
   .radar-stage .leaflet-control-attribution {
     max-width: min(16rem, calc(100vw - 6rem));
     background: rgba(2, 6, 23, 0.72);

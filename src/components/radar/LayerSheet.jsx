@@ -143,6 +143,11 @@ export default function LayerSheet({
             <Chip key={id} label={label} active={surfaceField === id} onClick={() => onSurfaceField(id)} />
           ))}
         </div>
+        {surfaceField !== "off" && (
+          <p className="mt-1.5 text-[11px] leading-snug text-slate-400">
+            Readings show as numbers after you zoom in. The national map stays clear.
+          </p>
+        )}
       </Section>
 
       <Section title="Storms and hazards">
@@ -156,6 +161,11 @@ export default function LayerSheet({
           <Chip label="Fire perimeters" active={toggles.perimeters} onClick={() => onToggle("perimeters")} />
           <Chip label="Snow" active={toggles.snow} onClick={() => onToggle("snow")} />
           <Chip label="Air quality" active={toggles.air} onClick={() => onToggle("air")} />
+          {toggles.air && (
+            <p className="col-span-2 text-[11px] leading-snug text-slate-400">
+              AQI numbers show after you zoom in. The national map stays clear.
+            </p>
+          )}
           <Chip label="Earthquakes" active={toggles.quakes} onClick={() => onToggle("quakes")} />
           <Chip label="Fronts" active={toggles.fronts} onClick={() => onToggle("fronts")} />
         </div>
