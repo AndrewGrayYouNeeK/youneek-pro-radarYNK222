@@ -32,11 +32,12 @@ export default function Contacts() {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
+  const [editingId, setEditingId] = useState(null);
 
   const { data: contacts = [] } = useQuery({
     queryKey: ["shelterContacts_v2"],
     queryFn: loadContacts,
-    initialData: loadContacts,
+    initialData: loadContacts(),
   });
 
   const addMutation = useMutation({
@@ -74,15 +75,43 @@ export default function Contacts() {
     onSettled: () => queryClient.invalidateQueries({ queryKey: ["shelterContacts_v2"] }),
   });
 
+  const updateMutation = useMutation({
+    mutationFn: async (contact) => {
+      const current = queryClient.getQueryData(["shelterContacts_v2"]) || [];
+      const next = current.map((item) => (item.id === contact.id ? { ...item, ...contact } : item));
+      saveContacts(next);
+      return next;
+    },
+    onSuccess: (next) => {
+      queryClient.setQueryData(["shelterContacts_v2"], next);
+      setEditingId(null);
+      setName("");
+      setPhone("");
+      setError("");
+    },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ["shelterContacts_v2"] }),
+  });
+
   const handleAdd = () => {
-    if (addMutation.isPending) return;
+    if (addMutation.isPending || updateMutation.isPending) return;
     const trimName = name.trim();
     const cleaned = cleanPhone(phone);
     if (!trimName) { setError("Enter a name."); return; }
     if (!cleaned) { setError("Enter a valid 10-digit US number."); return; }
-    if (contacts.some((c) => c.phone === cleaned)) { setError("That number is already saved."); return; }
-    if (contacts.length >= MAX_SHELTER_CONTACTS) { setError("Max 5 shelter contacts."); return; }
+    if (contacts.some((c) => c.phone === cleaned && c.id !== editingId)) { setError("That number is already saved."); return; }
+    if (!editingId && contacts.length >= MAX_SHELTER_CONTACTS) { setError("Max 5 shelter contacts."); return; }
+    if (editingId) {
+      updateMutation.mutate({ id: editingId, name: trimName, phone: cleaned });
+      return;
+    }
     addMutation.mutate({ id: Date.now().toString(), name: trimName, phone: cleaned });
+  };
+
+  const startEdit = (contact) => {
+    setEditingId(contact.id);
+    setName(contact.name);
+    setPhone(formatDisplay(contact.phone));
+    setError("");
   };
 
   // Export contacts as JSON file for backup
@@ -181,12 +210,12 @@ export default function Contacts() {
           <button
             type="button"
             onClick={handleAdd}
-            disabled={!name.trim() || !phone.trim() || addMutation.isPending || contacts.length >= MAX_SHELTER_CONTACTS}
-            aria-label="Add shelter contact"
+            disabled={!name.trim() || !phone.trim() || addMutation.isPending || updateMutation.isPending || (!editingId && contacts.length >= MAX_SHELTER_CONTACTS)}
+            aria-label={editingId ? "Save shelter contact" : "Add shelter contact"}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white shadow-md transition-colors hover:bg-emerald-500 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <UserPlus className="h-4 w-4" aria-hidden="true" />
-            {contacts.length >= MAX_SHELTER_CONTACTS ? "5 contacts saved" : addMutation.isPending ? "Adding..." : "Add Contact"}
+            {editingId ? "Save contact" : contacts.length >= MAX_SHELTER_CONTACTS ? "5 contacts saved" : addMutation.isPending ? "Adding..." : "Add Contact"}
           </button>
         </div>
 
@@ -208,6 +237,14 @@ export default function Contacts() {
                   <div className="text-sm font-semibold text-white truncate">{contact.name}</div>
                   <div className="text-xs text-slate-400">{formatDisplay(contact.phone)}</div>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => startEdit(contact)}
+                  aria-label={`Edit ${contact.name}`}
+                  className="flex h-9 min-w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 px-2 text-xs font-semibold text-slate-200"
+                >
+                  Edit
+                </button>
                 <button
                   type="button"
                   onClick={() => removeMutation.mutate(contact.id)}
