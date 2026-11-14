@@ -2,7 +2,7 @@ import { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "@/lib/query-client";
-import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from "react-router-dom";
 import PageNotFound from "./lib/PageNotFound";
 import RadarApp from "./pages/RadarApp";
 import { LocationProvider } from "@/lib/LocationContext";
@@ -11,6 +11,7 @@ import { UnitsProvider } from "@/lib/UnitsContext";
 import { NavigationStackProvider } from "@/lib/NavigationStack";
 import { RadioProvider } from "@/lib/RadioContext";
 import OnboardingModal from "@/components/radar/OnboardingModal";
+import { isDemoHurricane } from "@/lib/demo/hurricaneFlag";
 
 const Radar = lazy(() => import("./pages/Radar"));
 const Contacts = lazy(() => import("./pages/Contacts"));
@@ -40,13 +41,15 @@ const MapLayers = lazy(() => import("./pages/MapLayers"));
 const DarkFallback = () => <div className="h-full bg-slate-950" />;
 
 function AppShell() {
+  const location = useLocation();
+  const demoHurricane = isDemoHurricane(location.search);
   const [showOnboarding, setShowOnboarding] = useState(
-    () => typeof window !== "undefined" && !localStorage.getItem("onboarded_v1")
+    () => typeof window !== "undefined" && !localStorage.getItem("onboarded_v1") && !isDemoHurricane(window.location.search)
   );
 
   return (
     <div className="app-shell h-[100dvh] w-full overflow-hidden bg-slate-950 text-white">
-      {showOnboarding && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
+      {showOnboarding && !demoHurricane && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
       <Suspense fallback={<DarkFallback />}>
         <Outlet />
       </Suspense>
