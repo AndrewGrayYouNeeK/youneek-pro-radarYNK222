@@ -1,4 +1,4 @@
-import { useState, useCallback, Suspense, lazy } from "react";
+import { useState, useCallback, useEffect, useMemo, Suspense, lazy } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 const RadarDisplay = lazy(() => import("../components/radar/RadarDisplay"));
@@ -9,6 +9,7 @@ import { loadRadarLayers } from "@/lib/radarLayers";
 import { useNavigationStack } from "@/lib/NavigationStack";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import OfflineNotice from "@/components/OfflineNotice";
+import { demoHurricaneView, isDemoHurricane } from "@/lib/demo/hurricaneFlag";
 
 const DEFAULT_SETTINGS = {
   showLabels: true,
@@ -23,6 +24,9 @@ export default function Radar() {
   useTabPageMemory("Radar");
   const navigate = useNavigate();
   const location = useLocation();
+  const demoHurricane = isDemoHurricane(location.search);
+  const [demoInstalled, setDemoInstalled] = useState(false);
+  const [DemoOverlay, setDemoOverlay] = useState(null);
   const { goBack } = useNavigationStack();
   const queryClient = useQueryClient();
   const { data: targets = [] } = useQuery({
@@ -35,6 +39,34 @@ export default function Radar() {
     showNexrad: loadRadarLayers().radar,
   }));
   const [showRadio, setShowRadio] = useState(false);
+
+  useEffect(() => {
+    if (!demoHurricane) return undefined;
+    let cancelled = false;
+    let uninstall = () => {};
+    Promise.all([
+      import("../components/radar/demo/installDemoHurricane"),
+      import("../components/radar/demo/DemoHurricaneOverlay"),
+    ]).then(([installer, overlay]) => {
+      if (cancelled) return;
+      uninstall = installer.installDemoHurricane();
+      setDemoOverlay(() => overlay.default);
+      setDemoInstalled(true);
+    }).catch(() => {
+      if (!cancelled) setDemoInstalled(true);
+    });
+    return () => {
+      cancelled = true;
+      uninstall();
+      setDemoInstalled(false);
+      setDemoOverlay(null);
+    };
+  }, [demoHurricane]);
+
+  const displaySettings = useMemo(() => {
+    if (demoHurricaneView(location.search) !== "velocity") return settings;
+    return { ...settings, showNexrad: true, product: "velocity", station: "KHGX" };
+  }, [location.search, settings]);
 
   const urlParams = new URLSearchParams(location.search);
   const dialogMode = urlParams.get("dialog");
@@ -145,18 +177,25 @@ export default function Radar() {
             </div>
           )}
         >
-          <RadarDisplay
-            settings={settings}
-            showNexrad={settings.showNexrad}
-            onSettingsChange={setSettings}
-            showRadio={showRadio}
-            onToggleRadio={setShowRadio}
-            variant="clean"
-            targets={targets}
-            onTargetClick={handleTargetClick}
-            onDeleteTarget={handleDeleteTarget}
-          />
+          {demoHurricane && !demoInstalled ? (
+            <div className="flex h-full items-center justify-center bg-slate-950">
+              <div className="h-8 w-8 rounded-full border-4 border-slate-700 border-t-sky-400 animate-spin" />
+            </div>
+          ) : (
+            <RadarDisplay
+              settings={displaySettings}
+              showNexrad={displaySettings.showNexrad}
+              onSettingsChange={setSettings}
+              showRadio={showRadio}
+              onToggleRadio={setShowRadio}
+              variant="clean"
+              targets={targets}
+              onTargetClick={handleTargetClick}
+              onDeleteTarget={handleDeleteTarget}
+            />
+          )}
         </Suspense>
+        {DemoOverlay ? <DemoOverlay /> : null}
       </div>
 
       <BottomTab />
