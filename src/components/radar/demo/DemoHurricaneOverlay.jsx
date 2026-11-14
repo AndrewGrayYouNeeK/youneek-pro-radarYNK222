@@ -6,35 +6,24 @@ import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import { demoHurricaneView } from "@/lib/demo/hurricaneFlag";
 import {
   DEMO_CAMERAS,
-  STORM_CENTER,
-  VELOCITY_STOPS,
+  HARVEY_REPLAY_LABEL,
+  N0Q_WMS_URL,
+  RIDGE_WMS_URL,
   WARNING_POLYGON_STYLE,
   demoBannerAlert,
-  sampleStorm,
-  trackLatLngs,
-  WARNING_RING,
+  harveyWarningCollection,
+  reflectivityWmsParams,
+  velocityWmsParams,
 } from "@/lib/demo/hurricaneField";
 import { RADAR_LAYERS_EVENT, loadRadarLayers } from "@/lib/radarLayers";
 import { subscribeDemoMap } from "./installDemoHurricane";
 
 function isLiveRadarTile(layer) {
-  return typeof layer?._url === "string" && layer._url.length > 0 && !layer._url.includes("World_Dark_Gray");
-}
-
-function Legend({ rows, title }) {
-  return (
-    <div className="pointer-events-none absolute right-3 z-[1400] w-36 rounded-xl border border-white/10 bg-slate-950/90 p-2 shadow-xl" style={{ top: "calc(4.2rem + env(safe-area-inset-top))" }}>
-      <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-400">{title}</div>
-      <div className="flex flex-col gap-1">
-        {rows.map((row) => (
-          <div key={row.label} className="flex items-center gap-2">
-            <span className="h-2.5 w-5 rounded-sm" style={{ background: row.color }} />
-            <span className="text-[11px] text-slate-200">{row.label}</span>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+  const url = layer?._url;
+  if (typeof url !== "string" || url.length === 0) return false;
+  if (url.includes("World_Dark_Gray")) return false;
+  if (url.includes("n0q-t.cgi") || url.includes("/nexrad/ridge.cgi")) return false;
+  return true;
 }
 
 export default function DemoHurricaneOverlay() {
@@ -105,86 +94,44 @@ export default function DemoHurricaneOverlay() {
     apply();
     map.on("moveend", apply);
     const timers = [500, 1500, 3000, 6000].map((delay) => window.setTimeout(apply, delay));
-    const frame = window.requestAnimationFrame(() => setReady(true));
     return () => {
       map.off("moveend", apply);
       timers.forEach((timer) => window.clearTimeout(timer));
-      window.cancelAnimationFrame(frame);
     };
   }, [map, camera.lat, camera.lon, camera.zoom]);
 
   useEffect(() => {
     if (!map) return undefined;
-    const mode = view === "velocity" ? "velocity" : "reflectivity";
-    const layer = L.gridLayer({
-      tileSize: 256,
-      opacity: 0.9,
-      zIndex: 650,
-      updateWhenIdle: false,
-      updateWhenZooming: false,
-      keepBuffer: 2,
-    });
-    layer.createTile = function createTile(coords) {
-      const tile = document.createElement("canvas");
-      const size = this.getTileSize().x;
-      const ratio = Math.min(window.devicePixelRatio || 1, 2);
-      tile.width = Math.round(size * ratio);
-      tile.height = Math.round(size * ratio);
-      const ctx = tile.getContext("2d");
-      const image = ctx.createImageData(tile.width, tile.height);
-      const pixels = image.data;
-      const mapRef = this._map;
-      const step = 2;
-      for (let py = 0; py < tile.height; py += step) {
-        for (let px = 0; px < tile.width; px += step) {
-          const latlng = mapRef.unproject(
-            L.point(coords.x * size + px / ratio, coords.y * size + py / ratio),
-            coords.z
-          );
-          const sample = sampleStorm(latlng.lat, latlng.lng, mode);
-          if (!sample) continue;
-          for (let oy = 0; oy < step; oy += 1) {
-            for (let ox = 0; ox < step; ox += 1) {
-              const index = ((py + oy) * tile.width + (px + ox)) * 4;
-              pixels[index] = sample[0];
-              pixels[index + 1] = sample[1];
-              pixels[index + 2] = sample[2];
-              pixels[index + 3] = sample[3];
-            }
-          }
-        }
-      }
-      ctx.putImageData(image, 0, 0);
-      return tile;
-    };
-    layer.addTo(map);
-
-    const polygon = L.polygon(
-      WARNING_RING.map(([lon, lat]) => [lat, lon]),
-      WARNING_POLYGON_STYLE
-    ).addTo(map);
-    polygon.bringToFront();
-
-    const showTrack = view === "overview" || view === "alert";
-    const track = showTrack
-      ? L.polyline(trackLatLngs(), {
-        color: "#fb7185",
-        weight: 3,
+    setReady(false);
+    const archive = view === "velocity"
+      ? L.tileLayer.wms(RIDGE_WMS_URL, {
+        ...velocityWmsParams(),
+        uppercase: false,
         opacity: 0.95,
-        dashArray: "7 5",
-      }).addTo(map)
-      : null;
+        zIndex: 660,
+        attribution: "IEM KCRP N0U archive",
+      })
+      : L.tileLayer.wms(N0Q_WMS_URL, {
+        ...reflectivityWmsParams(),
+        uppercase: false,
+        opacity: 0.92,
+        zIndex: 650,
+        attribution: "IEM NEXRAD N0Q archive",
+      });
+    const markReady = () => setReady(true);
+    archive.on("load", markReady);
+    archive.addTo(map);
+    const backup = window.setTimeout(markReady, 8000);
 
-    const icon = L.divIcon({
-      className: "",
-      html: '<div style="width:14px;height:14px;margin-left:-1px;margin-top:-1px;border:2px solid #fecdd3;border-radius:999px;background:#e11d48;box-shadow:0 0 0 5px rgba(225,29,72,0.28)"></div>',
-      iconSize: [14, 14],
-      iconAnchor: [7, 7],
-    });
-    const marker = L.marker([STORM_CENTER.lat, STORM_CENTER.lon], { icon, interactive: false }).addTo(map);
+    const showPolygons = view === "overview" || view === "alert";
+    const polygons = showPolygons
+      ? L.geoJSON(harveyWarningCollection(), { style: () => WARNING_POLYGON_STYLE }).addTo(map)
+      : null;
+    polygons?.bringToFront();
 
     return () => {
-      [layer, polygon, track, marker].forEach((item) => {
+      window.clearTimeout(backup);
+      [archive, polygons].forEach((item) => {
         if (item && map.hasLayer(item)) map.removeLayer(item);
       });
     };
@@ -201,10 +148,18 @@ export default function DemoHurricaneOverlay() {
           style={{ top: "calc(3.6rem + env(safe-area-inset-top))" }}
         >
           <AlertBanner alerts={[demoBannerAlert()]} />
-          {showSafety && <SafetyTextActions compact coords={{ latitude: 29.27, longitude: -94.82 }} />}
+          {showSafety && <SafetyTextActions compact coords={{ latitude: 28.03, longitude: -97.05 }} />}
         </div>
       )}
-      {view === "velocity" && <Legend title="Base velocity" rows={VELOCITY_STOPS} />}
+      {view === "velocity" && (
+        <div
+          className="pointer-events-none absolute right-3 z-[1400] max-w-[11rem] rounded-xl border border-white/10 bg-slate-950/90 px-3 py-2 text-[11px] leading-snug text-slate-200 shadow-xl"
+          style={{ top: "calc(4.2rem + env(safe-area-inset-top))" }}
+        >
+          KCRP N0U · 03:01 UTC
+          <div className="text-slate-400">{HARVEY_REPLAY_LABEL}</div>
+        </div>
+      )}
     </div>
   );
 }

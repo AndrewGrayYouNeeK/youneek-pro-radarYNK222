@@ -65,7 +65,7 @@ export default function Radar() {
 
   const displaySettings = useMemo(() => {
     if (demoHurricaneView(location.search) !== "velocity") return settings;
-    return { ...settings, showNexrad: true, product: "velocity", station: "KHGX" };
+    return { ...settings, showNexrad: true, product: "velocity", station: "KCRP" };
   }, [location.search, settings]);
 
   const urlParams = new URLSearchParams(location.search);
