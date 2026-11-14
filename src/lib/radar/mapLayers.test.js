@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { holdGpsLocation, showWeatherSkeleton, weatherQueryCoords } from "../locationStability.js";
-import { buildRadarLoop, opacitiesForIndex, syncFrameLayers } from "./loopFrames.js";
+import { buildRadarLoop, loadLoopFrameCount, loadLoopSpeed, opacitiesForIndex, saveLoopFrameCount, saveLoopSpeed, syncFrameLayers } from "./loopFrames.js";
 import { NATIONAL_MOSAIC_ID, ridgeProductLabel, ridgeTileUrl } from "./ridgeTiles.js";
 
 test("a small GPS move keeps the forecast and hides the skeleton", () => {
@@ -63,6 +63,22 @@ test("fills an empty RainViewer nowcast with an estimated future loop", () => {
   assert.equal(loop.frames.at(-1).extrapolated, true);
   assert.equal(loop.frames.at(-1).kind, "future");
   assert.equal(loop.frames.at(-1).tileUrl, "https://tiles.example/2.png");
+});
+
+test("loop speed and frame count survive a reload", () => {
+  const memory = new Map();
+  const storage = {
+    getItem: (key) => (memory.has(key) ? memory.get(key) : null),
+    setItem: (key, value) => memory.set(key, String(value)),
+  };
+  assert.equal(loadLoopSpeed(storage), 400);
+  assert.equal(loadLoopFrameCount(storage), 8);
+  assert.equal(saveLoopSpeed(800, storage), 800);
+  assert.equal(saveLoopFrameCount(4, storage), 4);
+  assert.equal(loadLoopSpeed(storage), 800);
+  assert.equal(loadLoopFrameCount(storage), 4);
+  assert.equal(saveLoopSpeed(999, storage), 400);
+  assert.equal(saveLoopFrameCount(3, storage), 8);
 });
 
 test("frame count keeps the newest reflectivity frames", () => {

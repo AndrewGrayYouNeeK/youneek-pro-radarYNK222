@@ -1,8 +1,65 @@
 export const LOOP_FRAME_COUNTS = [4, 6, 8, 12];
+export const LOOP_SPEEDS = [180, 400, 800];
+export const LOOP_SPEED_KEY = "pref_loopSpeed";
+export const LOOP_FRAMES_KEY = "pref_loopFrames";
 
 export function clampLoopFrames(value) {
   const count = Number(value);
   return LOOP_FRAME_COUNTS.includes(count) ? count : 8;
+}
+
+export function clampLoopSpeed(value) {
+  const speed = Number(value);
+  return LOOP_SPEEDS.includes(speed) ? speed : 400;
+}
+
+function storageOr(storage) {
+  if (storage) return storage;
+  try {
+    return globalThis.localStorage || null;
+  } catch {
+    return null;
+  }
+}
+
+export function loadLoopSpeed(storage) {
+  const store = storageOr(storage);
+  try {
+    return clampLoopSpeed(store?.getItem(LOOP_SPEED_KEY));
+  } catch {
+    return 400;
+  }
+}
+
+export function saveLoopSpeed(value, storage) {
+  const next = clampLoopSpeed(value);
+  const store = storageOr(storage);
+  try {
+    store?.setItem(LOOP_SPEED_KEY, String(next));
+  } catch {
+    /* ignore private mode */
+  }
+  return next;
+}
+
+export function loadLoopFrameCount(storage) {
+  const store = storageOr(storage);
+  try {
+    return clampLoopFrames(store?.getItem(LOOP_FRAMES_KEY));
+  } catch {
+    return 8;
+  }
+}
+
+export function saveLoopFrameCount(value, storage) {
+  const next = clampLoopFrames(value);
+  const store = storageOr(storage);
+  try {
+    store?.setItem(LOOP_FRAMES_KEY, String(next));
+  } catch {
+    /* ignore private mode */
+  }
+  return next;
 }
 
 export function buildRadarLoop(past = [], nowcast = [], { includeFuture = false, maxFrames = 8 } = {}) {

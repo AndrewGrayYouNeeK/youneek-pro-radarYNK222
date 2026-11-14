@@ -24,6 +24,8 @@ const APP_STORAGE_KEYS = [
   "ynk_safety_preview_v1",
   "radarLayers_v1",
   "pref_browserAlerts",
+  "pref_loopSpeed",
+  "pref_loopFrames",
   "radarTargets",
 ];
 
