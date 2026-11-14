@@ -3,6 +3,7 @@ import L from "leaflet";
 import { gibsVisibleFrames, IOWA_SATELLITE } from "@/lib/radar/satelliteTiles";
 import { SPC_MD_URL, SPC_OUTLOOKS, USGS_QUAKES_URL, WPC_FRONTS_URL, snowAnalysisUrl, wfigsPerimeterUrl } from "@/lib/radar/overlaySources";
 import { syncFrameLayers } from "@/lib/radar/loopFrames";
+import { formatSampleLabel, sampleLabelInk, shouldDrawSampleGrid } from "@/lib/radar/sampleGrid";
 
 const SURFACE_FIELDS = {
   temperature: "temperature_2m",
@@ -36,6 +37,21 @@ function colorFor(field, value) {
   if (number <= 60) return "#22c55e";
   if (number <= 80) return "#eab308";
   return "#ef4444";
+}
+
+function addSampleMarker(group, lat, lon, field, value, color, popup) {
+  const label = formatSampleLabel(field, value);
+  if (!label) return;
+  const ink = sampleLabelInk(color);
+  const icon = L.divIcon({
+    className: "ynk-wx-sample",
+    html: `<span class="ynk-wx-sample-label" data-ynk-sample="${field}" style="--ynk-sample:${color};color:${ink}">${label}</span>`,
+    iconSize: [64, 20],
+    iconAnchor: [32, 10],
+  });
+  L.marker([lat, lon], { icon, keyboard: false })
+    .bindPopup(`<div style="font-size:12px">${popup}</div>`)
+    .addTo(group);
 }
 
 function gridPoints(bounds, rows, cols) {
@@ -239,6 +255,10 @@ export default function ExtraMapLayers({ map, ready, satelliteMode, surfaceField
     let cancelled = false;
     const field = SURFACE_FIELDS[surfaceField] || "temperature_2m";
     const load = () => {
+      if (!shouldDrawSampleGrid(map.getZoom())) {
+        group.clearLayers();
+        return;
+      }
       const points = gridPoints(map.getBounds(), 6, 6);
       const url = new URL("https://api.open-meteo.com/v1/forecast");
       url.searchParams.set("latitude", points.map((point) => point.lat.toFixed(3)).join(","));
@@ -250,19 +270,21 @@ export default function ExtraMapLayers({ map, ready, satelliteMode, surfaceField
         .then((payload) => {
           if (cancelled) return;
           group.clearLayers();
+          if (!shouldDrawSampleGrid(map.getZoom())) return;
           const rows = Array.isArray(payload) ? payload : [payload];
           rows.forEach((row, index) => {
             const value = row?.current?.[field];
             const point = points[index];
             if (!point || value == null) return;
-            L.circleMarker([point.lat, point.lon], {
-              radius: 10,
-              stroke: false,
-              fillColor: colorFor(surfaceField, value),
-              fillOpacity: 0.72,
-            })
-              .bindPopup(`<div style="font-size:12px">${field.replace(/_/g, " ")}: ${value}</div>`)
-              .addTo(group);
+            addSampleMarker(
+              group,
+              point.lat,
+              point.lon,
+              surfaceField,
+              value,
+              colorFor(surfaceField, value),
+              `${field.replace(/_/g, " ")}: ${value}`
+            );
           });
         })
         .catch(() => {});
@@ -289,6 +311,10 @@ export default function ExtraMapLayers({ map, ready, satelliteMode, surfaceField
     groups.current.air = group;
     let cancelled = false;
     const load = () => {
+      if (!shouldDrawSampleGrid(map.getZoom())) {
+        group.clearLayers();
+        return;
+      }
       const points = gridPoints(map.getBounds(), 5, 5);
       const url = new URL("https://air-quality-api.open-meteo.com/v1/air-quality");
       url.searchParams.set("latitude", points.map((point) => point.lat.toFixed(3)).join(","));
@@ -299,15 +325,14 @@ export default function ExtraMapLayers({ map, ready, satelliteMode, surfaceField
         .then((payload) => {
           if (cancelled) return;
           group.clearLayers();
+          if (!shouldDrawSampleGrid(map.getZoom())) return;
           const rows = Array.isArray(payload) ? payload : [payload];
           rows.forEach((row, index) => {
             const value = row?.current?.us_aqi;
             const point = points[index];
             if (!point || value == null) return;
             const color = value > 150 ? "#7e22ce" : value > 100 ? "#ef4444" : value > 50 ? "#eab308" : "#22c55e";
-            L.circleMarker([point.lat, point.lon], { radius: 9, stroke: false, fillColor: color, fillOpacity: 0.75 })
-              .bindPopup(`<div style="font-size:12px">US AQI ${value}</div>`)
-              .addTo(group);
+            addSampleMarker(group, point.lat, point.lon, "air", value, color, `US AQI ${value}`);
           });
         })
         .catch(() => {});
