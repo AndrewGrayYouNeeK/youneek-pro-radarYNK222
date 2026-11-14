@@ -9,7 +9,7 @@ import { loadRadarLayers } from "@/lib/radarLayers";
 import { useNavigationStack } from "@/lib/NavigationStack";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
 import OfflineNotice from "@/components/OfflineNotice";
-import { demoHurricaneView, isDemoHurricane } from "@/lib/demo/hurricaneFlag";
+import { HARVEY_STATUS_LINE, demoHurricaneView, isDemoHurricane } from "@/lib/demo/hurricaneFlag";
 
 const DEFAULT_SETTINGS = {
   showLabels: true,
@@ -192,6 +192,7 @@ export default function Radar() {
               targets={targets}
               onTargetClick={handleTargetClick}
               onDeleteTarget={handleDeleteTarget}
+              replayStatus={demoHurricane ? HARVEY_STATUS_LINE : undefined}
             />
           )}
         </Suspense>

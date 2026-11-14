@@ -1,4 +1,6 @@
 /** Opt-in screenshot mode. Absent or any other value leaves the app unchanged. */
+
+export const HARVEY_STATUS_LINE = "Hurricane Harvey replay · 10 PM CDT Aug 25, 2017";
 export function readDemoParams(search) {
   const raw = String(search || "");
   const query = raw.includes("?") ? raw.slice(raw.indexOf("?") + 1) : raw;

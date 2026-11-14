@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { demoHurricaneView, isDemoHurricane } from "./hurricaneFlag.js";
+import { HARVEY_STATUS_LINE, demoHurricaneView, isDemoHurricane } from "./hurricaneFlag.js";
 import {
   DEMO_FEATURE_ID,
   HARVEY_REFLECTIVITY_TIME,
@@ -40,6 +40,7 @@ test("replay uses the Harvey landfall archive, not a drawn storm", () => {
   assert.equal(velocity.time, HARVEY_VELOCITY_SCAN);
   assert.equal(HARVEY_REPLAY_LABEL.includes("replay"), true);
   assert.equal(HARVEY_REPLAY_LABEL.includes("Harvey"), true);
+  assert.equal(HARVEY_STATUS_LINE, "Hurricane Harvey replay · 10 PM CDT Aug 25, 2017");
 });
 
 test("archived hurricane warning zones are the real VTEC zones", () => {

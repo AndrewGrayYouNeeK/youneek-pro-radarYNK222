@@ -144,6 +144,7 @@ export default function RadarDisplay({
   onTargetClick,
   onDeleteTarget,
   variant = "clean",
+  replayStatus,
 }) {
   const mapRef = useRef(null);
   const leafletMap = useRef(null);
@@ -1022,6 +1023,7 @@ export default function RadarDisplay({
               frameTime={shownFrameTime}
               warningCount={warningList.length || warningCount}
               onOpenAlerts={() => setAlertSheet("list")}
+              replayStatus={replayStatus}
             />
             <RainArrivalAlert />
             {showSafetyTexts && (
@@ -1179,7 +1181,7 @@ export default function RadarDisplay({
               frameLabel={
                 loopEnabled && loopFrames[loopIndex]?.time
                   ? `${loopFrames[loopIndex].kind === "future" ? "Future " : ""}${new Date(loopFrames[loopIndex].time * 1000).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
-                  : "Live"
+                  : replayStatus ? "Replay" : "Live"
               }
               speed={loopSpeed}
               frameCount={loopFrameCount}
