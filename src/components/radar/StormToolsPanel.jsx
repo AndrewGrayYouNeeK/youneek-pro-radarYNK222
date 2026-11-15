@@ -1,10 +1,6 @@
 
 import { Clock, Compass, Crosshair, Navigation, X } from "lucide-react";
-
-const CARDINAL_DIRS = ["N","NNE","NE","ENE","E","ESE","SE","SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"];
-function bearingToCardinal(deg) {
-  return CARDINAL_DIRS[Math.round(((deg % 360) + 360) % 360 / 22.5) % 16];
-}
+import { bearingToCardinal, etaLabel as formatEta, stormDistanceSummary } from "@/lib/radar/stormDistance";
 
 function ToolChip({ icon: IconComponent, label, value, accent = "text-cyan-300" }) {
   return (
@@ -18,15 +14,32 @@ function ToolChip({ icon: IconComponent, label, value, accent = "text-cyan-300" 
   );
 }
 
-export default function StormToolsPanel({ stormData, onClose }) {
+export default function StormToolsPanel({ stormData, onClose, compact = false }) {
   if (!stormData) return null;
   const { bearing, distanceMi, speedMph, etaMinutes } = stormData;
   const cardinal = bearingToCardinal(bearing);
-  const etaLabel = etaMinutes < 1
-    ? "< 1 min"
-    : etaMinutes < 60
-      ? `${etaMinutes} min`
-      : `${(etaMinutes / 60).toFixed(1)} hr`;
+  const etaLabel = formatEta(etaMinutes);
+
+  if (compact) {
+    return (
+      <div
+        className="pointer-events-auto flex items-center gap-2 rounded-xl border border-emerald-400/40 bg-slate-950/88 px-3 py-2 font-mono text-emerald-200 shadow-[0_0_18px_rgba(52,211,153,0.18)] backdrop-blur-md"
+        role="status"
+        aria-label="Storm distance"
+      >
+        <Crosshair className="h-3.5 w-3.5 shrink-0 text-emerald-300" aria-hidden="true" />
+        <span className="min-w-0 flex-1 truncate text-[11px] font-semibold tracking-wide">{stormDistanceSummary(stormData)}</span>
+        <button
+          type="button"
+          onClick={onClose}
+          className="-m-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg text-emerald-300/70 hover:bg-emerald-400/10"
+          aria-label="Close storm distance"
+        >
+          <X className="h-3.5 w-3.5" aria-hidden="true" />
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="pointer-events-auto w-full" role="dialog" aria-label="Storm tracking panel">

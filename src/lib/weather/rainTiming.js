@@ -5,10 +5,13 @@ function minuteTime(minute) {
   return Number.isFinite(time) ? time : NaN;
 }
 
+// 0.01 in/hr is the usual "measurable light rain / drizzle" floor; 0.05 missed light rain.
+export const LIGHT_RAIN_IN_PER_HR = 0.01;
+
 export function isWetMinute(minute) {
   const intensity = Number(minute?.intensity) || 0;
   const chance = Number(minute?.chance) || 0;
-  return intensity > 0.05 || chance >= 50;
+  return intensity >= LIGHT_RAIN_IN_PER_HR || chance >= 50;
 }
 
 export function isRainOrStorm(current) {
