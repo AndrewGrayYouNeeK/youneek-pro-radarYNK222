@@ -619,10 +619,10 @@ test("every radar weather tool renders on an iPhone viewport", async () => {
     await shot(page, "rain-in-minutes");
 
     await page.goto(`${ORIGIN}/Radar?safetyPreview=Tornado%20Warning`, { waitUntil: "domcontentloaded" });
-    await page.getByRole("button", { name: "Help Me text" }).waitFor();
-    await page.getByRole("button", { name: /Sheltering text/ }).waitFor();
-    record("safety-help", "PASS", "Help Me is a labeled button during a severe warning.");
-    record("safety-sheltering", "PASS", "I’m Sheltering is a labeled button during a severe warning.");
+    await page.getByRole("button", { name: "I Need Help", exact: true }).first().waitFor();
+    await page.getByRole("button", { name: "I'm Safe", exact: true }).first().waitFor();
+    record("safety-help", "PASS", "I Need Help is a labeled button during a severe warning.");
+    record("safety-safe", "PASS", "I'm Safe is a labeled button during a severe warning.");
     await shot(page, "safety");
 
     assert.equal(await regularDotGrid(page), false);

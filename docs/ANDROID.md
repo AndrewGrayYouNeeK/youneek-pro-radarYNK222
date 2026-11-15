@@ -39,7 +39,7 @@ Then in Android Studio:
 - Open Settings uses the same `app-settings:` link as iOS. On Android that link opens this app's system settings page. Allow location only while using the app.
 - Last location, safety contacts, and the rest of the existing local settings are mirrored into `@capacitor/preferences` on device. Backup and device-to-device transfer of those preferences are turned off (`android:allowBackup="false"` and `data_extraction_rules.xml`).
 - A severe warning triggers a warning haptic once per alert, same as iOS. The haptics plugin adds the vibrate permission when Gradle merges manifests.
-- Help Me and I’m Sheltering open one SMS draft for the contacts saved on the device. Android uses `sms:` with `?body=`. You tap Send in the SMS app. The app does not declare a permission that would let it send the text itself. Contacts stay on the device.
+- I Need Help and I’m Safe open one SMS draft for the contacts saved on the device. Android uses `sms:` with `?body=`. You tap Send in the SMS app. The app does not declare a permission that would let it send the text itself. Contacts stay on the device.
 - The same review link as iOS shows the simulated warning: `youneekproradar://safety-preview`. Turn it off with `youneekproradar://open?safetyPreview=0`. The card is labeled Simulated alert. It is the existing preview, not a new Android path.
 - The status bar uses light text on the dark UI. The splash and icon are the same radar mark as iOS. Review both before you ship.
 - The app does not ask for notification permission, and it does not include an advertising id, analytics SDK, or ads SDK.
@@ -82,7 +82,7 @@ Run this on a real phone. An emulator is enough to see the shell, and not enough
 - [ ] Deny location. The home screen offers city/ZIP search and Open Settings. Open Settings lands on this app's Android settings. Radar still opens.
 - [ ] Turn on airplane mode. An offline note appears. Turn the network back on and pull to refresh or reopen Now. Data returns.
 - [ ] Radar status line shows a frame time and an "updated … ago" age without covering the map.
-- [ ] Help Me and I’m Sheltering stay hidden until a warning covers the location, or until you open `youneekproradar://safety-preview`.
+- [ ] I Need Help and I’m Safe stay hidden until a warning covers the location, or until you open `youneekproradar://safety-preview`.
 - [ ] Before the first text, the app explains that the draft contains coordinates and map links. Cancel sends nothing.
 - [ ] Continue opens one SMS draft to the saved contacts. The body has latitude, longitude, an Apple Maps link, and a Google Maps link. You must tap Send. Nothing sends if you back out.
 - [ ] With no contacts saved, the buttons explain that a contact is required and do not crash.

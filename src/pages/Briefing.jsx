@@ -68,7 +68,7 @@ export default function Briefing() {
             </h2>
             <p className="mt-2">
               Official NWS watches and warnings, SPC convective outlooks, and NHC storm positions
-              stay unlocked. Use Contacts to draft Emergency or I’m Sheltering texts when a warning
+              stay unlocked. Use Contacts to set up I’m Safe and I Need Help texts when a warning
               is nearby.
             </p>
           </section>

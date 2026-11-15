@@ -30,7 +30,9 @@ assert(getMapFeature("hourly")?.path === "/Forecast#hourly", "Hourly should open
 assert(getMapFeature("daily")?.path === "/Forecast#daily", "10 Day should open from the radar");
 assert(getMapFeature("radio")?.path === "/Radio", "Radio should open from the radar");
 assert(getMapFeature("settings")?.path === "/Settings", "Settings should be on the radar");
-assert(getMapFeature("help")?.kind === "action", "Help Me should be a radar action");
+assert(getMapFeature("help")?.kind === "action", "I Need Help should be a radar action");
+assert(getMapFeature("help")?.label === "I Need Help", "Help button label");
+assert(getMapFeature("safe")?.label === "I'm Safe", "Safe button label");
 assert(getMapFeature("fires")?.kind === "layer", "Fires should stay a radar layer");
 assert(DEFAULT_DOCK_IDS.length === MAP_FEATURES.length, "Every pro feature should show on the radar by default");
 assert(MAX_DOCK_CHIPS === MAP_FEATURES.length, "The radar can hold the full pro desk");
@@ -46,7 +48,7 @@ assert(
   featuresOnMap(DEFAULT_DOCK_IDS, { safetyActions: false }).every(
     (group) => group.id !== "safety" || group.features.every((feature) => feature.id !== "help" && feature.id !== "safe")
   ),
-  "Help Me and I'm Safe hide when there is no local emergency"
+  "I Need Help and I'm Safe hide when there is no local emergency"
 );
 
 const saved = saveDockIds(["hourly", "help", "bogus", "radar"]);

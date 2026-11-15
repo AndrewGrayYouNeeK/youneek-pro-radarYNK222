@@ -158,7 +158,7 @@ export default function Contacts() {
           <h1 className="text-xl font-bold">Shelter Contacts</h1>
           <p className="mt-1 text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{contacts.length} of {MAX_SHELTER_CONTACTS}</p>
           <p className="mt-1 text-sm text-slate-400">
-            These people are stored only on this device. Help Me and I’m Sheltering open one Messages draft. I’m Sheltering says you are sheltering and safe, with your exact coordinates and a Google Maps link. Nothing sends until you tap Send.
+            These people are stored only on this device. One tap on I’m Safe or I Need Help opens Messages with the text already written: the alert, where you are, and one map link. Nothing sends until you tap Send.
           </p>
         </div>
 
@@ -263,12 +263,12 @@ export default function Contacts() {
           <div className="rounded-2xl border border-rose-400/30 bg-rose-950/40 p-4">
             <div className="mb-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-rose-200">Send a text</div>
             <p className="mb-3 text-sm font-semibold text-white">{safety.primary?.name}</p>
-            <SafetyTextActions coords={safety.coords} />
+            <SafetyTextActions coords={safety.coords} alertName={safety.primary?.name} />
           </div>
         )}
         {contacts.length > 0 && !safety.show && (
           <p className="text-xs leading-relaxed text-slate-400">
-            Help Me and I’m Sheltering stay hidden until a warning or watch covers your location.
+            I’m Safe and I Need Help stay hidden until a warning or watch covers your location.
           </p>
         )}
         {contacts.length > 0 && (
@@ -297,7 +297,7 @@ export default function Contacts() {
         <div className="flex items-start gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3 py-3">
           <Shield className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" aria-hidden="true" />
           <p className="text-xs leading-relaxed text-slate-500">
-            Contacts are stored only on this device. Emergency and I’m Sheltering texts only go out when you tap a button, then Send in Messages.
+            Contacts are stored only on this device. I’m Safe and I Need Help texts only go out when you tap a button, then Send in Messages.
           </p>
         </div>
 

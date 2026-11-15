@@ -12,7 +12,7 @@ export default function SafetyReminderCard() {
       <Link to="/Contacts" className="font-semibold text-emerald-300">
         Add them in Contacts
       </Link>{" "}
-      so Help Me and I’m Sheltering are ready during a warning or watch.
+      so I’m Safe and I Need Help are ready during a warning or watch.
     </p>
   );
 }

@@ -56,7 +56,7 @@ test("Info.plist asks for When In Use location, forces dark UI, and does not tra
   const plist = read("ios/App/App/Info.plist");
   assert.ok(
     plist.includes(
-      "YouNeeK Pro Radar needs your location to show radar and alerts for your area and to include your coordinates in the I’m Sheltering emergency text."
+      "YouNeeK Pro Radar needs your location to show radar and alerts for your area and to put a map link in your I’m Safe and I Need Help texts."
     )
   );
   assert.match(plist, /<key>UIUserInterfaceStyle<\/key>\s*<string>Dark<\/string>/);

@@ -318,7 +318,7 @@ export default function Settings() {
                 <p>
                   Included with the app: live NEXRAD, global + future radar, 3D radar globe, lightning
                   proximity, tropical cyclones, wildfires, satellite, NOAA Weather Radio, Emergency and
-                  I’m Sheltering texts, 168-hour / 16-day forecasts, minute precipitation, AQI, pollen, UV,
+                  I’m Safe / I Need Help texts, 168-hour / 16-day forecasts, minute precipitation, AQI, pollen, UV,
                   SPC storm risk, hurricane and fire centers, and unit conversion. Every WeatherBug-class
                   premium layer ships unlocked.
                 </p>

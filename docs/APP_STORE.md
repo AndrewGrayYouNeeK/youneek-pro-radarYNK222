@@ -49,7 +49,7 @@ Capacitor plugins ship their own manifests inside the Swift packages. Do not add
 
 ## Info.plist
 
-- `NSLocationWhenInUseUsageDescription`: "YouNeeK Pro Radar needs your location to show radar and alerts for your area and to include your coordinates in the I’m Sheltering emergency text."
+- `NSLocationWhenInUseUsageDescription`: "YouNeeK Pro Radar needs your location to show radar and alerts for your area and to put a map link in your I’m Safe and I Need Help texts."
 - No Always / background location, no `UIBackgroundModes` for location.
 - `UIUserInterfaceStyle` is `Dark`.
 - No `NSUserTrackingUsageDescription`.
@@ -57,7 +57,7 @@ Capacitor plugins ship their own manifests inside the Swift packages. Do not add
 
 Notifications are not requested at launch. The website's "Browser notifications" switch is hidden in the native app. Adding push later is a separate change: a usage string, a permission request at a moment the user understands, and a background mode only if you truly need one.
 
-## How a reviewer sees Help Me / I’m Sheltering
+## How a reviewer sees I Need Help / I’m Safe
 
 Those buttons appear only when an active severe warning covers the selected location. They are not on the home screen in clear weather.
 
@@ -73,7 +73,7 @@ To turn the simulated warning off:
 
 Suggested review notes:
 
-> Location is When In Use only. To see Help Me and I’m Sheltering without a live warning, open youneekproradar://safety-preview on the device. The card is labeled Simulated alert. The buttons open a message draft; the reviewer must tap Send. Contacts are typed in Settings → Contacts and stay on the device. No account is required. Privacy policy: https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy
+> Location is When In Use only. To see I Need Help and I’m Safe without a live warning, open youneekproradar://safety-preview on the device. The card is labeled Simulated alert. The buttons open a message draft; the reviewer must tap Send. Contacts are typed in Settings → Contacts and stay on the device. No account is required. Privacy policy: https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy
 
 Screenshot steps for each store image are in `docs/APP_STORE_LISTING.md`.
 
@@ -95,7 +95,7 @@ The Android shell collects the same data as the iOS app. Do not declare tracking
 
 `https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy`
 
-The published policy text still says the website and the iOS app. Android follows those same rules. Location is while the app is in use. Contacts and the Help Me / I’m Sheltering wording stay on the device. Backup of app data is off. A text leaves the phone only after the user taps Send in the SMS app.
+The published policy text still says the website and the iOS app. Android follows those same rules. Location is while the app is in use. Contacts and the I Need Help / I’m Safe wording stay on the device. Backup of app data is off. A text leaves the phone only after the user taps Send in the SMS app.
 
 | Play question | Answer |
 | --- | --- |

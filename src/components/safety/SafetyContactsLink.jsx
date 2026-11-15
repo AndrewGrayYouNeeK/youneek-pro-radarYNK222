@@ -9,7 +9,7 @@ export default function SafetyContactsLink() {
     <Link to="/Contacts" className="block rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
       <div className="text-sm font-semibold text-white">Safety contacts</div>
       <div className="mt-0.5 text-xs leading-relaxed text-slate-400">
-        Add people ahead of time. Help Me and I’m Sheltering appear only during an active warning or watch.
+        Add people ahead of time. I’m Safe and I Need Help appear only during an active warning or watch.
       </div>
     </Link>
   );
