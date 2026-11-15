@@ -55,7 +55,7 @@ test("describes when the next wet minute arrives", () => {
     "No rain in the next hour"
   );
   assert.equal(
-    rainTimingLabel([{ time: "2026-10-21T12:15:00Z", intensity: 0.05, chance: 10 }], now),
+    rainTimingLabel([{ time: "2026-10-21T12:15:00Z", intensity: 0.005, chance: 10 }], now),
     "No rain in the next hour"
   );
   assert.equal(

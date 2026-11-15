@@ -1199,6 +1199,15 @@ export default function RadarDisplay({
               onRetry={() => setAlertAttempt((value) => value + 1)}
             />
           )}
+          {stormData && (
+            <div
+              className="pointer-events-none absolute inset-x-3 z-[1150] mx-auto max-w-sm"
+              style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
+              data-storm-distance="clean"
+            >
+              <StormToolsPanel compact stormData={stormData} onClose={() => setStormData(null)} />
+            </div>
+          )}
           <div
             className="pointer-events-none absolute inset-x-3 z-[1100] flex items-end justify-between gap-2"
             style={{ bottom: "calc(0.75rem + env(safe-area-inset-bottom))" }}
