@@ -57,7 +57,7 @@ export default function SafetyTextActions({ compact = false, coords = null }) {
   };
 
   return (
-    <div className={compact ? "space-y-2" : "space-y-3"}>
+    <div className={compact ? "space-y-2" : "space-y-3"} data-safety-actions="true">
       {pendingKind ? (
         <div className="space-y-2 rounded-xl border border-white/10 bg-slate-950/80 p-3">
           <p className="text-xs leading-relaxed text-slate-200">{safetyMessageExplanation()}</p>

@@ -1,19 +1,18 @@
 import { Link } from "react-router-dom";
 import useShelterContactCount from "@/hooks/useShelterContacts";
+import { shouldRemindSafetyContacts } from "@/lib/safety/onboarding";
 
 export default function SafetyReminderCard() {
   const count = useShelterContactCount();
-  if (count > 0) return null;
+  if (count > 0 || !shouldRemindSafetyContacts()) return null;
 
   return (
-    <section className="rounded-3xl border border-amber-300/30 bg-amber-950/30 p-4" data-safety-reminder="true">
-      <h2 className="text-sm font-semibold text-amber-100">Add a safety contact</h2>
-      <p className="mt-1 text-xs leading-relaxed text-amber-50/80">
-        Help Me and I’m Sheltering stay hidden until a warning covers your location. Add someone now so the texts are ready.
-      </p>
-      <Link to="/Contacts" className="mt-3 inline-flex text-sm font-semibold text-amber-200">
-        Set up safety texts
-      </Link>
-    </section>
+    <p className="px-1 text-xs leading-relaxed text-slate-400" data-safety-reminder="true">
+      No safety contacts saved.{" "}
+      <Link to="/Contacts" className="font-semibold text-emerald-300">
+        Add them in Contacts
+      </Link>{" "}
+      so Help Me and I’m Sheltering are ready during a warning or watch.
+    </p>
   );
 }

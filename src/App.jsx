@@ -11,6 +11,7 @@ import { UnitsProvider } from "@/lib/UnitsContext";
 import { NavigationStackProvider } from "@/lib/NavigationStack";
 import { RadioProvider } from "@/lib/RadioContext";
 import OnboardingModal from "@/components/radar/OnboardingModal";
+import { shouldShowSafetyOnboarding } from "@/lib/safety/onboarding";
 
 const Radar = lazy(() => import("./pages/Radar"));
 const Contacts = lazy(() => import("./pages/Contacts"));
@@ -41,7 +42,7 @@ const DarkFallback = () => <div className="h-full bg-slate-950" />;
 
 function AppShell() {
   const [showOnboarding, setShowOnboarding] = useState(
-    () => typeof window !== "undefined" && !localStorage.getItem("onboarded_v1")
+    () => typeof window !== "undefined" && shouldShowSafetyOnboarding(window.localStorage)
   );
 
   return (

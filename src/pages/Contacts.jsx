@@ -268,7 +268,7 @@ export default function Contacts() {
         )}
         {contacts.length > 0 && !safety.show && (
           <p className="text-xs leading-relaxed text-slate-400">
-            Help Me and I’m Sheltering stay hidden until a warning covers your location.
+            Help Me and I’m Sheltering stay hidden until a warning or watch covers your location.
           </p>
         )}
         {contacts.length > 0 && (

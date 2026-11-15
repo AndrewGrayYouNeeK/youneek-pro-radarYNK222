@@ -1,5 +1,6 @@
 const APP_STORAGE_KEYS = [
   "onboarded_v1",
+  "safetyOnboardingSkipped_v1",
   "pref_notifyRain",
   "pref_notifyTornado",
   "pref_notifyLightning",

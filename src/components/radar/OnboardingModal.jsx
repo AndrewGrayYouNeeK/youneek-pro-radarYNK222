@@ -1,55 +1,61 @@
 import { useState } from "react";
-import { ChevronRight, X } from "lucide-react";
-import {
-  DEFAULT_EMERGENCY_LINE,
-  DEFAULT_SAFE_LINE,
-  addShelterContact,
-  loadSafetyMessages,
-  saveSafetyMessages,
-} from "@/lib/safety/sms";
+import { ChevronRight, Trash2, X } from "lucide-react";
+import { finishSafetyOnboarding } from "@/lib/safety/onboarding";
+import { MAX_SHELTER_CONTACTS, addShelterContact, loadShelterContacts, saveShelterContacts } from "@/lib/safety/sms";
 
-const STEPS = ["location", "radar", "contacts"];
+const STEPS = ["contacts", "location", "radar"];
 
 export default function OnboardingModal({ onDone }) {
   const [index, setIndex] = useState(0);
+  const [contacts, setContacts] = useState(() => loadShelterContacts());
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [helpText, setHelpText] = useState(() => loadSafetyMessages().emergency);
-  const [safeText, setSafeText] = useState(() => loadSafetyMessages().safe);
   const [error, setError] = useState("");
   const [locationNote, setLocationNote] = useState("");
   const step = STEPS[index];
 
-  const finish = () => {
-    localStorage.setItem("onboarded_v1", "true");
+  const finish = (skipped) => {
+    finishSafetyOnboarding(window.localStorage, { skipped });
     onDone();
   };
 
-  const persistMessages = () => {
-    saveSafetyMessages({
-      emergency: helpText.trim() || DEFAULT_EMERGENCY_LINE,
-      safe: safeText.trim() || DEFAULT_SAFE_LINE,
-    });
-  };
-
-  const close = () => {
-    if (step === "contacts") persistMessages();
-    finish();
-  };
-
-  const saveAndFinish = () => {
-    persistMessages();
+  const commitDraft = () => {
     const hasName = name.trim().length > 0;
     const hasPhone = phone.trim().length > 0;
-    if (hasName || hasPhone) {
-      try {
-        addShelterContact({ name, phone });
-      } catch (caught) {
-        setError(caught.message);
-        return;
-      }
+    if (!hasName && !hasPhone) return true;
+    try {
+      const next = addShelterContact({ name, phone });
+      setContacts(next);
+      setName("");
+      setPhone("");
+      setError("");
+      return true;
+    } catch (caught) {
+      setError(caught.message);
+      return false;
     }
-    finish();
+  };
+
+  const addContact = () => {
+    if (!name.trim() && !phone.trim()) {
+      setError("Enter a name and phone number.");
+      return;
+    }
+    commitDraft();
+  };
+
+  const removeContact = (id) => {
+    const next = saveShelterContacts(contacts.filter((contact) => contact.id !== id));
+    setContacts(next);
+  };
+
+  const continueStep = () => {
+    if (step === "contacts" && !commitDraft()) return;
+    if (index < STEPS.length - 1) {
+      setIndex((value) => value + 1);
+      return;
+    }
+    finish(false);
   };
 
   const allowLocation = () => {
@@ -61,71 +67,45 @@ export default function OnboardingModal({ onDone }) {
     navigator.geolocation.getCurrentPosition(
       () => setLocationNote("Location allowed. Radar and alerts can center on you."),
       () => setLocationNote("Location stayed off. Search for a city instead. You can allow it later while using the app."),
-      { timeout: 8000 }
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
     );
   };
 
   return (
-    <div className="fixed inset-0 z-[2000] flex items-end justify-center bg-slate-950/80 px-3 py-3 sm:items-center">
-      <div className="relative flex max-h-[92dvh] w-full max-w-sm flex-col overflow-hidden rounded-3xl border border-white/10 bg-slate-950">
+    <div
+      className="fixed inset-0 z-[2000] flex flex-col bg-slate-950 text-white"
+      data-safety-onboarding="true"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+      }}
+    >
+      <div className="flex items-center justify-between px-4 pt-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+          Step {index + 1} of {STEPS.length}
+        </p>
         <button
           type="button"
-          onClick={close}
-          aria-label="Close intro"
-          className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full text-white hover:bg-white/10"
+          onClick={() => finish(true)}
+          aria-label="Skip for now"
+          className="flex h-11 w-11 items-center justify-center rounded-full text-slate-300 hover:bg-white/10"
         >
           <X className="h-5 w-5" aria-hidden="true" />
         </button>
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-5 pt-12">
-          <div className="mb-5 flex items-center justify-center gap-2" aria-label={`Step ${index + 1} of ${STEPS.length}`}>
-            {STEPS.map((id, dot) => (
-              <div
-                key={id}
-                className="h-1.5 rounded-full"
-                style={{
-                  width: dot === index ? 24 : 6,
-                  background: dot === index ? "#22d3ee" : "rgba(255,255,255,0.2)",
-                }}
-              />
-            ))}
-          </div>
+      </div>
 
-          {step === "location" && (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Location</h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                YouNeeK Pro Radar asks for location only while you are using the app. It centers the radar, checks whether a warning covers you, and adds your coordinates to a safety text. If you say no, search for a city instead.
-              </p>
-              <button
-                type="button"
-                onClick={allowLocation}
-                className="mt-5 w-full rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-cyan-400"
-              >
-                Allow location
-              </button>
-              {locationNote && <p className="mt-3 text-xs leading-relaxed text-slate-400">{locationNote}</p>}
-            </div>
-          )}
-
-          {step === "radar" && (
-            <div className="text-center">
-              <h2 className="text-2xl font-bold text-white">Radar</h2>
-              <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                The map opens on the national reflectivity mosaic and shows how old the scan is. Loop, speed, and frame count sit on a small bar. Pick one NEXRAD site, such as KHTX or KLVX, from Layers when you want that radar instead of the mosaic.
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 pb-4">
+        {step === "contacts" && (
+          <div className="mx-auto max-w-sm space-y-4">
+            <div>
+              <h1 className="text-2xl font-bold text-white">Safety contacts</h1>
+              <p className="mt-2 text-sm leading-relaxed text-slate-300">
+                Help Me says you need help and are taking shelter. I’m Sheltering says you are sheltering and safe, and adds your coordinates with a map link. Both open one message to the people you save here. Nothing sends until you tap Send. These buttons show only while a warning or watch covers your location. Contacts stay on this device.
               </p>
             </div>
-          )}
-
-          {step === "contacts" && (
-            <div className="space-y-3 text-left">
-              <div>
-                <h2 className="text-xl font-bold text-white">Shelter contacts</h2>
-                <p className="mt-1 text-sm leading-relaxed text-slate-300">
-                  Save 1 to 5 people on this device. Help Me and I’m Sheltering appear only when a severe warning covers your location. Nothing sends until you tap Send in Messages.
-                </p>
-              </div>
+            <div className="space-y-3 rounded-2xl border border-emerald-400/30 bg-white/5 p-4">
               <label className="block text-xs font-medium text-slate-300">
-                Contact name
+                Name
                 <input
                   value={name}
                   onChange={(event) => {
@@ -134,11 +114,12 @@ export default function OnboardingModal({ onDone }) {
                   }}
                   aria-label="Contact name"
                   placeholder="Alex"
-                  className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-500/50"
+                  autoComplete="name"
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-emerald-400/60"
                 />
               </label>
               <label className="block text-xs font-medium text-slate-300">
-                Phone number
+                Phone
                 <input
                   value={phone}
                   onChange={(event) => {
@@ -148,60 +129,88 @@ export default function OnboardingModal({ onDone }) {
                   aria-label="Contact phone number"
                   inputMode="tel"
                   type="tel"
+                  autoComplete="tel"
                   placeholder="(555) 555-0100"
-                  className="mt-1 w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-cyan-500/50"
-                />
-              </label>
-              <label className="block text-xs font-medium text-slate-300">
-                Help Me message
-                <textarea
-                  value={helpText}
-                  onChange={(event) => setHelpText(event.target.value)}
-                  aria-label="Help Me message"
-                  rows={2}
-                  maxLength={320}
-                  className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-white outline-none focus:border-cyan-500/50"
-                />
-              </label>
-              <label className="block text-xs font-medium text-slate-300">
-                I’m Sheltering message
-                <textarea
-                  value={safeText}
-                  onChange={(event) => setSafeText(event.target.value)}
-                  aria-label="I’m Sheltering message"
-                  rows={2}
-                  maxLength={320}
-                  className="mt-1 w-full resize-none rounded-xl border border-white/10 bg-slate-900 px-3 py-3 text-sm text-white outline-none focus:border-cyan-500/50"
+                  className="mt-1 w-full rounded-xl border border-white/10 bg-slate-950 px-3 py-3 text-sm text-white outline-none placeholder:text-slate-600 focus:border-emerald-400/60"
                 />
               </label>
               {error && <p className="text-xs text-red-300">{error}</p>}
+              <button
+                type="button"
+                onClick={addContact}
+                disabled={contacts.length >= MAX_SHELTER_CONTACTS}
+                className="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200 disabled:opacity-40"
+              >
+                Add contact
+              </button>
+              <p className="text-[11px] text-slate-500">{contacts.length} of {MAX_SHELTER_CONTACTS} on this device</p>
             </div>
-          )}
-
-          <div className="mt-6 space-y-2">
-            {step !== "contacts" ? (
-              <button
-                type="button"
-                onClick={() => setIndex((value) => value + 1)}
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-cyan-400"
-              >
-                Next
-                <ChevronRight className="h-4 w-4" aria-hidden="true" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={saveAndFinish}
-                className="w-full rounded-2xl bg-cyan-500 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-cyan-400"
-              >
-                Save and continue
-              </button>
+            {contacts.length > 0 && (
+              <ul className="space-y-2">
+                {contacts.map((contact) => (
+                  <li key={contact.id} className="flex items-center gap-3 rounded-xl border border-white/10 px-3 py-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="truncate text-sm font-semibold">{contact.name}</div>
+                      <div className="text-xs text-slate-400">{contact.phone}</div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeContact(contact.id)}
+                      aria-label={`Remove ${contact.name}`}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl text-slate-400 hover:bg-white/10"
+                    >
+                      <Trash2 className="h-4 w-4" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
             )}
-            <button type="button" onClick={close} className="w-full py-2 text-sm text-slate-400 hover:text-white">
-              Skip for now
-            </button>
           </div>
-        </div>
+        )}
+
+        {step === "location" && (
+          <div className="mx-auto max-w-sm text-center">
+            <h1 className="text-2xl font-bold text-white">Location</h1>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              YouNeeK Pro Radar asks for location only while you are using the app. It centers the radar, checks whether a warning or watch covers you, and adds your coordinates to a safety text. If you say no, search for a city instead.
+            </p>
+            <button
+              type="button"
+              onClick={allowLocation}
+              className="mt-5 w-full rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-emerald-300"
+            >
+              Allow location
+            </button>
+            {locationNote && <p className="mt-3 text-xs leading-relaxed text-slate-400">{locationNote}</p>}
+          </div>
+        )}
+
+        {step === "radar" && (
+          <div className="mx-auto max-w-sm text-center">
+            <h1 className="text-2xl font-bold text-white">Radar</h1>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              The map opens on the national reflectivity mosaic and shows how old the scan is. Loop, speed, and frame count sit on a small bar. Pick one NEXRAD site, such as KHTX or KLVX, from Layers when you want that radar instead of the mosaic.
+            </p>
+          </div>
+        )}
+      </div>
+
+      <div className="mx-auto w-full max-w-sm space-y-2 px-5 pb-4">
+        <button
+          type="button"
+          onClick={continueStep}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-emerald-300"
+        >
+          {step === "radar" ? "Done" : "Continue"}
+          {step !== "radar" && <ChevronRight className="h-4 w-4" aria-hidden="true" />}
+        </button>
+        <button
+          type="button"
+          onClick={() => finish(true)}
+          className="w-full py-2 text-sm font-semibold text-slate-300 hover:text-white"
+        >
+          Skip for now
+        </button>
       </div>
     </div>
   );
