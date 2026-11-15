@@ -18,14 +18,16 @@ Checked items are done in this branch. Unchecked items need a Mac, a device, or 
 
 - [ ] Internal testing first, then an external group.
 
-On a Mac:
+Preferred path (CI): add the secrets in `docs/IOS_CI.md`, then Actions → **iOS App Store** → **Run workflow** with upload enabled. That builds with Xcode 26 and uploads to the existing listing (`6766993130` / `com.base69facdfe1fbc3700e00a8387.app`).
+
+On a Mac (manual):
 
 1. `npm install`
 2. `npm run build:ios`
 3. `npm run cap:open`
 4. Xcode → App target → Signing & Capabilities → select the YouNeeK Team.
-5. Confirm the bundle id `com.youneek.proradar` (change it first if you want a different id) and the display name YouNeeK Pro Radar.
-6. Product → Archive. Use a generic iOS device or Any iOS Device, not a simulator.
+5. Confirm the bundle id `com.base69facdfe1fbc3700e00a8387.app` (must match the existing App Store Connect listing) and the display name YouNeeK Pro Radar.
+6. Product → Archive. Use a generic iOS device or Any iOS Device, not a simulator. Prefer Xcode 26 so the archive uses the iOS 26 SDK.
 7. When the Organizer opens, Distribute App → App Store Connect → Upload.
 8. App Store Connect → TestFlight → wait for processing.
 9. Internal testing: add yourself and anyone on the App Store Connect team. Internal builds do not need Beta App Review.
@@ -40,7 +42,7 @@ Paste the listing from `docs/APP_STORE_LISTING.md`, or from `fastlane/metadata/e
 | Field | Value |
 | --- | --- |
 | Name | YouNeeK Pro Radar |
-| Bundle ID | com.youneek.proradar |
+| Bundle ID | com.base69facdfe1fbc3700e00a8387.app |
 | SKU | youneek-pro-radar-ios |
 | Subtitle | Tactical NEXRAD & Alerts |
 | Primary category | Weather |
