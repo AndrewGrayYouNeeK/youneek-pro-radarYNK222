@@ -45,17 +45,22 @@ export function clearZoneCache() {
   zoneCache.clear();
 }
 
+// ~1 km: plenty for a zone outline on a phone, and keeps /api/alerts small.
+const ZONE_MIN_STEP_DEG = 0.01;
+
 function roundRing(ring) {
   const out = [];
-  let last = "";
-  for (const point of ring || []) {
-    const lon = Math.round(Number(point?.[0]) * 1000) / 1000;
-    const lat = Math.round(Number(point?.[1]) * 1000) / 1000;
+  let last = null;
+  const points = ring || [];
+  for (let i = 0; i < points.length; i += 1) {
+    const lon = Math.round(Number(points[i]?.[0]) * 1000) / 1000;
+    const lat = Math.round(Number(points[i]?.[1]) * 1000) / 1000;
     if (!Number.isFinite(lon) || !Number.isFinite(lat)) continue;
-    const key = `${lon},${lat}`;
-    if (key === last) continue;
-    last = key;
-    out.push([lon, lat]);
+    const closing = i === points.length - 1;
+    if (last && !closing && Math.abs(lon - last[0]) < ZONE_MIN_STEP_DEG && Math.abs(lat - last[1]) < ZONE_MIN_STEP_DEG) continue;
+    if (last && lon === last[0] && lat === last[1]) continue;
+    last = [lon, lat];
+    out.push(last);
   }
   return out.length >= 4 ? out : null;
 }
