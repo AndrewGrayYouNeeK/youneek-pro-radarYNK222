@@ -24,8 +24,7 @@ export default function MoreFromYouneekRow() {
         <ExternalLink className="h-4 w-4 text-[#00ff9c]" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
-        <div className="text-sm font-medium leading-tight">More from YouNeeK</div>
-        <div className="mt-0.5 text-xs leading-snug text-slate-400">Other apps by Andrew Gray</div>
+        <div className="text-sm font-medium leading-tight">Other YouNeeK apps offered</div>
       </div>
       <ExternalLink className="h-4 w-4 shrink-0 text-[#00ff9c]" aria-hidden="true" />
     </a>

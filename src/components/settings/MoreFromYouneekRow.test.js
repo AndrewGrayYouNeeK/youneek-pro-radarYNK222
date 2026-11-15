@@ -43,7 +43,7 @@ function sourceFiles(dir, found = []) {
   return found;
 }
 
-test("the More from YouNeeK row renders in About and links to https://youneek.xyz", () => {
+test("the Other YouNeeK apps offered row renders in About and links to https://youneek.xyz", () => {
   assert.equal(YOUNEEK_SITE_URL, "https://youneek.xyz");
   const url = new URL(YOUNEEK_SITE_URL);
   assert.equal(url.origin, "https://youneek.xyz");
@@ -52,8 +52,8 @@ test("the More from YouNeeK row renders in About and links to https://youneek.xy
   assert.equal(url.hash, "");
 
   const html = renderToStaticMarkup(createElement(MoreFromYouneekRow));
-  assert.match(html, /More from YouNeeK/);
-  assert.match(html, /Other apps by Andrew Gray/);
+  assert.match(html, /Other YouNeeK apps offered/);
+  assert.doesNotMatch(html, /More from YouNeeK|Other apps by Andrew Gray|by Andrew Gray/);
   assert.match(html, /href="https:\/\/youneek\.xyz"/);
   assert.match(html, /target="_blank"/);
   assert.match(html, /rel="noopener noreferrer"/);
@@ -117,5 +117,5 @@ test("the More from YouNeeK row renders in About and links to https://youneek.xy
   assert.deepEqual(mentions.sort(), [...allowed].sort());
 
   assert.match(read("src/pages/More.jsx"), /No ads\. No upsell\./);
-  assert.doesNotMatch(read("src/pages/Radar.jsx"), /More from YouNeeK|youneek\.xyz/);
+  assert.doesNotMatch(read("src/pages/Radar.jsx"), /Other YouNeeK apps offered|youneek\.xyz/);
 });
