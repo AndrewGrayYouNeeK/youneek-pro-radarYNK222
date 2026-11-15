@@ -11,6 +11,15 @@ const WATCH_EVENTS = [
   "flash flood watch",
 ];
 
+// Safety buttons only. Alert fetch and map paint keep their own event lists.
+export const SAFETY_BUTTON_WATCHES = [
+  "tornado watch",
+  "severe thunderstorm watch",
+  "hurricane watch",
+  "flash flood watch",
+  "winter storm watch",
+];
+
 function text(value) {
   return String(value || "").toLowerCase();
 }
@@ -38,14 +47,11 @@ export function isActiveSafetyAlert(alert, now = Date.now()) {
   if (Number.isFinite(expires) && expires <= now) return false;
   const name = text(alert.name || alert.event);
   const severity = text(alert.severity);
-  if (
-    name.includes("advisory") ||
-    name.includes("statement") ||
-    name.includes("outlook") ||
-    name.includes("watch")
-  ) {
+  if (name.includes("advisory") || name.includes("statement") || name.includes("outlook")) {
     return false;
   }
+  if (SAFETY_BUTTON_WATCHES.some((event) => name.includes(event))) return true;
+  if (name.includes("watch")) return false;
   if (name.includes("warning")) return true;
   return severity === "extreme" || severity === "severe";
 }

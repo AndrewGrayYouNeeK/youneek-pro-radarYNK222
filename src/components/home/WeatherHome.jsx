@@ -15,7 +15,6 @@ import LoadError from "@/components/LoadError";
 import LightningProximityCard from "@/components/forecast/LightningProximityCard";
 import StormRiskCard from "@/components/forecast/StormRiskCard";
 import RainArrivalAlert from "@/components/radar/RainArrivalAlert";
-import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
@@ -68,7 +67,6 @@ export default function WeatherHome() {
       <LocationPicker />
       <AlertBanner alerts={alerts} />
       <SafetyTextCard />
-      <SafetyReminderCard />
 
       {showLoading && <WeatherSkeleton />}
 
