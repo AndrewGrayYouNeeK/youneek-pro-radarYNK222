@@ -108,3 +108,14 @@ test("zone polygons are rounded and drop bad rings", () => {
   assert.equal(polys[0].length, 1);
   assert.deepEqual(zonePolygons(null), []);
 });
+
+test("dense zone outlines are thinned to about 1 km steps", () => {
+  const ring = Array.from({ length: 1001 }, (_, i) => {
+    const a = (i / 1000) * 2 * Math.PI;
+    return [-100 + Math.cos(a), 40 + Math.sin(a)];
+  });
+  ring[1000] = ring[0];
+  const [rings] = zonePolygons({ type: "Polygon", coordinates: [ring] });
+  assert.ok(rings[0].length < 700 && rings[0].length >= 4, `kept ${rings[0].length}`);
+  assert.deepEqual(rings[0][0], rings[0][rings[0].length - 1], "ring stays closed");
+});
