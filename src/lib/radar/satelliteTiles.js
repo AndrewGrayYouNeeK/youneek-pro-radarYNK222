@@ -4,8 +4,11 @@ export const IOWA_SATELLITE = {
   vapor: "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/goes-east-wv-4km/{z}/{x}/{y}.png",
 };
 
+// GIBS publishes GOES-East GeoColor after the hour closes. The current UTC hour returns 404.
+export const GIBS_VISIBLE_LAG_MS = 60 * 60 * 1000;
+
 export function gibsVisibleFrames(now = new Date(), count = 4) {
-  const hour = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours());
+  const hour = Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), now.getUTCHours()) - GIBS_VISIBLE_LAG_MS;
   const frames = [];
   for (let index = count - 1; index >= 0; index -= 1) {
     const time = new Date(hour - index * 3600000);
