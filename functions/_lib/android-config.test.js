@@ -31,7 +31,8 @@ test("Android scripts exist and the iOS scripts stay iOS-only", () => {
   assert.equal(pkg.scripts["build:android"], "npm run build && npx cap sync android");
   assert.equal(pkg.scripts["cap:sync:android"], "npx cap sync android");
   assert.equal(pkg.scripts["cap:open:android"], "npx cap open android");
-  assert.equal(config.appId, "com.youneek.proradar");
+  // capacitor.config.json carries the iOS bundle ID; Android keeps its own applicationId in build.gradle.
+  assert.equal(config.appId, "com.base69facdfe1fbc3700e00a8387.app");
   assert.equal(config.appName, "YouNeeK Pro Radar");
   assert.equal(config.server.androidScheme, "https");
   assert.equal(config.server.iosScheme, "capacitor");
