@@ -107,7 +107,9 @@ export default function ExtraMapLayers({ map, ready, satelliteMode, surfaceField
       satelliteLayers.current = plan.layers.map((item, index) =>
         L.tileLayer(item.tileUrl, {
           opacity: index === plan.layers.length - 1 ? 0.55 : 0,
-          maxZoom: 7,
+          // Native GIBS tiles stop at level 7. The map opens a saved city at zoom 8,
+          // and Leaflet draws nothing once the map zoom is above maxZoom.
+          maxZoom: 12,
           maxNativeZoom: 7,
           zIndex: 210,
           attribution: "GOES visible via NASA GIBS",
