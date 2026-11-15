@@ -8,6 +8,7 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
 import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
+import MoreFromYouneekRow from "@/components/settings/MoreFromYouneekRow";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap, CloudSun } from "lucide-react";
 import { getPref, setPref } from "@/lib/prefs";
@@ -327,6 +328,7 @@ export default function Settings() {
                 <p className="text-slate-500">© 2026 Andrew Gray · YouNeeK</p>
               </div>
             )}
+            <MoreFromYouneekRow />
             <SettingRow
               icon={Shield}
               label="Privacy"
