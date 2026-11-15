@@ -6,12 +6,15 @@ import {
   MAX_SHELTER_CONTACTS,
   buildImSafeBody,
   buildGroupSmsUrl,
+  buildSafetyMessage,
   buildSmsUrl,
   deviceCanComposeSms,
-  formatSafetyLocationLine,
   loadSafetyMessages,
   normalizeUsPhone,
   safetyMessageExplanation,
+  safetyGpsLine,
+  safetyMapLink,
+  safetyPlaceName,
   saveSafetyMessages,
   uniqueContactPhones,
 } from "./sms.js";
@@ -28,23 +31,66 @@ function memoryStorage(seed = {}) {
   };
 }
 
-test("Help Me draft says to take shelter and includes the map link", () => {
-  const body = buildEmergencyBody({
-    locationLine: "My location: https://maps.google.com/?q=37.7,-122.4",
-  });
-  assert.match(body, /EMERGENCY — I need help/);
-  assert.match(body, /taking shelter/);
-  assert.match(body, /maps\.google\.com\/\?q=37\.7,-122\.4/);
-  assert.match(body, /YouNeeK Pro Radar/);
+const IPHONE = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)";
+const ANDROID = "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
+const DALLAS = { latitude: 32.7767, longitude: -96.797 };
+
+test("I'm Safe text is readable, names the alert and town, and has one Apple Maps link on iPhone", () => {
+  const body = buildSafetyMessage({ kind: "safe", alertName: "Tornado Warning", place: "Dallas, TX", coords: DALLAS, userAgent: IPHONE });
+  assert.equal(
+    body,
+    "I'm safe. Tornado Warning is in effect near Dallas, TX. Here's where I am: https://maps.apple.com/?ll=32.77670,-96.79700&q=32.77670,-96.79700\n(GPS 32.7767, -96.7970)"
+  );
+  assert.equal(body.match(/https?:\/\//g).length, 1);
 });
 
-test("I’m Sheltering draft says the user is sheltering and safe and keeps the map link", () => {
-  const body = buildImSafeBody({
-    locationLine: "My location: 37.70000, -122.41940\nhttps://maps.google.com/?q=37.70000,-122.41940",
-  });
-  assert.match(body, /I’M SHELTERING/);
-  assert.match(body, /sheltering and I am safe/);
-  assert.match(body, /maps\.google\.com/);
+test("I Need Help text asks for a call and has one Google Maps link on Android", () => {
+  const body = buildSafetyMessage({ kind: "emergency", alertName: "Tornado Warning", place: "Dallas, TX", coords: DALLAS, userAgent: ANDROID });
+  assert.equal(
+    body,
+    "I need help. Tornado Warning near Dallas, TX. I'm here: https://maps.google.com/?q=32.77670,-96.79700. Please call me or send help.\n(GPS 32.7767, -96.7970)"
+  );
+  assert.equal(body.match(/https?:\/\//g).length, 1);
+  assert.equal(body.includes("maps.apple.com"), false);
+});
+
+test("no town name falls back cleanly", () => {
+  assert.equal(
+    buildSafetyMessage({ kind: "safe", alertName: "Severe Thunderstorm Warning", coords: DALLAS, userAgent: ANDROID }),
+    "I'm safe. Severe Thunderstorm Warning is in effect. Here's where I am: https://maps.google.com/?q=32.77670,-96.79700\n(GPS 32.7767, -96.7970)"
+  );
+  assert.equal(
+    buildEmergencyBody({ alertName: "Tornado Warning", coords: DALLAS, userAgent: ANDROID }).split("\n")[0],
+    "I need help. Tornado Warning in effect. I'm here: https://maps.google.com/?q=32.77670,-96.79700. Please call me or send help."
+  );
+});
+
+test("location off still builds a text, with no link and no GPS line", () => {
+  const safe = buildImSafeBody({ alertName: "Tornado Warning", place: "Dallas, TX", coords: null, userAgent: IPHONE });
+  assert.equal(safe, "I'm safe. Tornado Warning is in effect near Dallas, TX. My location is off, so I couldn't share a map link.");
+  const help = buildEmergencyBody({ alertName: "Tornado Warning", coords: { latitude: "x" }, userAgent: IPHONE });
+  assert.equal(help, "I need help. Tornado Warning in effect. My location is off, so I couldn't share a map link. Please call me or send help.");
+  assert.equal(/GPS|https?:/.test(help), false);
+});
+
+test("map link and GPS line helpers", () => {
+  assert.equal(safetyMapLink(DALLAS, IPHONE), "https://maps.apple.com/?ll=32.77670,-96.79700&q=32.77670,-96.79700");
+  assert.equal(safetyMapLink(DALLAS, ANDROID), "https://maps.google.com/?q=32.77670,-96.79700");
+  assert.equal(safetyMapLink(null, ANDROID), "");
+  assert.equal(safetyGpsLine(DALLAS), "(GPS 32.7767, -96.7970)");
+  assert.equal(safetyPlaceName({ city: "Dallas", state: "TX" }), "Dallas, TX");
+  assert.equal(safetyPlaceName({ city: "Current", state: "" }), "");
+  assert.equal(safetyPlaceName(null), "");
+});
+
+test("the prefilled sms body round-trips exactly for iPhone (&body=) and Android (?body=)", () => {
+  const body = buildSafetyMessage({ kind: "emergency", alertName: "Tornado Warning", place: "Dallas, TX", coords: DALLAS, userAgent: IPHONE });
+  const ios = buildGroupSmsUrl(["+15555550100", "+15555550101"], body, IPHONE);
+  assert.match(ios, /^sms:\+15555550100,\+15555550101&body=/);
+  assert.equal(decodeURIComponent(ios.split("&body=")[1]), body);
+  const android = buildGroupSmsUrl(["+15555550100"], body, ANDROID);
+  assert.match(android, /^sms:\+15555550100\?body=/);
+  assert.equal(decodeURIComponent(android.split("?body=")[1]), body);
 });
 
 test("sms link keeps the phone and encodes the message", () => {
@@ -53,19 +99,11 @@ test("sms link keeps the phone and encodes the message", () => {
   assert.match(decodeURIComponent(url), /EMERGENCY — help/);
 });
 
-test("iOS opens one composer for every saved contact and the draft includes coordinates", () => {
-  const line = formatSafetyLocationLine({ latitude: 37.7, longitude: -122.4194 });
-  assert.match(line, /37\.70000, -122\.41940/);
-  assert.match(line, /maps\.apple\.com/);
-  assert.match(line, /maps\.google\.com\/\?q=37\.70000,-122\.41940/);
-  const url = buildGroupSmsUrl(["+15555550100", "+15555550101"], `Help\n${line}`, "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X)");
-  assert.match(url, /^sms:\+15555550100,\+15555550101&body=/);
-  assert.match(decodeURIComponent(url), /37\.70000, -122\.41940/);
+test("iPad and Mac can't compose sms; iPhone can", () => {
   assert.equal(deviceCanComposeSms({ userAgent: "iPhone", platform: "iPhone", maxTouchPoints: 5 }), true);
   assert.equal(deviceCanComposeSms({ userAgent: "iPad", platform: "iPad", maxTouchPoints: 5 }), false);
   assert.equal(deviceCanComposeSms({ userAgent: "Mozilla/5.0 (Macintosh)", platform: "MacIntel", maxTouchPoints: 5 }), false);
-  assert.match(safetyMessageExplanation(), /I’m Sheltering/);
-  assert.match(safetyMessageExplanation(), /Google Maps/);
+  assert.match(safetyMessageExplanation(), /I'm Safe and I Need Help/);
   assert.match(safetyMessageExplanation(), /tap Send/);
   assert.match(safetyMessageExplanation(), /does not resend/);
 });
@@ -73,12 +111,12 @@ test("iOS opens one composer for every saved contact and the draft includes coor
 test("Android keeps one sms draft with a question-mark body", () => {
   const url = buildGroupSmsUrl(
     ["+15555550100", "+15555550101"],
-    "I’M SHELTERING — I am sheltering and I am safe.",
+    "I'm safe.",
     "Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36"
   );
   assert.match(url, /^sms:\+15555550100,\+15555550101\?body=/);
   assert.equal(url.includes("&body="), false);
-  assert.match(decodeURIComponent(url), /sheltering and I am safe/);
+  assert.match(decodeURIComponent(url), /I'm safe\./);
   assert.equal(
     deviceCanComposeSms({
       userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel 8)",
@@ -96,27 +134,10 @@ test("duplicate shelter numbers are texted once", () => {
   );
 });
 
-test("edited safety messages are saved and used in the drafts", () => {
+test("saved custom wording still loads (kept for older installs)", () => {
   const store = memoryStorage();
-  saveSafetyMessages(
-    {
-      emergency: "HELP — meet me at the shelter.",
-      safe: "I am safe and heading home.",
-    },
-    store
-  );
-  assert.equal(loadSafetyMessages(store).safe, "I am safe and heading home.");
-  const emergency = buildEmergencyBody({
-    locationLine: "My location: https://maps.google.com/?q=37.7,-122.4",
-    storage: store,
-  });
-  const safe = buildImSafeBody({
-    locationLine: "My location: https://maps.google.com/?q=37.7,-122.4",
-    storage: store,
-  });
-  assert.match(emergency, /HELP — meet me at the shelter/);
-  assert.match(safe, /I am safe and heading home/);
-  assert.match(emergency, /maps\.google\.com/);
+  saveSafetyMessages({ emergency: "HELP", safe: "OK" }, store);
+  assert.equal(loadSafetyMessages(store).safe, "OK");
 });
 
 test("a new safety contact is stored for this device and the legacy phone list", () => {

@@ -39,12 +39,15 @@ import { RADAR_LAYERS_EVENT, loadRadarLayers, saveRadarLayers } from "@/lib/rada
 import LocationSearch from "@/components/location/LocationSearch";
 import RadarAlertSheet from "./RadarAlertSheet";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
+import LocationOffPrompt from "@/components/location/LocationOffPrompt";
+import useLocationStatus from "@/hooks/useLocationStatus";
+import { useLocation } from "@/lib/LocationContext";
 import { alertSummary, warningFeatures } from "@/lib/radar/alertText";
 import { latestProductScanUnix } from "@/lib/radar/productAge";
 import { readCachedJson, writeCachedJson } from "@/lib/offlineCache";
 import { hapticSevereWarning } from "@/lib/native/haptics";
 import { loadActiveLocation, saveActiveLocation } from "@/lib/locationStore";
-import { loadShelterContacts, sendContactTexts } from "@/lib/safety/sms";
+import { loadShelterContacts, safetyPlaceName, sendContactTexts } from "@/lib/safety/sms";
 import "leaflet/dist/leaflet.css";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -257,10 +260,14 @@ export default function RadarDisplay({
   const [safetyPreview] = useState(() =>
     typeof window === "undefined" ? null : readSafetyPreview(window.location.search)
   );
-  const showSafetyTexts = useMemo(() => {
+  const primarySafetyAlert = useMemo(() => {
     const live = Array.isArray(pointAlertsQuery.data) ? pointAlertsQuery.data : [];
-    return activeSafetyAlerts(safetyPreview ? [safetyPreview, ...live] : live).length > 0;
+    return activeSafetyAlerts(safetyPreview ? [safetyPreview, ...live] : live)[0] || null;
   }, [pointAlertsQuery.data, safetyPreview]);
+  const showSafetyTexts = Boolean(primarySafetyAlert);
+  const { location: appLocation, gpsFix } = useLocation();
+  const locationStatus = useLocationStatus();
+  const [safetySentWithoutLocation, setSafetySentWithoutLocation] = useState(false);
 
   useEffect(() => {
     clickContextRef.current = { userLocation, windData, onMapClick };
@@ -745,6 +752,15 @@ export default function RadarDisplay({
     );
   };
 
+  // Back from Settings with location allowed: hide the prompt and center on the user again.
+  useEffect(() => {
+    if (locationStatus.state.permission === "granted" && locationDenied) {
+      setSafetySentWithoutLocation(false);
+      handleLocateMe();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationStatus.state.permission]);
+
   const chooseSearchedPlace = (place) => {
     if (place?.latitude == null || place?.longitude == null) return;
     saveActiveLocation(place);
@@ -793,14 +809,22 @@ export default function RadarDisplay({
       return;
     }
     try {
-      await sendContactTexts({
+      const result = await sendContactTexts({
         kind,
-        coords: userLocation
-          ? { latitude: userLocation.lat, longitude: userLocation.lon }
-          : savedPlace
-            ? { latitude: savedPlace.latitude, longitude: savedPlace.longitude }
-            : undefined,
+        alertName: primarySafetyAlert?.name || "",
+        place: appLocation?.source === "search" ? "" : safetyPlaceName(appLocation),
+        lookupLocation: !locationStatus.off,
+        coords: locationStatus.off
+          ? null
+          : gpsFix
+            ? { latitude: gpsFix.lat, longitude: gpsFix.lon }
+            : userLocation
+              ? { latitude: userLocation.lat, longitude: userLocation.lon }
+              : savedPlace
+                ? { latitude: savedPlace.latitude, longitude: savedPlace.longitude }
+                : undefined,
       });
+      setSafetySentWithoutLocation(Boolean(result?.withoutLocation));
     } catch (error) {
       if (error.code === "NO_CONTACTS") {
         navigate("/Contacts");
@@ -1030,6 +1054,9 @@ export default function RadarDisplay({
               <div className="pointer-events-auto w-full max-w-sm">
                 <SafetyTextActions
                   compact
+                  alertName={primarySafetyAlert?.name || ""}
+                  showLocationPrompt={false}
+                  onSent={(result) => setSafetySentWithoutLocation(Boolean(result?.withoutLocation))}
                   coords={
                     userLocation
                       ? { latitude: userLocation.lat, longitude: userLocation.lon }
@@ -1040,19 +1067,20 @@ export default function RadarDisplay({
                 />
               </div>
             )}
-            {locationDenied && (
-              <div className="pointer-events-auto w-full max-w-sm rounded-2xl border border-white/10 bg-slate-950/95 p-3 shadow-xl">
-                <p className="text-xs leading-relaxed text-slate-200">
-                  Location is off. Search for a city, or allow location while using the app.
-                </p>
+            <LocationOffPrompt
+              variant="banner"
+              force={(locationDenied && !userLocation) || safetySentWithoutLocation}
+              urgent={safetySentWithoutLocation}
+              onDismiss={() => setSafetySentWithoutLocation(false)}
+              onGranted={handleLocateMe}
+              className="w-full max-w-sm"
+            >
+              {locationDenied && (
                 <div className="mt-2">
                   <LocationSearch current={savedPlace} onSelect={chooseSearchedPlace} />
                 </div>
-                <button type="button" onClick={handleLocateMe} className="mt-2 text-xs font-semibold text-sky-300">
-                  Try location again
-                </button>
-              </div>
-            )}
+              )}
+            </LocationOffPrompt>
             {(baseMapError || radarTileError) && (
               <div className="pointer-events-auto rounded-2xl border border-white/10 bg-slate-950/95 px-3 py-2 text-xs text-slate-100 shadow">
                 <p>{baseMapError ? "Map tiles didn't load." : "Radar tiles didn't load."}</p>

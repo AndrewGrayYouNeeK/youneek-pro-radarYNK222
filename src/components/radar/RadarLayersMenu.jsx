@@ -290,14 +290,14 @@ export default function RadarLayersMenu({
                         onClick={() => onFeatureAction?.("help")}
                         className="flex min-h-11 items-center justify-center rounded-xl bg-red-600 text-sm font-bold text-white"
                       >
-                        Help Me
+                        I Need Help
                       </button>
                       <button
                         type="button"
                         onClick={() => onFeatureAction?.("safe")}
                         className="flex min-h-11 items-center justify-center rounded-xl bg-emerald-400 text-sm font-bold text-slate-950"
                       >
-                        I’m Sheltering
+                        I&apos;m Safe
                       </button>
                     </div>
                   )}

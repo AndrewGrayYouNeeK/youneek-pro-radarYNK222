@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { ChevronRight, Trash2, X } from "lucide-react";
+import LocationOffPrompt from "@/components/location/LocationOffPrompt";
+import useLocationStatus from "@/hooks/useLocationStatus";
 import { finishSafetyOnboarding } from "@/lib/safety/onboarding";
 import { MAX_SHELTER_CONTACTS, addShelterContact, loadShelterContacts, saveShelterContacts } from "@/lib/safety/sms";
 
@@ -11,7 +13,7 @@ export default function OnboardingModal({ onDone }) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
-  const [locationNote, setLocationNote] = useState("");
+  const locationStatus = useLocationStatus();
   const step = STEPS[index];
 
   const finish = (skipped) => {
@@ -58,19 +60,6 @@ export default function OnboardingModal({ onDone }) {
     finish(false);
   };
 
-  const allowLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationNote("Location is not available here. You can search for a city on the map.");
-      return;
-    }
-    setLocationNote("Asking for location while you use the app…");
-    navigator.geolocation.getCurrentPosition(
-      () => setLocationNote("Location allowed. Radar and alerts can center on you."),
-      () => setLocationNote("Location stayed off. Search for a city instead. You can allow it later while using the app."),
-      { enableHighAccuracy: true, timeout: 8000, maximumAge: 10000 }
-    );
-  };
-
   return (
     <div
       className="fixed inset-0 z-[2000] flex flex-col bg-slate-950 text-white"
@@ -100,7 +89,7 @@ export default function OnboardingModal({ onDone }) {
             <div>
               <h1 className="text-2xl font-bold text-white">Safety contacts</h1>
               <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                Help Me says you need help and are taking shelter. I’m Sheltering says you are sheltering and safe, and adds your coordinates with a map link. Both open one message to the people you save here. Nothing sends until you tap Send. These buttons show only while a warning or watch covers your location. Contacts stay on this device.
+                I’m Safe and I Need Help each open Messages with the text already written for the people you save here: the alert, where you are, and one map link. You just tap Send. These buttons show only while a warning or watch covers your location. Contacts stay on this device.
               </p>
             </div>
             <div className="space-y-3 rounded-2xl border border-emerald-400/30 bg-white/5 p-4">
@@ -172,16 +161,15 @@ export default function OnboardingModal({ onDone }) {
           <div className="mx-auto max-w-sm text-center">
             <h1 className="text-2xl font-bold text-white">Location</h1>
             <p className="mt-3 text-sm leading-relaxed text-slate-300">
-              YouNeeK Pro Radar asks for location only while you are using the app. It centers the radar, checks whether a warning or watch covers you, and adds your coordinates to a safety text. If you say no, search for a city instead.
+              YouNeeK Pro Radar asks for location only while you are using the app. It centers the radar, checks whether a warning or watch covers you, and puts a map link in I’m Safe and I Need Help. If you say no, search for a city instead.
             </p>
-            <button
-              type="button"
-              onClick={allowLocation}
-              className="mt-5 w-full rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-emerald-300"
-            >
-              Allow location
-            </button>
-            {locationNote && <p className="mt-3 text-xs leading-relaxed text-slate-400">{locationNote}</p>}
+            {locationStatus.off ? (
+              <LocationOffPrompt variant="inline" className="mt-5 text-left" />
+            ) : (
+              <p className="mt-5 rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-3 font-mono text-xs text-emerald-200">
+                Location is on while you use the app.
+              </p>
+            )}
           </div>
         )}
 

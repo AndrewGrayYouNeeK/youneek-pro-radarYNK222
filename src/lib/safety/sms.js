@@ -5,9 +5,8 @@ export const SHELTER_CONTACTS_EVENT = "ynk-shelter-contacts";
 export const SAFETY_EXPLAINED_KEY = "safetySmsExplained_v1";
 export const SAFETY_MESSAGES_KEY = "safetyMessages_v1";
 export const MAX_SHELTER_CONTACTS = 5;
-export const DEFAULT_EMERGENCY_LINE = "EMERGENCY — I need help. I am taking shelter now.";
-export const DEFAULT_SAFE_LINE = "I’M SHELTERING — I am sheltering and I am safe.";
-const APP_SIGNATURE = "Sent from YouNeeK Pro Radar";
+export const DEFAULT_EMERGENCY_LINE = "I need help.";
+export const DEFAULT_SAFE_LINE = "I'm safe.";
 
 function storageFor(storage) {
   if (storage) return storage;
@@ -142,31 +141,85 @@ export function deviceCanComposeSms(env = {}) {
   return true;
 }
 
-export function formatSafetyLocationLine(coords) {
+function isAppleDevice(userAgent) {
+  const ua = userAgent ?? (typeof navigator === "undefined" ? "" : navigator.userAgent || "");
+  return /iPad|iPhone|iPod|Macintosh/.test(ua);
+}
+
+function validCoords(coords) {
   const lat = Number(coords?.latitude);
   const lon = Number(coords?.longitude);
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return "";
-  const latText = lat.toFixed(5);
-  const lonText = lon.toFixed(5);
-  return [
-    `My location: ${latText}, ${lonText}`,
-    `https://maps.apple.com/?ll=${latText},${lonText}&q=${latText},${lonText}`,
-    `https://maps.google.com/?q=${latText},${lonText}`,
-  ].join("\n");
+  if (coords == null || !Number.isFinite(lat) || !Number.isFinite(lon)) return null;
+  return { lat, lon };
+}
+
+// One map link only: Apple Maps from an iPhone, Google Maps everywhere else.
+export function safetyMapLink(coords, userAgent) {
+  const point = validCoords(coords);
+  if (!point) return "";
+  const lat = point.lat.toFixed(5);
+  const lon = point.lon.toFixed(5);
+  if (isAppleDevice(userAgent)) return `https://maps.apple.com/?ll=${lat},${lon}&q=${lat},${lon}`;
+  return `https://maps.google.com/?q=${lat},${lon}`;
+}
+
+export function safetyGpsLine(coords) {
+  const point = validCoords(coords);
+  if (!point) return "";
+  return `(GPS ${point.lat.toFixed(4)}, ${point.lon.toFixed(4)})`;
+}
+
+// Kept for older callers: a single readable line plus one map link.
+export function formatSafetyLocationLine(coords, userAgent) {
+  const link = safetyMapLink(coords, userAgent);
+  if (!link) return "";
+  return [`I'm here: ${link}`, safetyGpsLine(coords)].join("\n");
+}
+
+function cleanPhrase(value) {
+  return String(value || "").replace(/\s+/g, " ").trim().replace(/[.\s]+$/, "");
+}
+
+/**
+ * Human-readable text for I'm Safe ("safe") or I Need Help ("emergency").
+ * alertName and place are optional; coords may be missing when location is off.
+ */
+export function buildSafetyMessage({ kind, alertName, place, coords, userAgent } = {}) {
+  const alert = cleanPhrase(alertName);
+  const where = cleanPhrase(place);
+  const link = safetyMapLink(coords, userAgent);
+  const gps = safetyGpsLine(coords);
+  const near = where ? ` near ${where}` : "";
+  const lines = [];
+
+  if (kind === "emergency") {
+    let text = "I need help.";
+    if (alert) text += ` ${alert}${near || " in effect"}.`;
+    else if (where) text += ` I'm near ${where}.`;
+    text += link ? ` I'm here: ${link}` : " My location is off, so I couldn't share a map link.";
+    text += link ? ". Please call me or send help." : " Please call me or send help.";
+    lines.push(text);
+  } else {
+    let text = "I'm safe.";
+    if (alert) text += ` ${alert} is in effect${near}.`;
+    else if (where) text += ` I'm near ${where}.`;
+    text += link ? ` Here's where I am: ${link}` : " My location is off, so I couldn't share a map link.";
+    lines.push(text);
+  }
+  if (gps) lines.push(gps);
+  return lines.join("\n");
 }
 
 export function safetyMessageExplanation() {
-  return "This opens one message draft to the contacts you saved on this device. I’m Sheltering says you are sheltering and safe, and the draft includes your exact coordinates and a Google Maps link. Nothing is sent until you tap Send. The app does not text anyone by itself and does not resend.";
+  return "I'm Safe and I Need Help open Messages with the text already written: the alert, where you are, and one map link. Nothing is sent until you tap Send. The app does not text anyone by itself and does not resend.";
 }
 
-export function buildEmergencyBody({ locationLine, message, storage } = {}) {
-  const line = String(message ?? loadSafetyMessages(storage).emergency).trim() || DEFAULT_EMERGENCY_LINE;
-  return [line, locationLine, APP_SIGNATURE].filter(Boolean).join("\n");
+export function buildEmergencyBody({ alertName, place, coords, userAgent } = {}) {
+  return buildSafetyMessage({ kind: "emergency", alertName, place, coords, userAgent });
 }
 
-export function buildImSafeBody({ locationLine, context, message, storage } = {}) {
-  const line = String(message ?? context ?? loadSafetyMessages(storage).safe).trim() || DEFAULT_SAFE_LINE;
-  return [line, locationLine, APP_SIGNATURE].filter(Boolean).join("\n");
+export function buildImSafeBody({ alertName, place, coords, userAgent } = {}) {
+  return buildSafetyMessage({ kind: "safe", alertName, place, coords, userAgent });
 }
 
 export async function openSmsDrafts({ phones, body, onProgress }) {
@@ -179,15 +232,25 @@ export async function openSmsDrafts({ phones, body, onProgress }) {
   }
 }
 
-function locationLineFromCoords(coords) {
-  return formatSafetyLocationLine(coords);
-}
-
 function cancelledShare(error) {
   return /cancel/i.test(String(error?.message || error || ""));
 }
 
-export async function sendContactTexts({ kind, context, coords, storage } = {}) {
+function currentCoords(timeout = 6000) {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => resolve({ latitude: position.coords.latitude, longitude: position.coords.longitude }),
+      () => resolve(null),
+      { timeout, maximumAge: 60000 }
+    );
+  });
+}
+
+export async function sendContactTexts({ kind, coords, alertName, place, storage, lookupLocation = true } = {}) {
   const contacts = loadShelterContacts(storage);
   const phones = uniqueContactPhones(contacts);
   if (!phones.length) {
@@ -196,34 +259,19 @@ export async function sendContactTexts({ kind, context, coords, storage } = {}) 
     throw error;
   }
 
-  const knownLine = locationLineFromCoords(coords);
-  const locationLine = knownLine || await new Promise((resolve) => {
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      resolve("(Location unavailable)");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve(formatSafetyLocationLine({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-        }) || "(Location unavailable)");
-      },
-      () => resolve("(Location unavailable)"),
-      { timeout: 8000 }
-    );
-  });
-
+  const known = validCoords(coords) ? coords : null;
+  const resolved = known || (lookupLocation ? await currentCoords() : null);
   const body =
     kind === "emergency"
-      ? buildEmergencyBody({ locationLine, storage })
-      : buildImSafeBody({ locationLine, context, storage });
+      ? buildEmergencyBody({ alertName, place, coords: resolved })
+      : buildImSafeBody({ alertName, place, coords: resolved });
+  const withoutLocation = !resolved;
 
   if (isNativePlatform()) {
     if (!deviceCanComposeSms()) {
       try {
         await shareSafetyMessage(body);
-        return { count: phones.length, mode: "share", body };
+        return { count: phones.length, mode: "share", body, withoutLocation };
       } catch (error) {
         if (cancelledShare(error)) {
           const cancelled = new Error("Nothing was sent.");
@@ -241,9 +289,17 @@ export async function sendContactTexts({ kind, context, coords, storage } = {}) 
       unavailable.code = "SMS_UNAVAILABLE";
       throw unavailable;
     }
-    return { count: phones.length, mode: "sms", body };
+    return { count: phones.length, mode: "sms", body, withoutLocation };
   }
 
   await openSmsDrafts({ phones, body });
-  return { count: phones.length, mode: "sms", body };
+  return { count: phones.length, mode: "sms", body, withoutLocation };
+}
+
+// "Dallas, TX" from the app's own NWS point lookup. Empty when we only have coordinates.
+export function safetyPlaceName(location) {
+  const city = String(location?.city || "").trim();
+  const state = String(location?.state || "").trim();
+  if (!city || city === "Current") return "";
+  return state ? `${city}, ${state}` : city;
 }

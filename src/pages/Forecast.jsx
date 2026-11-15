@@ -148,7 +148,7 @@ export default function Forecast() {
                   <p className="mb-2 text-xs text-red-100">
                     {safetyAlerts[0].name} covers this location. One tap opens Messages. You still tap Send.
                   </p>
-                  <SafetyTextActions compact coords={coords} />
+                  <SafetyTextActions compact coords={coords} alertName={safetyAlerts[0].name} />
                 </section>
               )}
               {data && (

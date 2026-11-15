@@ -25,8 +25,8 @@ export const MAP_FEATURES = [
   { id: "more", label: "More", group: "desk", kind: "route", path: "/More", defaultDock: true },
   { id: "settings", label: "Settings", group: "desk", kind: "route", path: "/Settings", defaultDock: true },
   { id: "contacts", label: "Contacts", group: "safety", kind: "route", path: "/Contacts", defaultDock: true },
-  { id: "help", label: "Help Me", group: "safety", kind: "action", defaultDock: true },
-  { id: "safe", label: "I’m Sheltering", group: "safety", kind: "action", defaultDock: true },
+  { id: "help", label: "I Need Help", group: "safety", kind: "action", defaultDock: true },
+  { id: "safe", label: "I'm Safe", group: "safety", kind: "action", defaultDock: true },
 ];
 
 export const MAP_FEATURE_IDS = new Set(MAP_FEATURES.map((feature) => feature.id));

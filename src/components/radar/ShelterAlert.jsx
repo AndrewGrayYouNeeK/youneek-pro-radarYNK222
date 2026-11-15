@@ -42,10 +42,10 @@ export default function ShelterAlert({ activeTornadoWarning }) {
           </button>
         </div>
         <p className="mb-3 text-xs leading-5 text-slate-300">
-          Send an emergency text or an I’m Sheltering text to {contacts.map((contact) => contact.name).join(", ")}.
-          One draft opens in Messages with your coordinates and map links. You still tap Send.
+          Text {contacts.map((contact) => contact.name).join(", ")} with one tap. Messages opens with the text written,
+          including where you are and a map link. You tap Send.
         </p>
-        <SafetyTextActions compact coords={coords} />
+        <SafetyTextActions compact coords={coords} alertName="Tornado Warning" />
       </motion.div>
     </AnimatePresence>
   );
