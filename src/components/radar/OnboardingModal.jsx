@@ -1,8 +1,9 @@
-import { useState } from "react";
-import { ChevronRight, Trash2, X } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronRight, ShieldAlert, ShieldCheck, Trash2, X } from "lucide-react";
 import LocationOffPrompt from "@/components/location/LocationOffPrompt";
 import useLocationStatus from "@/hooks/useLocationStatus";
 import { finishSafetyOnboarding } from "@/lib/safety/onboarding";
+import { releaseLocationGate } from "@/lib/location/locationGate";
 import { MAX_SHELTER_CONTACTS, addShelterContact, loadShelterContacts, saveShelterContacts } from "@/lib/safety/sms";
 
 const STEPS = ["contacts", "location", "radar"];
@@ -16,8 +17,15 @@ export default function OnboardingModal({ onDone }) {
   const locationStatus = useLocationStatus();
   const step = STEPS[index];
 
+  // Location prompts wait until the safety contacts screen is done (or skipped).
+  useEffect(() => {
+    if (step !== "contacts") releaseLocationGate();
+  }, [step]);
+  useEffect(() => () => releaseLocationGate(), []);
+
   const finish = (skipped) => {
     finishSafetyOnboarding(window.localStorage, { skipped });
+    releaseLocationGate();
     onDone();
   };
 
@@ -87,10 +95,19 @@ export default function OnboardingModal({ onDone }) {
         {step === "contacts" && (
           <div className="mx-auto max-w-sm space-y-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Safety contacts</h1>
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-300/80">First things first</p>
+              <h1 className="mt-1 text-2xl font-bold text-white">Who should we text in a storm?</h1>
               <p className="mt-2 text-sm leading-relaxed text-slate-300">
-                I’m Safe and I Need Help each open Messages with the text already written for the people you save here: the alert, where you are, and one map link. You just tap Send. These buttons show only while a warning or watch covers your location. Contacts stay on this device.
+                These contacts power the one-tap I’m Safe and I Need Help messages. During a warning or watch, one tap opens Messages with the alert, where you are, and a map link already written. You just tap Send. Contacts stay on this device.
               </p>
+              <div className="mt-3 grid grid-cols-2 gap-2" aria-hidden="true">
+                <div className="flex items-center justify-center gap-1.5 rounded-xl border border-emerald-400/40 bg-emerald-400/10 py-2 font-mono text-xs font-semibold text-emerald-200">
+                  <ShieldCheck className="h-3.5 w-3.5" /> I’m Safe
+                </div>
+                <div className="flex items-center justify-center gap-1.5 rounded-xl border border-red-400/40 bg-red-500/10 py-2 font-mono text-xs font-semibold text-red-200">
+                  <ShieldAlert className="h-3.5 w-3.5" /> I Need Help
+                </div>
+              </div>
             </div>
             <div className="space-y-3 rounded-2xl border border-emerald-400/30 bg-white/5 p-4">
               <label className="block text-xs font-medium text-slate-300">
@@ -128,7 +145,7 @@ export default function OnboardingModal({ onDone }) {
                 type="button"
                 onClick={addContact}
                 disabled={contacts.length >= MAX_SHELTER_CONTACTS}
-                className="w-full rounded-xl border border-emerald-400/40 px-4 py-3 text-sm font-semibold text-emerald-200 disabled:opacity-40"
+                className="w-full rounded-xl bg-emerald-400 px-4 py-3 text-sm font-bold text-slate-950 shadow-[0_0_18px_rgba(52,211,153,0.35)] hover:bg-emerald-300 disabled:opacity-40"
               >
                 Add contact
               </button>
@@ -187,7 +204,11 @@ export default function OnboardingModal({ onDone }) {
         <button
           type="button"
           onClick={continueStep}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-emerald-300"
+          className={
+            step === "contacts" && contacts.length === 0 && !name.trim() && !phone.trim()
+              ? "flex w-full items-center justify-center gap-2 rounded-2xl border border-emerald-400/40 px-6 py-4 text-sm font-semibold text-emerald-200 hover:bg-emerald-400/10"
+              : "flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-400 px-6 py-4 text-sm font-bold text-slate-950 hover:bg-emerald-300"
+          }
         >
           {step === "radar" ? "Done" : "Continue"}
           {step !== "radar" && <ChevronRight className="h-4 w-4" aria-hidden="true" />}
