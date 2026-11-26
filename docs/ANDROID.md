@@ -52,7 +52,7 @@ Play requires an Android App Bundle (`.aab`) signed with an upload key. Keep tha
 2. Create a new upload keystore if you do not already have one. Store it outside the repo, and store the passwords in a password manager. If you lose the upload key, Play App Signing can reset it, but only if you enrolled in Play App Signing on the first upload.
 3. Choose the `release` build type. Leave the app id as `com.youneek.proradar`.
 4. On the first upload, enroll in Play App Signing and let Google hold the app signing key. You keep the upload key.
-5. Each later upload needs a higher `versionCode` in `android/app/build.gradle`. `versionName` is the version users see. The first project values are `versionCode 1` and `versionName "1.0"`.
+5. Each later upload needs a higher `versionCode` in `android/app/build.gradle`. `versionName` is the version users see. The first project values were `versionCode 1` and `versionName "1.0"`. The next store build uses `versionCode 2` (still `versionName "1.0"` until it ships). Raise `versionCode` again for every later upload.
 
 A debug APK from the Run button is not the file you upload.
 

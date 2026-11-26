@@ -2,7 +2,7 @@
 
 Paste these fields into App Store Connect. The same bytes are in `fastlane/metadata/en-US/` (`name.txt`, `subtitle.txt`, `promotional_text.txt`, `description.txt`, `keywords.txt`, `release_notes.txt`, `primary_category.txt`, `secondary_category.txt`, `privacy_url.txt`, `support_url.txt`).
 
-Character limits, checked by `functions/_lib/app-store-listing.test.js`: name 17/30, subtitle 24/30, promotional text 137/170, keywords 82/100.
+Character limits, checked by `functions/_lib/app-store-listing.test.js`: name 17/30, subtitle 24/30, promotional text 143/170, keywords 82/100.
 
 Do not edit the listing text below to match the app. The note under Suggested review-safe wording is the only place that proposes a change.
 
@@ -16,7 +16,7 @@ Tactical NEXRAD & Alerts
 
 ## Promotional text
 
-Live NEXRAD radar, real NWS warning polygons, and a one-tap “I’m Sheltering” button that texts your location. Ad-free. One-time purchase.
+Live NEXRAD radar, real NWS warning polygons, and one-tap I’m Safe and I Need Help texts that share your location. Ad-free. One-time purchase.
 
 ## Description
 
@@ -28,11 +28,11 @@ National base reflectivity mosaics from Iowa Mesonet, refreshed automatically. S
 NWS WARNING POLYGONS
 Tornado, severe thunderstorm, flood, and winter warnings drawn as real shapes on the map — not just text lists.
 
-I’M SHELTERING
-One tap sends your exact location and a map link to your emergency contacts. No typing. No hunting for numbers. Just a clear signal that you’re safe.
+SAFETY CONTACTS: I’M SAFE & I NEED HELP
+Pick the people to text the first time you open the app. When a tornado or severe weather warning or watch covers you, tap I’m Safe or I Need Help to open a ready-to-send text with your location and a map link. You review it and tap Send. Contacts stay on your device.
 
 NOAA WEATHER RADIO
-Auto-selects stations near you so you can listen when you need the official voice.
+Finds the nearest NOAA Weather Radio station and shows its call sign and frequency so you can tune your weather radio.
 
 CLEAN & FOCUSED
 Dark tactical interface. No ads. No subscriptions. One-time purchase.
@@ -49,7 +49,7 @@ Primary: Weather (`WEATHER`). Secondary, optional: Navigation (`NAVIGATION`).
 
 ## What’s New 1.0
 
-Initial release. • Live NEXRAD radar • NWS alert polygons • I’m Sheltering emergency text • NOAA Weather Radio • Dark tactical interface • Ad-free, one-time purchase
+Initial release. • Live NEXRAD radar • NWS alert polygons • Storm distance and rain-in-minutes • Safety contacts set up on first launch • I’m Safe and I Need Help texts with your location • NOAA Weather Radio station finder • Dark tactical interface • Ad-free, one-time purchase
 
 ## Age rating and price
 
@@ -63,13 +63,9 @@ Support: https://youneekproradar.com
 
 Confirm the support page shows a way to reach you before you submit.
 
-## Suggested review-safe wording
+## Review-safe wording
 
-Do not change Andrew’s listing unless he chooses to. On iOS, I’m Sheltering does not send the text by itself. The button opens Messages (or the share sheet) with the draft filled in, and the user taps Send.
-
-If Apple questions “One tap sends”, use this instead of the promotional line and the I’M SHELTERING paragraph:
-
-One tap opens a ready-to-send text with your exact location and a map link. You review it and tap Send.
+The listing above already says the user reviews the draft and taps Send. On iOS, I’m Safe and I Need Help do not send the text by themselves. The buttons open Messages (or the share sheet) with the draft filled in, and the user taps Send.
 
 ## Screenshot shot list
 
@@ -79,7 +75,7 @@ Capture on a Mac from a device or simulator, in the dark UI, at the sizes App St
 
 2. Radar with NWS warning polygons. Stay on Radar. Open Layers and turn on Warnings: Tornado, Severe, Flood, and Winter (those four start on). Polygons draw only when the National Weather Service has an active warning of that type, so take this shot while one of those warnings is active. They are the real NWS shapes, not a text list.
 
-3. I’m Sheltering button and the confirmation state. Add at least one contact in More → Contacts (or during onboarding). Then open `youneekproradar://safety-preview` on the phone, or on the website add `?safetyPreview=Tornado%20Warning`. The card is labeled Simulated alert. It appears on Now and, when a warning covers the location, on Radar. Tap I’m Sheltering once. The screen explains that the draft says you are sheltering and safe and includes exact coordinates and a Google Maps link, with Continue and Cancel. That is the confirmation state. Cancel if you do not want Messages to open. Turn the preview off with `youneekproradar://open?safetyPreview=0` or `?safetyPreview=0`.
+3. I’m Safe and I Need Help buttons. Add at least one contact (the first screen on first launch, or More → Contacts). Then open `youneekproradar://safety-preview` on the phone, or on the website add `?safetyPreview=Tornado%20Warning`. The card is labeled Simulated alert. It appears on Now and, when a warning covers the location, on Radar. Tap I’m Safe once to show the ready-to-send draft with your location and a map link. Cancel if you do not want Messages to open. Turn the preview off with `youneekproradar://open?safetyPreview=0` or `?safetyPreview=0`.
 
 4. Current conditions and hourly. Open the Now tab with a location set. The screen shows current conditions and the hourly strip.
 
@@ -95,10 +91,9 @@ True in this build:
 - Individual radar sites are in Layers → NEXRAD site. Reflectivity, base velocity, and storm-relative velocity use that site’s Iowa Mesonet ridge tiles.
 - Tornado, severe thunderstorm, flood, and winter warnings are NWS polygons on the map. Tornado, severe, flood, and winter start turned on.
 - The interface is dark. There are no ads and no subscriptions.
-- I’m Sheltering is the safety action. It stays hidden until a severe warning covers the location. Help Me is unchanged. The draft includes exact coordinates and a Google Maps link. The user taps Send.
+- I’m Safe and I Need Help are the safety actions. They appear only when a warning or watch covers the location. Safety contacts are the first screen on first launch (skippable) and stay on the device. The draft includes exact coordinates and a map link (Apple Maps on iOS, Google Maps on Android). The user taps Send.
 - The app shell and the last successful forecast and alert responses are cached for offline use (service worker, network-first, then the saved copy). Radar tiles are not stored as a full offline mosaic.
 
 Not true if you read the listing literally:
 
-- “One tap sends” and “One tap sends your exact location.” The tap opens a draft. The user sends it. See the suggested wording above.
-- “Auto-selects stations near you so you can listen.” The Radio page, under More, auto-selects the nearest NOAA Weather Radio transmitter from the National Weather Service listing and shows the call sign and frequency, with “Tune your weather radio to X MHz.” NOAA does not publish an internet audio stream this app is allowed to embed, so there is no in-app player. Drop “so you can listen” before submission, or change it to say the app selects the station and frequency to tune.
+- None open. The earlier “One tap sends” and “so you can listen” wording was removed from the listing. The Radio page selects the nearest NOAA Weather Radio transmitter and shows the call sign and frequency. There is no in-app audio player.
