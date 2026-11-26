@@ -1,4 +1,4 @@
-import { useState, useCallback, Suspense, lazy } from "react";
+import { useState, useCallback, useEffect, Suspense, lazy } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 const RadarDisplay = lazy(() => import("../components/radar/RadarDisplay"));
@@ -21,6 +21,13 @@ const DEFAULT_SETTINGS = {
 
 export default function Radar() {
   useTabPageMemory("Radar");
+  useEffect(() => {
+    const previous = document.title;
+    document.title = "YouNeeK ProRadar";
+    return () => {
+      document.title = previous;
+    };
+  }, []);
   const navigate = useNavigate();
   const location = useLocation();
   const { goBack } = useNavigationStack();
@@ -127,7 +134,7 @@ export default function Radar() {
 
   return (
     <div className="flex h-[100dvh] flex-col overflow-hidden bg-slate-950">
-      <AppHeader title="Radar" />
+      <AppHeader title="YouNeeK ProRadar" />
       <div
         className="relative min-h-0 flex-1 overflow-hidden"
         style={{ paddingBottom: "calc(4.5rem + env(safe-area-inset-bottom))" }}
