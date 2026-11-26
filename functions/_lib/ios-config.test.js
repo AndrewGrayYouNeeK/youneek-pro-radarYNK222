@@ -91,7 +91,8 @@ test("the public privacy page matches the in-app policy", () => {
   for (const paragraph of PRIVACY_POLICY_PARAGRAPHS) {
     assert.ok(html.includes(paragraph), paragraph.slice(0, 48));
   }
-  assert.match(worker, /pathname === "\/privacy"/);
+  // Rewriting /privacy to /privacy.html makes the assets binding 307 back to /privacy (redirect loop).
+  assert.doesNotMatch(worker, /"\/privacy\.html"/);
   assert.match(worker, /applyCors/);
   assert.doesNotMatch(worker, /Access-Control-Allow-Origin": "\*"/);
 });
