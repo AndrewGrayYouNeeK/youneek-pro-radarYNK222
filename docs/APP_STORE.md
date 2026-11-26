@@ -43,7 +43,7 @@ Source: `src/content/privacyPolicy.js` and `public/privacy.html`. Paste that URL
 - `NSPrivacyTracking` is false.
 - No tracking domains.
 - Required-reason API: User Defaults, reason `CA92.1`, because `@capacitor/preferences` stores contacts, the last location, and settings on device only.
-- Collected data type declared in the manifest: precise location, not linked, not tracking, purpose app functionality.
+- Collected data types declared in the manifest: precise location and coarse location, both not linked, not tracking, purpose app functionality. Coarse location is the ~11 km point stored with the push token for warning alerts.
 
 Capacitor plugins ship their own manifests inside the Swift packages. Do not add a tracking domain to any of them.
 
@@ -55,7 +55,20 @@ Capacitor plugins ship their own manifests inside the Swift packages. Do not add
 - No `NSUserTrackingUsageDescription`.
 - `ITSAppUsesNonExemptEncryption` is false (HTTPS only). Confirm that before you answer the export question.
 
-Notifications are not requested at launch. The website's "Browser notifications" switch is hidden in the native app. Adding push later is a separate change: a usage string, a permission request at a moment the user understands, and a background mode only if you truly need one.
+Notifications are not requested at launch. The app asks on the onboarding "Warning alerts" screen, after safety contacts and location, or later from Settings → Lock screen alerts. No background mode is needed: alerts are remote pushes sent by the Worker (see `docs/PUSH_SETUP.md`). The website's "Browser notifications" switch is hidden in the native app.
+
+### App Privacy answers (App Store Connect) with warning alerts
+
+- Location → Coarse Location: collected, App Functionality, not linked to the user, not used for tracking. (The ~11 km point sent with the push token.)
+- Location → Precise Location: keep the existing answer (sent to the Worker per request to load forecasts and alerts, not stored, not linked).
+- Identifiers: the APNs push token is not the IDFA or IDFV and is not tied to a user; Apple does not count it as Device ID. Answer "No" for Identifiers unless you add accounts later.
+- Data used to track you: none.
+
+### Google Play Data safety with warning alerts
+
+- Location → Approximate location: collected, not shared, processed for App functionality, users can't opt out of collection while alerts are on but can turn notifications off; data is encrypted in transit; deleted automatically after 30 days.
+- Device or other IDs: the FCM registration token is collected for App functionality (sending warnings), not shared, not linked to an account. Declare it here.
+- No data is sold or used for advertising.
 
 ## How a reviewer sees I Need Help / I’m Safe
 

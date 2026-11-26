@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { ChevronRight, ShieldAlert, ShieldCheck, Trash2, X } from "lucide-react";
+import { BellRing, ChevronRight, ShieldAlert, ShieldCheck, Trash2, X } from "lucide-react";
 import LocationOffPrompt from "@/components/location/LocationOffPrompt";
 import useLocationStatus from "@/hooks/useLocationStatus";
+import useNotificationStatus from "@/hooks/useNotificationStatus";
+import { isNativePlatform } from "@/lib/native/runtime";
 import { finishSafetyOnboarding } from "@/lib/safety/onboarding";
 import { releaseLocationGate } from "@/lib/location/locationGate";
 import { MAX_SHELTER_CONTACTS, addShelterContact, loadShelterContacts, saveShelterContacts } from "@/lib/safety/sms";
 
-const STEPS = ["contacts", "location", "radar"];
+// Notifications are asked for only after safety contacts and location. Web has no push, so it skips "alerts".
+const STEPS = ["contacts", "location", "alerts", "radar"];
 
 export default function OnboardingModal({ onDone }) {
   const [index, setIndex] = useState(0);
@@ -15,7 +18,9 @@ export default function OnboardingModal({ onDone }) {
   const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const locationStatus = useLocationStatus();
-  const step = STEPS[index];
+  const notifyStatus = useNotificationStatus();
+  const [steps] = useState(() => (isNativePlatform() ? STEPS : STEPS.filter((item) => item !== "alerts")));
+  const step = steps[index];
 
   // Location prompts wait until the safety contacts screen is done (or skipped).
   useEffect(() => {
@@ -59,9 +64,10 @@ export default function OnboardingModal({ onDone }) {
     setContacts(next);
   };
 
-  const continueStep = () => {
+  const continueStep = async () => {
     if (step === "contacts" && !commitDraft()) return;
-    if (index < STEPS.length - 1) {
+    if (step === "alerts" && notifyStatus.permission === "prompt") await notifyStatus.turnOn();
+    if (index < steps.length - 1) {
       setIndex((value) => value + 1);
       return;
     }
@@ -79,7 +85,7 @@ export default function OnboardingModal({ onDone }) {
     >
       <div className="flex items-center justify-between px-4 pt-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
-          Step {index + 1} of {STEPS.length}
+          Step {index + 1} of {steps.length}
         </p>
         <button
           type="button"
@@ -186,6 +192,41 @@ export default function OnboardingModal({ onDone }) {
               <p className="mt-5 rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-3 font-mono text-xs text-emerald-200">
                 Location is on while you use the app.
               </p>
+            )}
+          </div>
+        )}
+
+        {step === "alerts" && (
+          <div className="mx-auto max-w-sm text-center">
+            <BellRing className="mx-auto h-8 w-8 text-emerald-300" aria-hidden="true" />
+            <h1 className="mt-2 text-2xl font-bold text-white">Warning alerts</h1>
+            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+              Get a notification the moment the National Weather Service issues a Tornado, Severe Thunderstorm, or Flash Flood Warning for your area, even when the app is closed. Tapping it opens the radar and I’m Safe / I Need Help.
+            </p>
+            <p className="mt-2 text-xs leading-relaxed text-slate-400">
+              To match warnings, the app sends this phone’s notification token and your location rounded to about 11 km. Never your exact location.
+            </p>
+            {notifyStatus.permission === "granted" ? (
+              <p className="mt-5 rounded-xl border border-emerald-400/40 bg-emerald-400/10 px-3 py-3 font-mono text-xs text-emerald-200">
+                Warning alerts are on.
+              </p>
+            ) : notifyStatus.permission === "denied" ? (
+              <button
+                type="button"
+                onClick={notifyStatus.turnOn}
+                className="mt-5 w-full rounded-xl border border-emerald-400/60 bg-emerald-400/15 px-3 py-3 font-mono text-xs font-bold uppercase tracking-[0.14em] text-emerald-200 hover:bg-emerald-400/25"
+              >
+                Notifications are off · Open Settings
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={notifyStatus.turnOn}
+                disabled={notifyStatus.busy}
+                className="mt-5 w-full rounded-xl bg-emerald-400 px-3 py-3 text-sm font-bold text-slate-950 shadow-[0_0_18px_rgba(52,211,153,0.35)] hover:bg-emerald-300 disabled:opacity-50"
+              >
+                Turn on warning alerts
+              </button>
             )}
           </div>
         )}

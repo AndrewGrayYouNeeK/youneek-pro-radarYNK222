@@ -24,6 +24,16 @@
       "style": "DARK",
       "backgroundColor": "#020617",
       "overlaysWebView": true
+    },
+    "PushNotifications": {
+      "presentationOptions": [
+        "badge",
+        "sound",
+        "alert"
+      ]
+    },
+    "LocalNotifications": {
+      "iconColor": "#34d399"
     }
   }
 }

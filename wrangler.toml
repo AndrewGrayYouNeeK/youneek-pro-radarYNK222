@@ -13,3 +13,12 @@ run_worker_first = true
 [vars]
 # WeatherKit secrets: WEATHERKIT_TEAM_ID, WEATHERKIT_KEY_ID, WEATHERKIT_SERVICE_ID, WEATHERKIT_PRIVATE_KEY
 # See WEATHERKIT.md for Apple Developer setup.
+
+# Live warning pushes to phones. Device registry: push token + NWS zone codes + ~0.1° cell, 30-day TTL.
+# Push secrets (see docs/PUSH_SETUP.md): APNS_KEY_ID, APNS_TEAM_ID, APNS_PRIVATE_KEY, APNS_BUNDLE_ID, FCM_SERVICE_ACCOUNT
+[[kv_namespaces]]
+binding = "PUSH_KV"
+id = "5901c188276b442ea0ac7b41194fcec0"
+
+[triggers]
+crons = ["*/2 * * * *"]

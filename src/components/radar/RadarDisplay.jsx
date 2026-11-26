@@ -42,6 +42,7 @@ import PremiumPill from "@/components/premium/PremiumPill";
 import { PREMIUM_UNLOCKED, isLayerLocked, radarProductFor } from "@/lib/premium";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import LocationOffPrompt from "@/components/location/LocationOffPrompt";
+import NotificationsOffPrompt from "@/components/notifications/NotificationsOffPrompt";
 import useLocationStatus from "@/hooks/useLocationStatus";
 import { useLocation } from "@/lib/LocationContext";
 import { alertSummary, warningFeatures } from "@/lib/radar/alertText";
@@ -1086,6 +1087,7 @@ export default function RadarDisplay({
                 </div>
               )}
             </LocationOffPrompt>
+            <NotificationsOffPrompt className="w-full max-w-sm" />
             {(baseMapError || radarTileError) && (
               <div className="pointer-events-auto rounded-2xl border border-white/10 bg-slate-950/95 px-3 py-2 text-xs text-slate-100 shadow">
                 <p>{baseMapError ? "Map tiles didn't load." : "Radar tiles didn't load."}</p>

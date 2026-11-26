@@ -3,7 +3,10 @@ package com.youneek.proradar;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.Settings;
+import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 /**
@@ -27,5 +30,18 @@ public class AppSettingsPlugin extends Plugin {
             getContext().startActivity(intent);
         }
         return Boolean.TRUE;
+    }
+
+    /**
+     * True when the build includes Firebase config (google-services.json), so FCM
+     * registration will not fail. Without it, the web layer skips push and keeps
+     * in-app and local notifications only.
+     */
+    @PluginMethod
+    public void pushAvailable(PluginCall call) {
+        int id = getContext().getResources().getIdentifier("google_app_id", "string", getContext().getPackageName());
+        JSObject result = new JSObject();
+        result.put("available", id != 0);
+        call.resolve(result);
     }
 }

@@ -17,6 +17,7 @@ import { getPref, setPref } from "@/lib/prefs";
 import { isNativePlatform } from "@/lib/native/runtime";
 import { UNIT_OPTIONS } from "@/lib/weather/units";
 import { useUnits } from "@/lib/UnitsContext";
+import LockScreenAlertsRow from "@/components/notifications/LockScreenAlertsRow";
 
 const APP_VERSION = "1.0.0";
 
@@ -173,11 +174,7 @@ export default function Settings() {
               />
             )}
             {isNativePlatform() && (
-              <SettingRow
-                icon={Bell}
-                label="Lock screen alerts"
-                sublabel="Not turned on. Severe warnings stay inside the app. Notification permission is a later step, not requested at launch."
-              />
+              <LockScreenAlertsRow Row={SettingRow} icon={Bell} />
             )}
             <SettingRow
               icon={AlertTriangle}
