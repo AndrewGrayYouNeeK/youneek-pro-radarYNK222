@@ -16,6 +16,7 @@ import LightningProximityCard from "@/components/forecast/LightningProximityCard
 import StormRiskCard from "@/components/forecast/StormRiskCard";
 import RainArrivalAlert from "@/components/radar/RainArrivalAlert";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
+import PremiumOnly from "@/components/premium/PremiumOnly";
 import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
@@ -62,11 +63,15 @@ export default function WeatherHome() {
 
   return (
     <>
-      <RainArrivalAlert presentation="inline" />
+      <PremiumOnly>
+        <RainArrivalAlert presentation="inline" />
+      </PremiumOnly>
       <LegacyBrand />
       <LocationPicker />
       <AlertBanner alerts={alerts} />
-      <SafetyTextCard />
+      <PremiumOnly>
+        <SafetyTextCard />
+      </PremiumOnly>
 
       {showLoading && <WeatherSkeleton />}
 
@@ -92,12 +97,14 @@ export default function WeatherHome() {
           <StormRiskCard coords={coords} />
           <CurrentConditionsCard data={data.current} />
           <WeatherDetails data={data} />
-          <section className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <h2 className="text-sm font-semibold text-white">{rainTimingLabel(data.minutes)}</h2>
-            <div className="mt-3">
-              <MinutePrecipitation minutes={data.minutes} hideHeader />
-            </div>
-          </section>
+          <PremiumOnly>
+            <section className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <h2 className="text-sm font-semibold text-white">{rainTimingLabel(data.minutes)}</h2>
+              <div className="mt-3">
+                <MinutePrecipitation minutes={data.minutes} hideHeader />
+              </div>
+            </section>
+          </PremiumOnly>
           <HourlyStrip hours={(data.hourly || []).slice(0, 24)} title="Hourly" />
           <div className="text-right">
             <Link to="/Hourly" className="text-sm font-medium text-sky-300">

@@ -26,6 +26,7 @@ import useUnifiedWeather from "@/hooks/useUnifiedWeather";
 import { isMissingWeatherKit } from "@/lib/api/unifiedWeather";
 import { fetchPointAlerts } from "@/lib/api/outlook";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
+import { PREMIUM_UNLOCKED } from "@/lib/premium";
 import { activeSafetyAlerts } from "@/lib/safety/weatherEmergency";
 import { readSafetyPreview } from "@/lib/safety/safetyPreview";
 import { mergeWeatherAlerts } from "@/lib/weather/alertMerge";
@@ -143,7 +144,7 @@ export default function Forecast() {
                   WeatherKit credentials are optional. Full forecast, future radar, and 16-day outlook still load.
                 </p>
               )}
-              {safetyAlerts.length > 0 && (
+              {PREMIUM_UNLOCKED && safetyAlerts.length > 0 && (
                 <section className="rounded-2xl border border-red-500/30 bg-red-950/40 p-3">
                   <p className="mb-2 text-xs text-red-100">
                     {safetyAlerts[0].name} covers this location. One tap opens Messages. You still tap Send.
@@ -166,7 +167,7 @@ export default function Forecast() {
               <LifestyleStrip current={current} coords={coords} />
               <LightningProximityCard coords={coords} />
               <PrecipOutlookCard extras={data.extras} />
-              <MinutePrecipitation minutes={data.minutes} />
+              {PREMIUM_UNLOCKED && <MinutePrecipitation minutes={data.minutes} />}
               <StormRiskCard coords={coords} />
               <EnvironmentCards coords={coords} />
               <WinterCard extras={data.extras} />

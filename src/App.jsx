@@ -12,6 +12,8 @@ import { NavigationStackProvider } from "@/lib/NavigationStack";
 import { RadioProvider } from "@/lib/RadioContext";
 import OnboardingModal from "@/components/radar/OnboardingModal";
 import { shouldShowSafetyOnboarding } from "@/lib/safety/onboarding";
+import { PREMIUM_UNLOCKED } from "@/lib/premium";
+import PremiumLockedPage from "@/components/premium/PremiumLockedPage";
 
 const Radar = lazy(() => import("./pages/Radar"));
 const Contacts = lazy(() => import("./pages/Contacts"));
@@ -42,7 +44,8 @@ const DarkFallback = () => <div className="h-full bg-slate-950" />;
 
 function AppShell() {
   const [showOnboarding, setShowOnboarding] = useState(
-    () => typeof window !== "undefined" && shouldShowSafetyOnboarding(window.localStorage)
+    // Safety contacts first launch is app-only. The web preview skips it.
+    () => PREMIUM_UNLOCKED && typeof window !== "undefined" && shouldShowSafetyOnboarding(window.localStorage)
   );
 
   return (
@@ -93,8 +96,8 @@ function App() {
                 <Route path="/Health" element={<Health />} />
                 <Route path="/News" element={<News />} />
                 <Route path="/Astronomy" element={<Astronomy />} />
-                <Route path="/Radio" element={<RadioPage />} />
-                <Route path="/Contacts" element={<Contacts />} />
+                <Route path="/Radio" element={PREMIUM_UNLOCKED ? <RadioPage /> : <PremiumLockedPage title="NOAA Weather Radio" />} />
+                <Route path="/Contacts" element={PREMIUM_UNLOCKED ? <Contacts /> : <PremiumLockedPage title="Safety contacts" />} />
                 <Route path="/Settings" element={<Settings />} />
                 <Route path="/Privacy" element={<Privacy />} />
               </Route>
