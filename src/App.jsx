@@ -11,6 +11,7 @@ import { UnitsProvider } from "@/lib/UnitsContext";
 import { NavigationStackProvider } from "@/lib/NavigationStack";
 import { RadioProvider } from "@/lib/RadioContext";
 import OnboardingModal from "@/components/radar/OnboardingModal";
+import LiveAlerts from "@/components/notifications/LiveAlerts";
 import { shouldShowSafetyOnboarding } from "@/lib/safety/onboarding";
 import { PREMIUM_UNLOCKED } from "@/lib/premium";
 import PremiumLockedPage from "@/components/premium/PremiumLockedPage";
@@ -51,6 +52,7 @@ function AppShell() {
   return (
     <div className="app-shell h-[100dvh] w-full overflow-hidden bg-slate-950 text-white">
       {showOnboarding && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
+      <LiveAlerts paused={showOnboarding} />
       <Suspense fallback={<DarkFallback />}>
         <Outlet />
       </Suspense>

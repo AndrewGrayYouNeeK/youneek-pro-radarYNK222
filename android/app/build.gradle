@@ -43,3 +43,14 @@ dependencies {
 }
 
 apply from: 'capacitor.build.gradle'
+
+// Firebase Cloud Messaging for live warnings. Applied only when Andrew adds
+// android/app/google-services.json (see docs/PUSH_SETUP.md); builds work without it.
+try {
+    def servicesJSON = file('google-services.json')
+    if (servicesJSON.text) {
+        apply plugin: 'com.google.gms.google-services'
+    }
+} catch (Exception e) {
+    logger.info("google-services.json not found, push notifications are off for this build")
+}

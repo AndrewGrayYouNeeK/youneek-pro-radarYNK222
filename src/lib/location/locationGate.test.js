@@ -47,7 +47,7 @@ test("returning users are not held", () => {
 
 test("safety contacts are the first onboarding screen and release location after it", () => {
   const modal = readFileSync(new URL("../../components/radar/OnboardingModal.jsx", import.meta.url), "utf8");
-  assert.match(modal, /const STEPS = \["contacts", "location", "radar"\]/);
+  assert.match(modal, /const STEPS = \["contacts", "location", "alerts", "radar"\]/);
   assert.match(modal, /releaseLocationGate\(\)/);
   assert.match(modal, /Skip for now/);
   const main = readFileSync(new URL("../../main.jsx", import.meta.url), "utf8");

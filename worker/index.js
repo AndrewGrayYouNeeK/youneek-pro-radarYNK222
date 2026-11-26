@@ -13,6 +13,8 @@ import { onRequestGet as getWeatherStatus } from "../functions/api/weather-statu
 import { handleNwsRequest } from "../server/nwsApi.js";
 import { finalizeAssetResponse } from "./serveAssets.js";
 import { applyCors } from "../functions/_lib/cors.js";
+import { handlePushRegister, handlePushUnregister } from "../functions/_lib/push/register.js";
+import { runPushCron } from "../functions/_lib/push/cron.js";
 
 async function handle(request, env) {
     const { pathname } = new URL(request.url);
@@ -82,6 +84,14 @@ async function handle(request, env) {
       }
     }
 
+    if (request.method === "POST" && pathname === "/api/push/register") {
+      return handlePushRegister(request, env);
+    }
+
+    if (request.method === "POST" && pathname === "/api/push/unregister") {
+      return handlePushUnregister(request, env);
+    }
+
     if (request.method === "GET" && pathname === "/sw.js") {
       const assetResponse = await env.ASSETS.fetch(request);
       const headers = new Headers(assetResponse.headers);
@@ -107,5 +117,14 @@ export default {
     const { pathname } = new URL(request.url);
     if (pathname.startsWith("/api/")) return applyCors(request, response);
     return response;
+  },
+
+  // Live warnings to phones (cron in wrangler.toml). No-ops until PUSH_KV and push secrets exist.
+  async scheduled(controller, env, ctx) {
+    ctx.waitUntil(
+      runPushCron(env, { log: (line) => console.log(line) }).catch((error) => {
+        console.log(`push cron failed: ${error?.message || error}`);
+      })
+    );
   },
 };
