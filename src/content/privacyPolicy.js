@@ -8,5 +8,5 @@ export const PRIVACY_POLICY_PARAGRAPHS = [
   "Safety contacts stay on this device (iOS Preferences, or the browser's local storage on the website). They are not uploaded. Tapping I’m Safe or I Need Help opens a message you can read. It names the alert and your nearby town, and includes one map link to where you are and your GPS coordinates. The message is sent only if you tap Send in Messages or in the share sheet. The app does not send it for you and does not resend it.",
   "WeatherKit credentials stay on the Cloudflare Worker. They are not in the app.",
   "You can clear contacts, saved places, and settings in the app with Clear all app data, or by deleting the app. You can turn location off in iOS Settings.",
-  "Questions about this policy: https://youneekproradar.com",
+  "Questions about this policy: andrewgray@youneek.xyz or https://youneekproradar.com/support",
 ];

@@ -59,9 +59,9 @@ Age rating: 4+. Price: one-time purchase, no subscription. Set the tier in App S
 
 Privacy policy: https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy
 
-Support: https://youneekproradar.com
+Support: https://youneekproradar.com/support
 
-Confirm the support page shows a way to reach you before you submit.
+Support email: andrewgray@youneek.xyz
 
 ## Review-safe wording
 

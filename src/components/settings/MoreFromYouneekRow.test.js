@@ -112,7 +112,7 @@ test("the Other YouNeeK apps offered row renders in About and links to https://y
     "src/components/settings/MoreFromYouneekRow.test.js",
   ]);
   const mentions = sourceFiles(root)
-    .filter((path) => readFileSync(path, "utf8").includes("youneek.xyz"))
+    .filter((path) => /(?<!@)youneek\.xyz/.test(readFileSync(path, "utf8")))
     .map((path) => relative(root, path));
   assert.deepEqual(mentions.sort(), [...allowed].sort());
 

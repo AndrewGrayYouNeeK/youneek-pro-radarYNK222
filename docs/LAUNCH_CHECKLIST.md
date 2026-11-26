@@ -48,7 +48,8 @@ Paste the listing from `docs/APP_STORE_LISTING.md`, or from `fastlane/metadata/e
 | Primary category | Weather |
 | Secondary category | Navigation (optional) |
 | Privacy policy URL | https://youneek-pro-radarynk222.youneekartifacts.workers.dev/privacy |
-| Support URL | https://youneekproradar.com |
+| Support URL | https://youneekproradar.com/support |
+| Support email | andrewgray@youneek.xyz |
 | Price | One-time price in Pricing and Availability. No subscription and no in-app purchase. |
 
 Privacy labels: follow `docs/APP_STORE.md`. Do not turn on tracking.
