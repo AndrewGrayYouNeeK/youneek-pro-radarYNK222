@@ -87,7 +87,7 @@ Screenshots have to be captured on a Mac from the simulator or a device. Connect
 
 The price is a one-time price in Pricing and Availability, including free if you set it to $0. There is no StoreKit code and no subscription.
 
-Support URL to enter, after you confirm the page shows a way to reach you: `https://youneekproradar.com`
+Support URL to enter: `https://youneekproradar.com/support`. That page lists the support email, andrewgray@youneek.xyz.
 
 ## Play data safety
 
