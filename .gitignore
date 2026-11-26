@@ -62,3 +62,6 @@ vendor/bundle/
 **/.cloudflared/cert.pem
 cloudflared/config.local.yml
 .tunnel-url
+
+# wrangler local state
+.wrangler/
