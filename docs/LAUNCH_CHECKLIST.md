@@ -9,7 +9,7 @@ Checked items are done in this branch. Unchecked items need a Mac, a device, or 
 - [ ] Location prompt, allow, and deny are confirmed on a device. The app has a city/ZIP search and an Open Settings path. See the device checklist in `docs/IOS.md`.
 - [x] Radar status line includes a frame clock and "updated X min ago" when a frame time is known. Live frames use the latest RainViewer past frame. The line is the existing status pill, not a new panel.
 - [ ] Alerts appear correctly on a device during a real warning.
-- [x] I’m Safe draft includes exact coordinates and a Google Maps link, and says the user is sheltering and safe. The user taps Send. No automatic or repeat send. Listing text is verbatim in `docs/APP_STORE_LISTING.md`; the “one tap sends” line is called out there for Andrew to change if he wants.
+- [x] I’m Safe and I Need Help drafts include exact coordinates and a map link. The user taps Send. No automatic or repeat send. Safety contacts setup is the first screen on first launch. Listing text is in `docs/APP_STORE_LISTING.md` and matches the app.
 - [ ] No crash on first launch or when location is denied. Needs a device.
 - [x] Privacy policy is in the app (Settings → Privacy) and as a static page at `/privacy`, served by the Worker once this is merged.
 - [x] App icon (1024, plus dark and tinted) and splash are generated from the existing radar mark. Andrew should review them before upload. They are a best-effort brand mark, not a final marketing illustration.

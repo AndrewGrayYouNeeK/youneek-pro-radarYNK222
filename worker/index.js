@@ -94,12 +94,8 @@ async function handle(request, env) {
       });
     }
 
-    if (request.method === "GET" && (pathname === "/privacy" || pathname === "/privacy/")) {
-      const assetUrl = new URL(request.url);
-      assetUrl.pathname = "/privacy.html";
-      const assetResponse = await env.ASSETS.fetch(new Request(assetUrl, request));
-      return finalizeAssetResponse(request, assetResponse);
-    }
+    // /privacy is served by the assets binding's clean-URL handling (privacy.html).
+    // Do not rewrite it to /privacy.html: assets 307-redirects that back to /privacy and loops.
 
     const assetResponse = await env.ASSETS.fetch(request);
     return finalizeAssetResponse(request, assetResponse);

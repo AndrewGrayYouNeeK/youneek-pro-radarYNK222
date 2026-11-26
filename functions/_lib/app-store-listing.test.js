@@ -21,8 +21,8 @@ test("App Store metadata stays inside Apple's character limits", () => {
   assert.ok(subtitle.length <= 30, `subtitle ${subtitle.length}`);
   assert.ok(promo.length <= 170, `promo ${promo.length}`);
   assert.ok(keywords.length <= 100, `keywords ${keywords.length}`);
-  assert.match(field("description.txt"), /I’M SHELTERING/);
-  assert.match(field("release_notes.txt"), /I’m Sheltering/);
+  assert.match(field("description.txt"), /SAFETY CONTACTS: I’M SAFE & I NEED HELP/);
+  assert.match(field("release_notes.txt"), /I’m Safe and I Need Help/);
   assert.equal(field("primary_category.txt"), "WEATHER");
   assert.equal(field("secondary_category.txt"), "NAVIGATION");
   assert.match(readFileSync(join(root, "public/sw.js"), "utf8"), /networkFirst/);

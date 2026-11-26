@@ -6,11 +6,11 @@ National base reflectivity mosaics from Iowa Mesonet, refreshed automatically. S
 NWS WARNING POLYGONS
 Tornado, severe thunderstorm, flood, and winter warnings drawn as real shapes on the map — not just text lists.
 
-I’M SHELTERING
-One tap sends your exact location and a map link to your emergency contacts. No typing. No hunting for numbers. Just a clear signal that you’re safe.
+SAFETY CONTACTS: I’M SAFE & I NEED HELP
+Pick the people to text the first time you open the app. When a tornado or severe weather warning or watch covers you, tap I’m Safe or I Need Help to open a ready-to-send text with your location and a map link. You review it and tap Send. Contacts stay on your device.
 
 NOAA WEATHER RADIO
-Auto-selects stations near you so you can listen when you need the official voice.
+Finds the nearest NOAA Weather Radio station and shows its call sign and frequency so you can tune your weather radio.
 
 CLEAN & FOCUSED
 Dark tactical interface. No ads. No subscriptions. One-time purchase.
