@@ -8,6 +8,8 @@ import useTabPageMemory from "@/hooks/useTabPageMemory";
 import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
 import SafetyReminderCard from "@/components/safety/SafetyReminderCard";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
+import PremiumOnly from "@/components/premium/PremiumOnly";
+import PremiumPill from "@/components/premium/PremiumPill";
 import MoreFromYouneekRow from "@/components/settings/MoreFromYouneekRow";
 import { Switch } from "@/components/ui/switch";
 import { ChevronRight, Radio, Bell, Shield, Info, Trash2, AlertTriangle, Gauge, Zap, CloudSun } from "lucide-react";
@@ -127,9 +129,11 @@ export default function Settings() {
       <AppHeader title="Settings" />
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-5">
         <div className="mx-auto max-w-md space-y-4">
-          <SafetyTextCard />
-          <SafetyReminderCard />
-          <SafetyContactsLink />
+          <PremiumOnly fallback={<PremiumPill />}>
+            <SafetyTextCard />
+            <SafetyReminderCard />
+            <SafetyContactsLink />
+          </PremiumOnly>
           <Section title="Notifications">
             <SettingRow
               icon={Bell}

@@ -19,6 +19,9 @@ import {
 } from "lucide-react";
 import SafetyContactsLink from "@/components/safety/SafetyContactsLink";
 import SafetyTextCard from "@/components/safety/SafetyTextCard";
+import PremiumOnly from "@/components/premium/PremiumOnly";
+import PremiumPill from "@/components/premium/PremiumPill";
+import { PREMIUM_UNLOCKED } from "@/lib/premium";
 import AppHeader from "@/components/mobile/AppHeader";
 import BottomTab from "@/components/radar/BottomTab";
 import useTabPageMemory from "@/hooks/useTabPageMemory";
@@ -54,12 +57,14 @@ export default function More() {
       <AppHeader title="More" />
       <div className="min-h-0 flex-1 overflow-y-auto px-4 pb-28 pt-4">
         <div className="mx-auto max-w-3xl space-y-4">
-          <SafetyTextCard />
-          <SafetyContactsLink />
+          <PremiumOnly fallback={<PremiumPill />}>
+            <SafetyTextCard />
+            <SafetyContactsLink />
+          </PremiumOnly>
           <div className="rounded-3xl border border-cyan-400/20 bg-gradient-to-br from-cyan-950/50 to-slate-950 p-4">
             <div className="flex items-center gap-2 text-cyan-200">
               <Shield className="h-4 w-4" aria-hidden="true" />
-              <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">All Pro features included</span>
+              <span className="text-[11px] font-semibold uppercase tracking-[0.18em]">{PREMIUM_UNLOCKED ? "All Pro features included" : "Free web preview"}</span>
             </div>
             <p className="mt-2 text-sm leading-relaxed text-slate-300">
               Radar loops, future nowcast, lightning, hurricanes, 3D globe radar, air quality, pollen, cameras, and

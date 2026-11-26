@@ -38,6 +38,8 @@ import { getMapFeature } from "@/lib/mapDesk";
 import { RADAR_LAYERS_EVENT, loadRadarLayers, saveRadarLayers } from "@/lib/radarLayers";
 import LocationSearch from "@/components/location/LocationSearch";
 import RadarAlertSheet from "./RadarAlertSheet";
+import PremiumPill from "@/components/premium/PremiumPill";
+import { PREMIUM_UNLOCKED, isLayerLocked, radarProductFor } from "@/lib/premium";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import LocationOffPrompt from "@/components/location/LocationOffPrompt";
 import useLocationStatus from "@/hooks/useLocationStatus";
@@ -179,9 +181,9 @@ export default function RadarDisplay({
   const [showHeat, setShowHeat] = useState(() => loadRadarLayers().alertHeat);
   const [showWind, setShowWind] = useState(() => loadRadarLayers().alertWind);
   const [showFireWx, setShowFireWx] = useState(() => loadRadarLayers().alertFire);
-  const [showLightning, setShowLightning] = useState(() => loadRadarLayers().lightning);
+  const [showLightning, setShowLightning] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().lightning);
   const [showHurricanes, setShowHurricanes] = useState(() => loadRadarLayers().storms);
-  const [showCells, setShowCells] = useState(() => loadRadarLayers().cells);
+  const [showCells, setShowCells] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().cells);
   const [showSatellite, setShowSatellite] = useState(() => loadRadarLayers().satellite);
   const [showGlobalRadar, setShowGlobalRadar] = useState(false);
   const [showFutureRadar, setShowFutureRadar] = useState(false);
@@ -264,7 +266,8 @@ export default function RadarDisplay({
     const live = Array.isArray(pointAlertsQuery.data) ? pointAlertsQuery.data : [];
     return activeSafetyAlerts(safetyPreview ? [safetyPreview, ...live] : live)[0] || null;
   }, [pointAlertsQuery.data, safetyPreview]);
-  const showSafetyTexts = Boolean(primarySafetyAlert);
+  // Safety texts are app-only. The web preview never shows them.
+  const showSafetyTexts = PREMIUM_UNLOCKED && Boolean(primarySafetyAlert);
   const { location: appLocation, gpsFix } = useLocation();
   const locationStatus = useLocationStatus();
   const [safetySentWithoutLocation, setSafetySentWithoutLocation] = useState(false);
@@ -462,7 +465,8 @@ export default function RadarDisplay({
 
   useEffect(() => { alertTogglesRef.current = alertToggles; }, [alertToggles]);
 
-  const radarProduct = settings.product || "reflectivity";
+  // Web preview is reflectivity only; the app keeps velocity and storm-relative velocity.
+  const radarProduct = radarProductFor(settings.product);
   const radarSite = resolveRadarSite(settings.station, radarProduct, nearestSite);
   const loopTiles = loopEnabled && radarProduct === "reflectivity" && !showGlobalRadar && loopFrames.length > 0;
   const frameSignature = loopTiles
@@ -703,11 +707,11 @@ export default function RadarDisplay({
     paint(tornadoWatchLayerRef, "tornado_watch", showTornadoWatch);
     paint(severeWatchLayerRef, "severe_watch", showSevereWatch);
     paint(thunderLayerRef, "severe", showThunderstorm);
-    paint(floodLayerRef, "flood", showFlood);
-    paint(winterLayerRef, "winter", showWinter);
-    paint(heatLayerRef, "heat", showHeat);
-    paint(windLayerRef, "wind", showWind);
-    paint(fireWxLayerRef, "fire", showFireWx);
+    paint(floodLayerRef, "flood", PREMIUM_UNLOCKED && showFlood);
+    paint(winterLayerRef, "winter", PREMIUM_UNLOCKED && showWinter);
+    paint(heatLayerRef, "heat", PREMIUM_UNLOCKED && showHeat);
+    paint(windLayerRef, "wind", PREMIUM_UNLOCKED && showWind);
+    paint(fireWxLayerRef, "fire", PREMIUM_UNLOCKED && showFireWx);
 
     return () => {
       [tornadoLayerRef, tornadoWatchLayerRef, severeWatchLayerRef, thunderLayerRef, floodLayerRef, winterLayerRef, heatLayerRef, windLayerRef, fireWxLayerRef].forEach((layerRef) => {
@@ -931,6 +935,7 @@ export default function RadarDisplay({
     ? ridgeProductLabel(NATIONAL_MOSAIC_ID, radarProduct)
     : ridgeProductLabel(radarSite, radarProduct);
   const toggleSheet = (key) => {
+    if (isLayerLocked(key)) return;
     const flip = (current, setter, saved) => {
       const next = !current;
       setter(next);
@@ -1049,7 +1054,7 @@ export default function RadarDisplay({
               warningCount={warningList.length || warningCount}
               onOpenAlerts={() => setAlertSheet("list")}
             />
-            <RainArrivalAlert />
+            {PREMIUM_UNLOCKED ? <RainArrivalAlert /> : <PremiumPill />}
             {showSafetyTexts && (
               <div className="pointer-events-auto w-full max-w-sm">
                 <SafetyTextActions
@@ -1125,14 +1130,16 @@ export default function RadarDisplay({
               station={settings.station}
               onStationChange={(site) => onSettingsChange?.({ ...settings, station: site })}
               productId={radarProduct}
-              onProductChange={(id) => onSettingsChange?.({ ...settings, product: id, showNexrad: true })}
+              onProductChange={(id) => onSettingsChange?.({ ...settings, product: radarProductFor(id), showNexrad: true })}
               radarOn={showNexrad}
               onRadarChange={(next) => {
                 handleShowNexradChange(next);
                 saveRadarLayers({ radar: next });
               }}
               futureOn={showFutureRadar}
+              premium={PREMIUM_UNLOCKED}
               onFutureChange={(next) => {
+                if (isLayerLocked("future")) return;
                 setShowFutureRadar(next);
                 if (next) {
                   setLoopEnabled(true);
@@ -1199,7 +1206,7 @@ export default function RadarDisplay({
               onRetry={() => setAlertAttempt((value) => value + 1)}
             />
           )}
-          {stormData && (
+          {PREMIUM_UNLOCKED && stormData && (
             <div
               className="pointer-events-none absolute inset-x-3 z-[1150] mx-auto max-w-sm"
               style={{ bottom: "calc(5rem + env(safe-area-inset-bottom))" }}
@@ -1261,7 +1268,7 @@ export default function RadarDisplay({
       />}
       {variant !== "clean" && <div className="pointer-events-none absolute inset-x-0 bottom-3 z-[1200] flex flex-col items-center gap-2 px-3">
         <ShelterAlert activeTornadoWarning={activeTornadoWarning} activeTornadoWatch={activeTornadoWatch} />
-        {stormData && (
+        {PREMIUM_UNLOCKED && stormData && (
           <StormToolsPanel stormData={stormData} onClose={() => setStormData(null)} />
         )}
         {inspector?.active && <RadarInspectorPanel inspector={inspector} productLabel={getRadarProduct(radarProduct).label} />}
