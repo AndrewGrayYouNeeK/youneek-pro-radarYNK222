@@ -4,7 +4,7 @@ import { useNavigationStack } from "@/lib/NavigationStack";
 import { MARKETING_URL } from "@/lib/sites";
 
 const TITLES = {
-  "/Radar": "Radar",
+  "/Radar": "YouNeeK ProRadar",
   "/Forecast": "Forecast",
   "/Globe": "3D Radar Globe",
   "/More": "More",
