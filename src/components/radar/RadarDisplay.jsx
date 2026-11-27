@@ -39,7 +39,7 @@ import { RADAR_LAYERS_EVENT, loadRadarLayers, saveRadarLayers } from "@/lib/rada
 import LocationSearch from "@/components/location/LocationSearch";
 import RadarAlertSheet from "./RadarAlertSheet";
 import PremiumPill from "@/components/premium/PremiumPill";
-import { PREMIUM_UNLOCKED, isLayerLocked, radarProductFor } from "@/lib/premium";
+import { PREMIUM_UNLOCKED, isFreeFloodFeature, isLayerLocked, radarProductFor } from "@/lib/premium";
 import SafetyTextActions from "@/components/safety/SafetyTextActions";
 import LocationOffPrompt from "@/components/location/LocationOffPrompt";
 import NotificationsOffPrompt from "@/components/notifications/NotificationsOffPrompt";
@@ -183,7 +183,7 @@ export default function RadarDisplay({
   const [showWind, setShowWind] = useState(() => loadRadarLayers().alertWind);
   const [showFireWx, setShowFireWx] = useState(() => loadRadarLayers().alertFire);
   const [showLightning, setShowLightning] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().lightning);
-  const [showHurricanes, setShowHurricanes] = useState(() => loadRadarLayers().storms);
+  const [showHurricanes, setShowHurricanes] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().storms);
   const [showCells, setShowCells] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().cells);
   const [showSatellite, setShowSatellite] = useState(() => loadRadarLayers().satellite);
   const [showGlobalRadar, setShowGlobalRadar] = useState(false);
@@ -204,11 +204,11 @@ export default function RadarDisplay({
   const [radarRefresh, setRadarRefresh] = useState(0);
   const [nearestSite, setNearestSite] = useState("KTLX");
   const [loopSource, setLoopSource] = useState("past");
-  const [showFires, setShowFires] = useState(() => loadRadarLayers().fires);
+  const [showFires, setShowFires] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().fires);
   const [showTemps, setShowTemps] = useState(() => loadRadarLayers().temps);
   const [showClouds, setShowClouds] = useState(() => loadRadarLayers().clouds);
-  const [showPrecip, setShowPrecip] = useState(() => loadRadarLayers().precip);
-  const [showWindField, setShowWindField] = useState(() => loadRadarLayers().wind);
+  const [showPrecip, setShowPrecip] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().precip);
+  const [showWindField, setShowWindField] = useState(() => PREMIUM_UNLOCKED && loadRadarLayers().wind);
   const [radarCatalog, setRadarCatalog] = useState(null);
   const [loopEnabled, setLoopEnabled] = useState(false);
   const [loopPlaying, setLoopPlaying] = useState(false);
@@ -679,13 +679,13 @@ export default function RadarDisplay({
     );
     setWarningCount(features.filter((feature) => /warning/i.test(feature?.properties?.event || "")).length);
 
-    const paint = (layerRef, layerKey, enabled) => {
+    const paint = (layerRef, layerKey, enabled, keep) => {
       if (layerRef.current) {
         leafletMap.current.removeLayer(layerRef.current);
         layerRef.current = null;
       }
       if (!enabled || !leafletMap.current) return;
-      const layerFeatures = grouped.get(layerKey) || [];
+      const layerFeatures = (grouped.get(layerKey) || []).filter((feature) => !keep || keep(feature));
       if (!layerFeatures.length) return;
       const color = ALERT_LAYER_COLORS[layerKey];
       layerRef.current = L.geoJSON(
@@ -708,7 +708,8 @@ export default function RadarDisplay({
     paint(tornadoWatchLayerRef, "tornado_watch", showTornadoWatch);
     paint(severeWatchLayerRef, "severe_watch", showSevereWatch);
     paint(thunderLayerRef, "severe", showThunderstorm);
-    paint(floodLayerRef, "flood", PREMIUM_UNLOCKED && showFlood);
+    // Web keeps Flood and Flash Flood Warning outlines (not watches) for safety. The app shows all.
+    paint(floodLayerRef, "flood", showFlood, PREMIUM_UNLOCKED ? undefined : isFreeFloodFeature);
     paint(winterLayerRef, "winter", PREMIUM_UNLOCKED && showWinter);
     paint(heatLayerRef, "heat", PREMIUM_UNLOCKED && showHeat);
     paint(windLayerRef, "wind", PREMIUM_UNLOCKED && showWind);
@@ -1130,7 +1131,10 @@ export default function RadarDisplay({
             <LayerSheet
               stations={[NATIONAL_MOSAIC_ID, ...Object.keys(STATION_COORDS).sort()]}
               station={settings.station}
-              onStationChange={(site) => onSettingsChange?.({ ...settings, station: site })}
+              onStationChange={(site) => {
+                if (isLayerLocked("station")) return;
+                onSettingsChange?.({ ...settings, station: site });
+              }}
               productId={radarProduct}
               onProductChange={(id) => onSettingsChange?.({ ...settings, product: radarProductFor(id), showNexrad: true })}
               radarOn={showNexrad}
@@ -1150,11 +1154,15 @@ export default function RadarDisplay({
               }}
               satelliteMode={satelliteMode}
               onSatelliteMode={(mode) => {
+                if (isLayerLocked("satellite")) return;
                 setSatelliteMode(mode);
                 saveRadarLayers({ satelliteMode: mode });
               }}
               surfaceField={surfaceField}
-              onSurfaceField={setSurfaceField}
+              onSurfaceField={(field) => {
+                if (isLayerLocked("surface")) return;
+                setSurfaceField(field);
+              }}
               productCaption={loopSource === "extrapolated-recent-frames" && showFutureRadar ? `${productCaption} · future is estimated` : productCaption}
               toggles={{
                 wind: showWindField,

@@ -2,7 +2,7 @@ import { Suspense, lazy, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { queryClientInstance } from "@/lib/query-client";
-import { BrowserRouter as Router, Route, Routes, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate, Outlet, useLocation } from "react-router-dom";
 import PageNotFound from "./lib/PageNotFound";
 import RadarApp from "./pages/RadarApp";
 import { LocationProvider } from "@/lib/LocationContext";
@@ -13,7 +13,7 @@ import { RadioProvider } from "@/lib/RadioContext";
 import OnboardingModal from "@/components/radar/OnboardingModal";
 import LiveAlerts from "@/components/notifications/LiveAlerts";
 import { shouldShowSafetyOnboarding } from "@/lib/safety/onboarding";
-import { PREMIUM_UNLOCKED } from "@/lib/premium";
+import { PREMIUM_UNLOCKED, isPathFree } from "@/lib/premium";
 import PremiumLockedPage from "@/components/premium/PremiumLockedPage";
 
 const Radar = lazy(() => import("./pages/Radar"));
@@ -43,6 +43,25 @@ const MapLayers = lazy(() => import("./pages/MapLayers"));
 
 const DarkFallback = () => <div className="h-full bg-slate-950" />;
 
+const LOCKED_TITLES = {
+  "/": "Now",
+  "/Hourly": "Hourly",
+  "/Daily": "10-Day",
+  "/Forecast": "Forecast",
+  "/Radio": "NOAA Weather Radio",
+  "/Contacts": "Safety contacts",
+  "/More": "More",
+  "/Settings": "Settings",
+};
+
+/** Web preview: only FREE_WEB_PATHS render. Every other page shows the Premium in the app lock. */
+function WebGate() {
+  const { pathname } = useLocation();
+  if (isPathFree(pathname)) return <Outlet />;
+  if (pathname === "/") return <Navigate to="/Radar" replace />;
+  return <PremiumLockedPage title={LOCKED_TITLES[pathname] || pathname.replace(/^\//, "") || "This page"} />;
+}
+
 function AppShell() {
   const [showOnboarding, setShowOnboarding] = useState(
     // Safety contacts first launch is app-only. The web preview skips it.
@@ -54,7 +73,7 @@ function AppShell() {
       {showOnboarding && <OnboardingModal onDone={() => setShowOnboarding(false)} />}
       <LiveAlerts paused={showOnboarding} />
       <Suspense fallback={<DarkFallback />}>
-        <Outlet />
+        <WebGate />
       </Suspense>
     </div>
   );
@@ -98,8 +117,8 @@ function App() {
                 <Route path="/Health" element={<Health />} />
                 <Route path="/News" element={<News />} />
                 <Route path="/Astronomy" element={<Astronomy />} />
-                <Route path="/Radio" element={PREMIUM_UNLOCKED ? <RadioPage /> : <PremiumLockedPage title="NOAA Weather Radio" />} />
-                <Route path="/Contacts" element={PREMIUM_UNLOCKED ? <Contacts /> : <PremiumLockedPage title="Safety contacts" />} />
+                <Route path="/Radio" element={<RadioPage />} />
+                <Route path="/Contacts" element={<Contacts />} />
                 <Route path="/Settings" element={<Settings />} />
                 <Route path="/Privacy" element={<Privacy />} />
               </Route>

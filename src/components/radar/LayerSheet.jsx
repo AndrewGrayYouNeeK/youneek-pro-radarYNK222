@@ -131,7 +131,21 @@ export default function LayerSheet({
         </div>
         <label className="mt-2 block">
           <span className="text-[10px] uppercase tracking-[0.14em] text-slate-500">NEXRAD site</span>
+          {locked("station") && (
+            <a
+              href={GET_APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              data-locked="premium"
+              aria-label={`Single NEXRAD sites: ${PREMIUM_LABEL}`}
+              className="mt-1 flex items-center justify-between rounded-lg border border-white/10 bg-white/5 px-2 py-1.5 text-[12px] text-slate-400"
+            >
+              National mosaic · single sites in the app
+              <Lock className="h-3 w-3 text-emerald-300" aria-hidden="true" />
+            </a>
+          )}
           <select
+            hidden={locked("station")}
             value={station}
             onChange={(event) => onStationChange(event.target.value)}
             aria-label="NEXRAD site"
@@ -153,7 +167,13 @@ export default function LayerSheet({
             ["ir", "Infrared"],
             ["vapor", "Water vapor"],
           ].map(([id, label]) => (
-            <Chip key={id} label={label} active={satelliteMode === id} onClick={() => onSatelliteMode(id)} />
+            <Chip
+              key={id}
+              label={label}
+              active={satelliteMode === id}
+              locked={id !== "off" && locked("satellite")}
+              onClick={() => onSatelliteMode(id)}
+            />
           ))}
         </div>
       </Section>
@@ -170,7 +190,13 @@ export default function LayerSheet({
             ["clouds", "Cloud cover"],
             ["pressure", "Pressure"],
           ].map(([id, label]) => (
-            <Chip key={id} label={label} active={surfaceField === id} onClick={() => onSurfaceField(id)} />
+            <Chip
+              key={id}
+              label={label}
+              active={surfaceField === id}
+              locked={id !== "off" && locked("surface")}
+              onClick={() => onSurfaceField(id)}
+            />
           ))}
         </div>
         {surfaceField !== "off" && (
