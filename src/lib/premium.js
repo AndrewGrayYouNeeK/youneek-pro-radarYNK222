@@ -3,7 +3,9 @@ import { isNativePlatform } from "./native/runtime.js";
 /**
  * Free web preview vs the paid app.
  * The native (Capacitor) app is a $6.99 one-time purchase, so everything is unlocked there.
- * The website is a free preview: basic radar, loop, map, and tornado/severe warning outlines.
+ * The website is a free preview with warnings only: base map, reflectivity radar (national
+ * mosaic) and loop, locate, tornado and severe thunderstorm warning/watch outlines, flood and
+ * flash flood warning outlines, and the alert list/details. Everything else is in the app.
  * Gating is UI-only. Radar, velocity, tornado-hook, and alert code paths are unchanged in the app.
  */
 export const GET_APP_URL = "https://youneekproradar.com";
@@ -19,19 +21,62 @@ export function isPremiumUnlocked(native = isNativePlatform()) {
 /** Radar products only in the app (velocity shows rotation / tornado hooks). */
 export const PREMIUM_PRODUCTS = ["velocity", "stormRelative"];
 
+/** Layer keys that stay free on the web for public safety. */
+export const FREE_LAYER_KEYS = ["radar", "tornado", "severe", "tornadoWatch", "severeWatch", "flood"];
+
+/** Layer keys only in the app. Anything not in FREE_LAYER_KEYS is locked on the web. */
+export const PREMIUM_LAYER_KEYS = [
+  "future",
+  "station",
+  "satellite",
+  "surface",
+  "wind",
+  "precip",
+  "stormReports",
+  "cells",
+  "hurricanes",
+  "fires",
+  "perimeters",
+  "snow",
+  "air",
+  "quakes",
+  "fronts",
+  "spc1",
+  "spc2",
+  "spc3",
+  "md",
+  "winter",
+  "heat",
+  "windAlert",
+  "fireWx",
+];
+
+/** Web pages that stay free. Every other page shows the Premium in the app lock. */
+export const FREE_WEB_PATHS = ["/Radar", "/Privacy"];
+
+export function isPathFree(pathname, premium = PREMIUM_UNLOCKED) {
+  if (premium) return true;
+  const path = String(pathname || "/").replace(/\/+$/, "").toLowerCase() || "/";
+  return FREE_WEB_PATHS.some((free) => free.toLowerCase() === path);
+}
+
 /**
- * Layer toggles only in the app. Tornado and severe thunderstorm warnings plus
- * tornado and severe watches stay free on the web for public safety.
+ * On the web the flood layer shows only Flood and Flash Flood Warnings (not watches).
+ * In the app every feature in the layer is shown.
  */
-export const PREMIUM_LAYER_KEYS = ["future", "cells", "stormReports", "md", "flood", "winter", "heat", "windAlert", "fireWx"];
+export function isFreeFloodFeature(feature) {
+  return /^(flash )?flood warning$/i.test(String(feature?.properties?.event || "").trim());
+}
 
 /** What the paid app adds, shown on web lock states. */
 export const PREMIUM_FEATURES = [
   "Base and storm-relative velocity (rotation and tornado hooks)",
   "Storm distance",
   "Rain in X minutes",
-  "Flood, winter, heat, wind, and fire weather alert polygons",
-  "Future radar, storm cells, storm reports, and mesoscale discussions",
+  "Single NEXRAD sites, future radar, storm cells, storm reports, and mesoscale discussions",
+  "Winter, heat, wind, fire weather, and flood watch polygons",
+  "Satellite, surface maps, hurricanes, fires, earthquakes, fronts, and SPC outlooks",
+  "Forecasts: now, hourly, 10-day, and every weather page",
   "Safety contacts with I’m Safe and I Need Help texts",
   "NOAA Weather Radio",
 ];
@@ -47,5 +92,6 @@ export function isProductLocked(productId, premium = PREMIUM_UNLOCKED) {
 }
 
 export function isLayerLocked(key, premium = PREMIUM_UNLOCKED) {
-  return !premium && PREMIUM_LAYER_KEYS.includes(key);
+  if (premium) return false;
+  return !FREE_LAYER_KEYS.includes(key);
 }

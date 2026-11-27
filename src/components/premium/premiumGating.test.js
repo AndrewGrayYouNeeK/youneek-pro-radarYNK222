@@ -58,14 +58,18 @@ function sheet(premium) {
   );
 }
 
-test("web layer sheet locks velocity and extras but keeps tornado and severe warnings", () => {
+test("web layer sheet shows only radar and warnings unlocked", () => {
   const html = sheet(false);
   const lockedLabels = [...html.matchAll(/data-locked="premium"[^>]*aria-label="([^":]+):/g)].map((m) => m[1]);
-  for (const label of ["Future", "Storm cells", "Storm reports", "Mesoscale", "Flood", "Winter", "Heat", "Wind alert", "Fire weather"]) {
+  for (const label of [
+    "Future", "Single NEXRAD sites", "Visible", "Infrared", "Water vapor", "Temperature", "Wind", "Precip",
+    "Storm reports", "Storm cells", "Hurricanes", "Fire detects", "Fire perimeters", "Snow", "Air quality",
+    "Earthquakes", "Fronts", "SPC Day 1", "SPC Day 2", "SPC Day 3", "Mesoscale", "Winter", "Heat", "Wind alert", "Fire weather",
+  ]) {
     assert.ok(lockedLabels.includes(label), label);
   }
   assert.ok(lockedLabels.some((label) => /velocity/i.test(label)), "velocity locked");
-  for (const label of ["Tornado", "Severe", "Tornado watch", "Severe watch", "Radar"]) {
+  for (const label of ["Radar", "Reflectivity", "Tornado", "Severe", "Tornado watch", "Severe watch", "Flood"]) {
     assert.equal(lockedLabels.includes(label), false, label);
   }
   assert.match(html, /data-premium-note="web"/);
@@ -97,10 +101,13 @@ test("radar, app shell, and pages gate premium UI with PREMIUM_UNLOCKED only", (
   assert.match(radar, /PREMIUM_UNLOCKED && stormData/);
   assert.match(radar, /paint\(tornadoLayerRef, "tornado", showTornado\)/);
   assert.match(radar, /paint\(thunderLayerRef, "severe", showThunderstorm\)/);
-  assert.match(radar, /paint\(floodLayerRef, "flood", PREMIUM_UNLOCKED && showFlood\)/);
+  assert.match(radar, /paint\(floodLayerRef, "flood", showFlood, PREMIUM_UNLOCKED \? undefined : isFreeFloodFeature\)/);
+  assert.match(radar, /paint\(winterLayerRef, "winter", PREMIUM_UNLOCKED && showWinter\)/);
+  assert.match(radar, /useState\(\(\) => PREMIUM_UNLOCKED && loadRadarLayers\(\)\.storms\)/);
   const app = read("src/App.jsx");
   assert.match(app, /PREMIUM_UNLOCKED && typeof window !== "undefined" && shouldShowSafetyOnboarding/);
-  assert.match(app, /PREMIUM_UNLOCKED \? <Contacts \/>/);
-  assert.match(app, /PREMIUM_UNLOCKED \? <RadioPage \/>/);
+  assert.match(app, /if \(isPathFree\(pathname\)\) return <Outlet \/>;/);
+  assert.match(app, /<Navigate to="\/Radar" replace \/>/);
+  assert.match(app, /<WebGate \/>/);
   assert.match(read("src/lib/premium.js"), /isNativePlatform\(\)/);
 });
