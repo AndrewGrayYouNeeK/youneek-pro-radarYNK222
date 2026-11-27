@@ -47,15 +47,21 @@ npx wrangler secret list
 1. developer.apple.com → Certificates, IDs & Profiles → **Keys** → **+** → name "YouNeeK Push", check
    **Apple Push Notifications service (APNs)** → Continue → Register → **Download** the `.p8` (one-time download).
    Note the **Key ID**. Keep the `.p8` with your other keys (outside the repo).
-2. Identifiers → `com.base69facdfe1fbc3700e00a8387.app` → enable **Push Notifications** → Save.
-3. Xcode → open `ios/App/App.xcworkspace` → target **App** → **Signing & Capabilities** → **+ Capability** →
-   **Push Notifications**, then **+ Capability** → **Time Sensitive Notifications** (lets Tornado Warnings break through Focus). This adds `App.entitlements`; commit it. No background modes are needed.
+2. Identifiers → `com.base69facdfe1fbc3700e00a8387.app` → enable **Push Notifications** and **Time Sensitive Notifications** → Save.
+3. Xcode settings are already in the repo: `ios/App/App/App.entitlements` (`aps-environment`,
+   `com.apple.developer.usernotifications.time-sensitive`) and `CODE_SIGN_ENTITLEMENTS` for Debug and Release.
+   The file says `development` on purpose: the archive is signed with Apple Development, and the App Store
+   export re-signs it with the distribution profile, which sets `aps-environment` to `production`.
+   No `UIBackgroundModes` entry is needed (these are visible alert pushes, not silent ones).
+   **Signed builds fail until** the App ID has **Push Notifications** and **Time Sensitive Notifications** turned on
+   (step 2) and the provisioning profiles are regenerated. Automatic/cloud signing regenerates them on the next
+   signed build; if you use manual profiles, re-download them in Xcode → Settings → Accounts → Download Manual Profiles.
 4. Add the four `APNS_*` secrets above.
 5. Build and upload a new iOS build (TestFlight/App Store builds use production APNs). For a debug build run
    straight from Xcode, build the web app with `VITE_APNS_SANDBOX=1 npm run build && npx cap sync ios` so the
    token is sent to the APNs sandbox.
 
-Until step 3 ships in a build, iOS registration fails quietly and the app keeps local notifications only.
+Until a build signed after step 2 ships, iOS registration fails quietly and the app keeps local notifications only.
 
 ## 2. Firebase (Android)
 
