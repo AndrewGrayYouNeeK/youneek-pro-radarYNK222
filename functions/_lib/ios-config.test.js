@@ -119,3 +119,14 @@ test("the app bundle sources do not contain a private key or a tracking SDK", ()
     }
   }
 });
+
+test("push entitlements are wired for the App target (Debug and Release)", () => {
+  const entitlements = read("ios/App/App/App.entitlements");
+  // Xcode signs the archive with the development value; App Store export rewrites it to production.
+  assert.match(entitlements, /<key>aps-environment<\/key>\s*<string>development<\/string>/);
+  assert.match(entitlements, /<key>com\.apple\.developer\.usernotifications\.time-sensitive<\/key>\s*<true\/>/);
+  const project = read("ios/App/App.xcodeproj/project.pbxproj");
+  assert.equal((project.match(/CODE_SIGN_ENTITLEMENTS = App\/App\.entitlements;/g) || []).length, 2);
+  const plist = read("ios/App/App/Info.plist");
+  assert.doesNotMatch(plist, /remote-notification/, "alert pushes need no background mode");
+});
