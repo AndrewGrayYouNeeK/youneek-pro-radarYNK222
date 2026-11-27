@@ -62,3 +62,7 @@ WeatherKit forecasts need Apple credentials in `.env` — copy `.env.example` an
 ## Where features came from
 
 Location alerts, the customizable radar desk, NOAA radio, contacts, and safety texts came from **youneekproradarBABY** and live on this app's pages. The marketing site stays on that other Worker at youneekproradar.com.
+
+---
+
+YouNeeK™ · © 2026 Andrew Gray
